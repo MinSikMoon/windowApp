@@ -1,0 +1,8 @@
+﻿  main.cpp
+d:\visualworkspace\linetest\linetest\main.cpp(160): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
+d:\visualworkspace\linetest\linetest\main.cpp(190): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
+d:\visualworkspace\linetest\linetest\main.cpp(115): warning C4996: 'freopen': This function or variable may be unsafe. Consider using freopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\stdio.h(240): note: 'freopen' 선언을 참조하십시오.
+d:\visualworkspace\linetest\linetest\main.cpp(99): warning C4101: 'size' :참조되지 않은 지역 변수입니다.
+  lineTest.vcxproj -> D:\visualWorkspace\lineTest\Debug\lineTest.exe
+  lineTest.vcxproj -> D:\visualWorkspace\lineTest\Debug\lineTest.pdb (Full PDB)
