@@ -1,15 +1,4 @@
-#include <windows.h>
-#include <tchar.h>
-#include <cstdio>
-#include <iostream>
-#include <vector>
-#include <map>
-
-#include "mstring.h"
-#include "mWordPixel.h"
-#include "g_variable.h"
-#include "project_methods.h"
-using namespace std;
+#include "main_header.h"
 
 //=================================WIN PROC======================================
 				/* This is where all the input to the window goes to */
@@ -79,73 +68,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 	//3. 스크롤 메시지 관련
 	case WM_VSCROLL: {
-		yInc = 0;
-		
-		switch (LOWORD(wParam)) {
-		case SB_LINEUP: {
-			yInc = -wordHeight;
-			break;
-		}
-		case SB_PAGEUP: {
-			yInc = -20 * wordHeight;
-			break;
-		}
-		case SB_LINEDOWN: {
-			yInc = wordHeight;
-			if (yPos + (curScreenLineNum*wordHeight) >= yMax) {
-				yInc = 0;
-			}
-			break;
-		}
-		case SB_PAGEDOWN: {
-			yInc = 20 * wordHeight;
-			if (yPos + yInc >= yMax) {
-				int frontWordNum = yPos / wordHeight;
-				int tempLoopCnt = yMax / wordHeight;
-				int tempCnt = tempLoopCnt - frontWordNum - curScreenLineNum;
-;				yInc = tempCnt * wordHeight;
-			}
-			break;
-		}
-		case SB_THUMBTRACK: {
-			int temp_yPos = HIWORD(wParam); //thumb의 위치
-			int temp_yInc = (temp_yPos - yPos);
-			int temp_lineJump = temp_yInc / wordHeight;
-			int temp_jumpMore = temp_yInc % wordHeight;
-			int halfCharWidth = wordHeight / 2;
-
-			if (temp_jumpMore >= halfCharWidth) {
-				temp_lineJump++;
-			}
-
-			yInc = temp_lineJump * wordHeight;/*printf("현재 스크롤바 위치는 %d \n", yPos);*/
-											  //printf("썸 위치: %d \n", HIWORD(wParam));
-		
-			break;
-		}
-
-		}
-	
-		if (yPos + yInc < 0) {	//스크롤 위치 필터
-			yInc = -yPos;
-		
-		}
-		if (yPos + yInc > yMax) {
-			yInc = yMax - yPos;
-		
-		}
-	
-		//새로운 썸의 위치 계산
-		yPos += yInc;  //새로운 썸의 위치가 여기서 계산된다. 
-
-	
-	/*	printf("====>현재 yMax는 %d \n",yMax);
-		printf("현재 yPos는 %d \n", yPos);
-		printf("현재 화면 크기는 %d \n", rect.bottom);
-		printf("한 화면에 몇줄? => %d줄 \n", curScreenLineNum);*/
+		yInc = mScrollSwitches(wParam, wordHeight, curScreenLineNum, yPos, yMax);	/*	printf("====>현재 yMax는 %d \n",yMax);		printf("현재 yPos는 %d \n", yPos);		printf("현재 화면 크기는 %d \n", rect.bottom);		printf("한 화면에 몇줄? => %d줄 \n", curScreenLineNum);*/
 		ScrollWindow(hwnd, 0, -yInc, NULL, NULL);
 		SetScrollPos(hwnd, SB_VERT, yPos, TRUE);
-
 		break;
 	}
 
@@ -166,6 +91,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 		nodeIdx = getNodeIdx(nodeLineNum, yPos, wordHeight);//화면의 첫번째 문장이 몇번째 노드의 문장인지 알아보자. 	printf("첫 문장은 %d번째 노드 소속입니다. \n", nodeIdx);
 	
 
+		
+															
+															
 		//비례 스크롤바 호출
 		yMax = textHeight;
 		int alwaysLittleThanMax = yMax - 1;
@@ -204,7 +132,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 	case WM_DESTROY: {
 		FreeConsole();
 		fclose(fp);
-		for (int i = 0; i < v1.size(); i++) {
+		for (unsigned int i = 0; i < v1.size(); i++) {
 			delete v1[i];
 		}
 		PostQuitMessage(0);

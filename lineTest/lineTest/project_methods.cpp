@@ -18,10 +18,11 @@ int getNodeIdx(map<int, int> v, int yPos, int wordHeight) {
 	}
 
 	return nodeIdx;
+
 };
 
 //2. 화면에 맞추어 개행시켜 보여주는 로직
-int autoLineSwitch(HDC hdc, vector<TCHAR*> v1, int screenWidth, int wordHeight, int yPos, map<int,int>& nodeLineNum) {
+int autoLineSwitch( HDC hdc, vector<TCHAR*> v1, int screenWidth, int wordHeight, int yPos, map<int,int>& nodeLineNum) {
 	int startIdx = 0;
 	int lastIdx = 0;
 	int sentenceNum;
@@ -58,6 +59,70 @@ int autoLineSwitch(HDC hdc, vector<TCHAR*> v1, int screenWidth, int wordHeight, 
 	}
 
 	return loopCnt; //총 몇줄 돌았는지 리턴
+}
+
+//3. 스크롤 스위치 로직 분리
+int mScrollSwitches(WPARAM wParam, int wordHeight, int curScreenLineNum, int& yPos, int yMax) {
+	int yInc = 0;
+
+	switch (LOWORD(wParam)) {
+	case SB_LINEUP: {
+		yInc = -wordHeight;
+		break;
+	}
+	case SB_PAGEUP: {
+		yInc = -20 * wordHeight;
+		break;
+	}
+	case SB_LINEDOWN: {
+		yInc = wordHeight;
+		if (yPos + (curScreenLineNum*wordHeight) >= yMax) {
+			yInc = 0;
+		}
+		break;
+	}
+	case SB_PAGEDOWN: {
+		yInc = 20 * wordHeight;
+		if (yPos + yInc >= yMax) {
+			int frontWordNum = yPos / wordHeight;
+			int tempLoopCnt = yMax / wordHeight;
+			int tempCnt = tempLoopCnt - frontWordNum - curScreenLineNum;
+			;				yInc = tempCnt * wordHeight;
+		}
+		break;
+	}
+	case SB_THUMBTRACK: {
+		int temp_yPos = HIWORD(wParam); //thumb의 위치
+		int temp_yInc = (temp_yPos - yPos);
+		int temp_lineJump = temp_yInc / wordHeight;
+		int temp_jumpMore = temp_yInc % wordHeight;
+		int halfCharWidth = wordHeight / 2;
+
+		if (temp_jumpMore >= halfCharWidth) {
+			temp_lineJump++;
+		}
+
+		yInc = temp_lineJump * wordHeight;/*printf("현재 스크롤바 위치는 %d \n", yPos);*/
+										  //printf("썸 위치: %d \n", HIWORD(wParam));
+
+		break;
+	}
+
+	}
+
+	if (yPos + yInc < 0) {	//스크롤 위치 필터
+		yInc = -yPos;
+
+	}
+	if (yPos + yInc > yMax) {
+		yInc = yMax - yPos;
+
+	}
+
+	//새로운 썸의 위치 계산
+	yPos += yInc;  //새로운 썸의 위치가 여기서 계산된다. 
+	return yInc;
+	
 }
 
 

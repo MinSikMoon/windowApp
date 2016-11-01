@@ -170,6 +170,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="g_variable.h" />
+    <ClInclude Include="main_header.h" />
     <ClInclude Include="mstring.h" />
     <ClInclude Include="mWordPixel.h" />
     <ClInclude Include="project_methods.h" />
