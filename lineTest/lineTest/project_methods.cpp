@@ -1,17 +1,19 @@
 #include "project_methods.h"
+#include "lineContainer.h"
 
 //1. 몇번째 노드에 저장된 데이터인가? : 스크롤바의 yPos가 주어질 경우
-int getNodeIdx(map<int, int> v, int yPos, int wordHeight) {
+int getNodeIdx(map<int, int> v, int yPos, int wordHeight, int& out_lineNum) {
 	int sum = 0;
 	int tempSum = 0;
 	int nodeIdx = 0;
-	int frontLine = yPos / wordHeight;
+	int frontLine = yPos / wordHeight; //앞에 몇글자 있는지 본다. 
 
-	for (int i = 0; i < v.size(); i++) {
+	for (unsigned int i = 0; i < v.size(); i++) {
 
 		tempSum += v[i];
 		if (frontLine >= sum &&frontLine < tempSum) {
 			nodeIdx = i;
+			out_lineNum = frontLine - sum;
 			break;
 		}
 		sum = tempSum;
@@ -21,12 +23,14 @@ int getNodeIdx(map<int, int> v, int yPos, int wordHeight) {
 
 };
 
+
 //2. 화면에 맞추어 개행시켜 보여주는 로직
-int autoLineSwitch( HDC hdc, vector<TCHAR*> v1, int screenWidth, int wordHeight, int yPos, map<int,int>& nodeLineNum) {
+int autoLineSwitch( HDC hdc, vector<TCHAR*> v1, int screenWidth, int wordHeight, int yPos, map<int,int>& nodeLineNum, lineContainer& lc1) {
 	int startIdx = 0;
 	int lastIdx = 0;
 	int sentenceNum;
-	int i, j;
+	unsigned int i;
+	int j;
 	int loopCnt = 0;
 	int avgCharWidth2;
 	TCHAR* testStr;
@@ -45,19 +49,33 @@ int autoLineSwitch( HDC hdc, vector<TCHAR*> v1, int screenWidth, int wordHeight,
 			for (j = 0; j < sentenceNum; j++) {
 				lastIdx = getEndIdx(hdc, testStr, screenWidth, startIdx, avgCharWidth2);
 				textOutCustom(hdc, 0, loopCnt*wordHeight - yPos, testStr, startIdx, lastIdx);
+				//i: 몇번째 노드인가// 여기서 nodeLineCnt-1하면 노드안에서 몇번째 줄인지// lastIdx-startIdx+1하면 한 줄에 글자 몇개인지
+				//startIdx: 문장의 첫글자의 인덱스는 몇인가?// 맵에 1차원 배열을 key 값으로 받을 수 있는지 조사.
+				//실험 //인자로 lineContainer를 받아보자. 
+				//printf("%d 번 노드의 %d 번째 라인인데 길이는 %d 입니다. \n", i, j, lastIdx - startIdx + 1); //여기는 잘 나옴.
+				lc1.setData(i, j, lastIdx - startIdx + 1, startIdx);
+				//printf("함수 안에서의 0,1은 %d \n", lc1.getWordCnt(0,1));
 				startIdx = lastIdx + 1;
 				loopCnt++;
 				nodeLineCnt++;
+				
+				
 			}
 		}
 		else {
 			TextOut(hdc, 0, loopCnt*wordHeight - yPos, testStr, getLen(testStr));
+			//i: 몇번째 노드인가// 여기서 nodeLineCnt-1하면 노드안에서 몇번째 줄인지// lastIdx-startIdx+1하면 한 줄에 글자 몇개인지
+			//startIdx: 문장의 첫글자의 인덱스는 몇인가?// 맵에 1차원 배열을 key 값으로 받을 수 있는지 조사.
+			//실험 //인자로 lineContainer를 받아보자. 
+			//printf("그냥 넣습니다. \n");
+			lc1.setData(i, 0, getLen(testStr), 0);
+
 			loopCnt++;
 			nodeLineCnt++;
 		}
 		nodeLineNum[i] = nodeLineCnt;	//노드의 한 문장당 몇 라인을 차지하는 가에 대한 정보 획득. 
 	}
-
+	
 	return loopCnt; //총 몇줄 돌았는지 리턴
 }
 

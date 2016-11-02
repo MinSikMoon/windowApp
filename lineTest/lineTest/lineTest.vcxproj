@@ -154,6 +154,7 @@
     <ClCompile Include="fileOpen.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="lineContainer.cpp" />
     <ClCompile Include="main.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -166,11 +167,18 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="project_methods.cpp" />
-    <ClCompile Include="scrollV2Main.cpp" />
+    <ClCompile Include="scrollV2Main.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="writeMain01.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="g_variable.h" />
+    <ClInclude Include="lineContainer.h" />
     <ClInclude Include="main_header.h" />
+    <ClInclude Include="mCaret.h" />
     <ClInclude Include="mstring.h" />
     <ClInclude Include="mWordPixel.h" />
     <ClInclude Include="project_methods.h" />

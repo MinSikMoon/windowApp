@@ -51,8 +51,7 @@ int getEndIdx(HDC hdc, const TCHAR* targetStr, int limitWidth, int startIdx, int
 				break;
 		}
 	}
-	else if (strPxWidth(hdc, tempStr) < limitWidth) {
-		tempEndIdx++;
+	else {
 		while (1) {
 			tempEndIdx++;
 			TCHAR* cleaner = tempStr;

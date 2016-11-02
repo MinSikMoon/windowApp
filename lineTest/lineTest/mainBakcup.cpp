@@ -1,44 +1,24 @@
-#include <windows.h>
-#include <tchar.h>
-#include <cstdio>
-#include <iostream>
-#include "mstring.h"
-#include <vector>
-#include "mWordPixel.h"
-using namespace std;
+#include "main_header.h"
 
-
-//======================================================================================
-FILE* fp;
-TCHAR* testStr;
-vector<TCHAR*> v1;
-TCHAR* tempStr;
-//글자 너비, 높이 관련
-int wordHeight = 16;
-int avgCharWidth2;
-int textHeight;
-//스크롤 관련 전역 변수
-int xMax, yMax; //스크롤 범위 최대치 지정
-int xPos, yPos; //썸의 위치
-
-				//=================================WIN PROC======================================
-				/* This is where all the input to the window goes to */
+//=================================WIN PROC======================================
+/* This is where all the input to the window goes to */
 LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
 	//-----------------------------------------------------------------------MEMBERS
-	//그리기 관련
+	//----------------그리기 관련
 	HDC hdc;
 	PAINTSTRUCT ps;
 	//SIZE size;
 	static RECT rect;
-	//OFN 관련
+	//-----------------OFN 관련
 	OPENFILENAME OFN;
-	//파일 관련 WINDOW API
+	//------------------파일 관련 WINDOW API
 	HANDLE hFile;
 	static TCHAR str[100], lpstrFile[100] = TEXT(""); //lpstrFile에 디렉터리 정보가 저장된다. 
 	TCHAR filter[] = TEXT("\0텍스트 문서(.txt) \0 *.txt \0 모든파일 \0 *.* \0");
 	char buf[1024];
-	//스크롤 관련
+	//-----------------스크롤 관련
 	//int xInc;
+	SCROLLINFO si;
 	int yInc; //썸의 이동거리
 
 			  //----------------------------------------------------------------------MESSAGE LOGIC
@@ -80,53 +60,17 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 					//2. 화면 크기 바뀔때 rect 얻어오기 //화면 그리는 메시지 강제 호출 //전체 텍스트의 높이도 알아야 한다. // 현재 창에 비친 텍스트의 높이도 알아야
 	case WM_SIZE: {
-		GetClientRect(hwnd, &rect);
+		GetClientRect(hwnd, &rect); //화면 사이즈가 나오고 화면에 몇줄 들어갈 수 있는지도 구할 수 있겠지.
+		curScreenLineNum = rect.bottom / wordHeight; //현재 화면에 몇 문장을 출력할 수 있는지 계산
 		InvalidateRect(hwnd, &rect, TRUE);
 		break;
 	}
 
 				  //3. 스크롤 메시지 관련
 	case WM_VSCROLL: {
-		yInc = 0;
-		switch (LOWORD(wParam)) {
-		case SB_LINEUP: {
-			yInc = -1;
-			break;
-		}
-		case SB_PAGEUP: {
-			yInc = -20;
-			break;
-		}
-		case SB_LINEDOWN: {
-			yInc = 1;
-			break;
-		}
-		case SB_PAGEDOWN: {
-			yInc = 20;
-			break;
-		}
-		case SB_THUMBTRACK: {
-			int temp_yPos = HIWORD(wParam);
-			yInc = temp_yPos - yPos;
-			//yInc = HIWORD(wParam) - xPos; //
-			printf("썸 위치: %d \n", HIWORD(wParam));
-			break;
-		}
-
-		}
-		//스크롤 위치 필터
-		if (yPos + yInc < 0) {
-			yInc = -yPos;
-		}
-		if (yPos + yInc > yMax) {
-			yInc = yMax - yPos;
-		}
-		//새로운 썸의 위치 계산
-		yPos += yInc;
-
+		yInc = mScrollSwitches(wParam, wordHeight, curScreenLineNum, yPos, yMax);	/*	printf("====>현재 yMax는 %d \n",yMax);		printf("현재 yPos는 %d \n", yPos);		printf("현재 화면 크기는 %d \n", rect.bottom);		printf("한 화면에 몇줄? => %d줄 \n", curScreenLineNum);*/
 		ScrollWindow(hwnd, 0, -yInc, NULL, NULL);
 		SetScrollPos(hwnd, SB_VERT, yPos, TRUE);
-
 		break;
 	}
 
@@ -134,47 +78,29 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 	case WM_PAINT: {
 		hdc = BeginPaint(hwnd, &ps);
 
-		int curWndWidth = rect.right;
-		int startIdx = 0;
-		int lastIdx = 0;
-		int sentenceNum;
-		int i, j;
-		int loopCnt = 0;
-		for (i = 0; i < v1.size(); i++) {
-			testStr = NULL;
-			testStr = v1[i];
-			avgCharWidth2 = strPxWidth(hdc, testStr) / _tcslen(testStr);
-			sentenceNum = strPxWidth(hdc, testStr) / curWndWidth + 1;
-			startIdx = 0;
+		map<int, int> nodeLineNum; //노드 하나당 몇 라인을 쓰는지 저장할 맵
 
-			if (curWndWidth < strPxWidth(hdc, testStr)) {
-				for (j = 0; j < sentenceNum; j++) {
-					lastIdx = getEndIdx(hdc, testStr, rect.right, startIdx, avgCharWidth2);
-					textOutCustom(hdc, 0, loopCnt*wordHeight - yPos, testStr, startIdx, lastIdx);
-					startIdx = lastIdx + 1;
-					loopCnt++;
-				}
-			}
-			else {
-				TextOut(hdc, 0, loopCnt*wordHeight - yPos, testStr, getLen(testStr));
-				loopCnt++;
-			}
-		}
-		textHeight = (loopCnt)* wordHeight; //텍스트의 높이 계산// 이게 yMax가 된다.
-											//만약 화면의 높이가 텍스트높이보다 짧아지면 스크롤 생성
-											//printf("%d, %d \n", textHeight, rect.bottom);
-		if (rect.bottom < textHeight) {
-			//스크롤 생성
-			//yPos = 0; //썸의 시작위치는 0이다.
-			yMax = textHeight - rect.bottom;
-			SetScrollRange(hwnd, SB_VERT, 0, yMax, TRUE);
-			SetScrollPos(hwnd, SB_VERT, yPos, TRUE); //기본은 0에서 시작
-		}
-		else {
-			SetScrollRange(hwnd, SB_VERT, 0, 0, TRUE); //스크롤바가 숨겨진다. 
-		}
+		int loopCnt = autoLineSwitch(hdc, v1, rect.right, wordHeight, yPos, nodeLineNum); //개행 함수 //총 몇 줄 나오는지 리턴해줌.
+		textHeight = (loopCnt)* wordHeight; //텍스트의 높이 계산// 이게 yMax가 된다. //loopCnt: 현재 총 라인수, // nodeLineNum[i]: i번째 노드 라인수
+		nodeIdx = getNodeIdx(nodeLineNum, yPos, wordHeight);//화면의 첫번째 문장이 몇번째 노드의 문장인지 알아보자. 	printf("첫 문장은 %d번째 노드 소속입니다. \n", nodeIdx);
 
 
+
+
+
+															//비례 스크롤바 호출
+		yMax = textHeight;
+		si.cbSize = sizeof(SCROLLINFO);
+		si.fMask = SIF_ALL; //sif nocontroll 없애주니까 첫번째 부터 스크롤바 나온다. //아마 ypos가 0이면 숨기는듯.
+		si.nMin = 0;
+		si.nMax = yMax;
+		si.nPage = rect.bottom; //화면의 높이가 yMax보다 textHeight보다 커지면 사라진다. 
+
+		if (rect.bottom >= yMax) { //항상 켜있도록 
+			si.nPage = textHeight - yPos;
+		}
+		si.nPos = yPos;
+		SetScrollInfo(hwnd, SB_VERT, &si, TRUE);
 
 
 		EndPaint(hwnd, &ps);
@@ -182,11 +108,24 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 	}
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 				   //윈도우 해제
 	case WM_DESTROY: {
 		FreeConsole();
 		fclose(fp);
-		for (int i = 0; i < v1.size(); i++) {
+		for (unsigned int i = 0; i < v1.size(); i++) {
 			delete v1[i];
 		}
 		PostQuitMessage(0);
@@ -199,6 +138,45 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 	}
 	return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* The 'main' function of Win32 GUI programs: this is where execution starts */
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {

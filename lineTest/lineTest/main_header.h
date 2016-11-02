@@ -11,6 +11,8 @@
 #include "mWordPixel.h"
 #include "g_variable.h"
 #include "project_methods.h"
+#include "mCaret.h"
+#include "lineContainer.h"
 using namespace std;
 
 #endif // !_main_header
