@@ -93,7 +93,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 		//printf("0노드의 라인 수 %d \n", nodeLineNum[0]);
 		printf("4번째 노드의 4번 인덱스줄은 몇 글자? => %d/ 첫인덱스? = %d, 끝 인덱스 = %d \n", lc1.getWordCnt(4, 4), lc1.getFirstIdx(4,4), lc1.getLastIdx(4,4));
 		
-															
+		//실험중 **
+		SetCaretPos(caret.getXpixel(hdc, v1, lc1, nodeLineNum), caret.getYpixel(hdc, wordHeight));
 															
 		//비례 스크롤바 호출
 		yMax = textHeight;
@@ -135,7 +136,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 		switch (wParam) {
 		//1. 상 //현재 라인을 --시킨다. --라인이 0보다 작아지면 이전 노드의 마지막으로 이동, 노드도 0, 줄도 0이면 안 올라간다. 
 		case VK_UP: {
-
+			
 			break;
 		}
 		//2. 하
@@ -145,12 +146,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 		}
 		//3. 좌
 		case VK_LEFT: {
-
+			caret.moveLeft(lc1, nodeLineNum);
 			break;
 		}
 		//4. 우
 		case VK_RIGHT: {
-
+			caret.moveRight(lc1, nodeLineNum, v1);
 			break;
 		}
 

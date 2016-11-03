@@ -36,6 +36,9 @@ private:
 			if (startIdx <= caretIdx && caretIdx <= endIdx) //범위 안에 들어가면 해당 라인 인덱스 리턴
 				return i;
 		}
+
+		//오류나면 -1리턴
+		return -1;
 	}
 
 	//2. 캐럿이 무슨 노드의 몇 번째 라인에 있는지 알았으므로, 전체 텍스트기준으로 위로 몇 줄 있는지 구한다. 
@@ -82,24 +85,7 @@ private:
 		}
 	}
 
-	//5. getXpixel //현재 캐럿의 x픽셀 값 추출, 
-	int getXpixel(HDC hdc, vector<TCHAR*>& v1, lineContainer& lc) {
-		int result;
-		//픽셀이 문장의 첫 줄이면 무조건 0
-		if (isLineFirst) {
-			result = 0;
-		}
-		else { //아니면 
-			int tempStartIdx = lc.getFirstIdx(curNodeIdx, caretLineIdxInNode); //첫번째 인덱스를 알아낸다. 
-			result = getStrPixelWidth(hdc, v1[curNodeIdx], tempStartIdx, frontWordIdxInNode); //길이를 알아낸다. 
-		}
-		return result;
-	}
-
-	//6. getYpixel
-	int getYpixel(HDC hdc, int wordHeight) {
-		return wordHeight*upperLineCnt;
-	}
+	
 	
 	void setCaretLineIdxInNode(int n) {
 		caretLineIdxInNode = n;
@@ -171,6 +157,24 @@ public:
 
 
 	//4. 캐럿의 출력
+	//5. getXpixel //현재 캐럿의 x픽셀 값 추출, 
+	int getXpixel(HDC hdc, vector<TCHAR*>& v1, lineContainer& lc, map<int,int>& nodeLineNum) {
+		int result;
+		//픽셀이 문장의 첫 줄이면 무조건 0
+		if (isLineFirst(lc, nodeLineNum)) {
+			result = 0;
+		}
+		else { //아니면 
+			int tempStartIdx = lc.getFirstIdx(curNodeIdx, caretLineIdxInNode); //첫번째 인덱스를 알아낸다. 
+			result = getStrPixelWidth(hdc, v1[curNodeIdx], tempStartIdx, frontWordIdxInNode); //길이를 알아낸다. 
+		}
+		return result;
+	}
+
+	//6. getYpixel
+	int getYpixel(HDC hdc, int wordHeight) {
+		return wordHeight*upperLineCnt;
+	}
 	
 };
 #endif // !_mCaret_
