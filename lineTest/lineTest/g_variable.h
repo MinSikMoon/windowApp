@@ -19,6 +19,7 @@ int avgCharWidth2;
 int textHeight;
 int curScreenLineNum; //현재 화면에 보이는 글자 라인수 
 int g_totalLineCnt; //현재 화면에 총 몇 줄이 출력되는가?
+map<int, int> nodeLineNum; //노드 하나당 몇 라인을 쓰는지 저장할 맵
 //-------------------------------------------------------------------------------------스크롤
 int xMax, yMax; //스크롤 범위 최대치 지정
 int xPos, yPos; //썸의 위치

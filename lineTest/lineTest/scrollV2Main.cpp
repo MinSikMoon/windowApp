@@ -78,7 +78,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 	case WM_PAINT: {
 		hdc = BeginPaint(hwnd, &ps);
 
-		map<int, int> nodeLineNum; //노드 하나당 몇 라인을 쓰는지 저장할 맵
+		//map<int, int> nodeLineNum; //노드 하나당 몇 라인을 쓰는지 저장할 맵
 
 		//노드 안에서 몇째줄인가
 		int out_lineNum =0;
@@ -90,6 +90,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 		
 		//printf("첫 문장은 %d번째 노드 소속입니다. %d번째 인덱스 줄 \n", nodeIdx, out_lineNum);
 		//loopCnt: 현재 총 라인수, // nodeLineNum[i]: i번째 노드 라인수
+		//printf("0노드의 라인 수 %d \n", nodeLineNum[0]);
 		printf("4번째 노드의 4번 인덱스줄은 몇 글자? => %d/ 첫인덱스? = %d, 끝 인덱스 = %d \n", lc1.getWordCnt(4, 4), lc1.getFirstIdx(4,4), lc1.getLastIdx(4,4));
 		
 															
