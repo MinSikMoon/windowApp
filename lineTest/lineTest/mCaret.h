@@ -23,7 +23,7 @@ private:
 	int caretLineIdxInNode; //캐럿이 현재 노드안에서 몇 번째 라인에 있느냐?
 	
 	//내부 함수
-	//1. 캐럿 인덱스를 넣으면 현재 노드의 몇 번째 라인에 속해있는지 지정해주는 함수
+	//1. 캐럿 인덱스를 넣으면 현재 노드의 몇 번째 라인에 속해있는지 지정해주는 함수--------------------------- -1배출
 	int getLineInNode(int caretIdx, map<int,int>& nodeLineNum, lineContainer& lc) {
 		int lineCnt = nodeLineNum[curNodeIdx]; //현재 노드가 몇 줄 차지 하는지 나온다. 
 
@@ -37,8 +37,8 @@ private:
 				return i;
 		}
 
-		//오류나면 -1리턴
-		return -1;
+		//오류나면 0리턴 해보자.// 원래 -1이었음. 이게 오류 나는 걸까봐
+		return 0; 
 	}
 
 	//2. 캐럿이 무슨 노드의 몇 번째 라인에 있는지 알았으므로, 전체 텍스트기준으로 위로 몇 줄 있는지 구한다. 
@@ -52,10 +52,10 @@ private:
 		return sum;
 	}
 	
-	//3. 현재 캐럿인덱스는 어떤 실제 문자열 인덱스에 영향을 미치는가?
+	//3. 현재 캐럿인덱스는 어떤 실제 문자열 인덱스에 영향을 미치는가? ------------------------------------- -1 배출
 	int getRealIdx(int caretIdx, lineContainer& lc) {
 		if (caretIdx == 0)
-			return -1; //0이면 -1을 리턴 
+			return -1; //0이면 0을 리턴해보자.
 
 		int startIdx = lc.getFirstIdx(curNodeIdx, caretLineIdxInNode) + caretLineIdxInNode; //현재 캐럿이 속한 라인의 시작 캐럿인덱스
 		if (caretIdx == startIdx) { //문장의 시작 캐럿 인덱스라면 .
@@ -165,7 +165,7 @@ public:
 			result = 0;
 		}
 		else { //아니면 
-			int tempStartIdx = lc.getFirstIdx(curNodeIdx, caretLineIdxInNode); //첫번째 인덱스를 알아낸다. 
+			int tempStartIdx = lc.getFirstIdx(curNodeIdx, caretLineIdxInNode); //첫번째 인덱스를 알아낸다.
 			result = getStrPixelWidth(hdc, v1[curNodeIdx], tempStartIdx, frontWordIdxInNode); //길이를 알아낸다. 
 		}
 		return result;

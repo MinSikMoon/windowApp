@@ -5,6 +5,10 @@
 //1. 한 문장과 startIdx, endIdx를 넣으면 pixel 너비가 얼마인지 리턴해주는 함수
 int getStrPixelWidth(HDC hdc, const TCHAR* targetStr, int startIdx, int endIdx) {
 	SIZE size;
+	//디버그: startIdx가 endIdx보다 커지는 문제printf("=============>start: %d, end: %d \n", startIdx, endIdx);
+	if (startIdx > endIdx) {
+		startIdx = endIdx;
+	}
 	TCHAR* tempStr = subTchar(targetStr, startIdx, endIdx);
 	GetTextExtentPoint(hdc, tempStr, _tcslen(tempStr), &size);
 	delete tempStr;

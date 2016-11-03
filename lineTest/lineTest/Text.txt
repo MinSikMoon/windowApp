@@ -1,0 +1,4 @@
+< -1 배출하는 함수>
+
+1. getlineinnode
+2. getupperlinecnt
