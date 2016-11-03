@@ -4,7 +4,9 @@
 #include <map>
 #include <vector>
 #include <tchar.h>
+#include <Windows.h>
 #include "lineContainer.h"
+#include "mWordPixel.h"
 using namespace std;
 
 //결론 : 결국 눈에 보이는 것은 캐럿인덱스가 움직이는것/ 문자열 수정은 캐럿인덱스에 따른 실제 인덱스에 따른다. 
@@ -68,6 +70,36 @@ private:
 		//2. lineCnt-1 의 인덱스의 마지막 인덱스에 lineCnt 만큼 더해주면 마지막 캐럿 인덱스가 된다. 
 		return lc.getLastIdx(nodeIdx, lineCnt - 1) + lineCnt;
 	}
+
+	//5. 현재 캐럿인덱스가 문장의 첫줄인가?
+	bool isLineFirst(lineContainer& lc, map<int, int>& nodeLineNum) {
+		int startIdx = lc.getFirstIdx(curNodeIdx, caretLineIdxInNode) + caretLineIdxInNode;
+		if (caretIdx == startIdx || caretIdx == 0) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	//5. getXpixel //현재 캐럿의 x픽셀 값 추출, 
+	int getXpixel(HDC hdc, vector<TCHAR*>& v1, lineContainer& lc) {
+		int result;
+		//픽셀이 문장의 첫 줄이면 무조건 0
+		if (isLineFirst) {
+			result = 0;
+		}
+		else { //아니면 
+			int tempStartIdx = lc.getFirstIdx(curNodeIdx, caretLineIdxInNode); //첫번째 인덱스를 알아낸다. 
+			result = getStrPixelWidth(hdc, v1[curNodeIdx], tempStartIdx, frontWordIdxInNode); //길이를 알아낸다. 
+		}
+		return result;
+	}
+
+	//6. getYpixel
+	int getYpixel(HDC hdc, int wordHeight) {
+		return wordHeight*upperLineCnt;
+	}
 	
 	void setCaretLineIdxInNode(int n) {
 		caretLineIdxInNode = n;
@@ -86,9 +118,9 @@ public:
 	mCaret() : curNodeIdx(0), frontWordIdxInNode(0), upperLineCnt(0), caretIdx(0), caretLineIdxInNode(0){}
 	
 	//2. setters //결국 밖에서는 캐럿 인덱스와 노드만 지정해주면 안에서 자동으로 해주게끔 한다. 
-	void setCurNodeIdx(int n){
+	/*void setCurNodeIdx(int n){
 		curNodeIdx = n;
-	}
+	}*/ //굳이 필요없는듯
 	void setCaretIdx(int n, map<int, int>& nodeLineNum,lineContainer& lc) {
 		caretIdx = n; //캐럿이 지정되면 frontWordCnt도 되어야 겠지.
 		setCaretLineIdxInNode(getLineInNode(caretIdx, nodeLineNum, lc)); //현재 노드 안에서 몇 줄안 인지 지정.
@@ -112,6 +144,7 @@ public:
 
 		}
 		caretIdx = tempCaretIdx;
+		setCaretIdx(caretIdx, nodeLineNum, lc); //자동으로 나머지 변수들 계산해줌.
 	}
 
 	//3.2 오른쪽 //총 노드가 몇개인지도 알아야 하기에 v1이 들어가 줘야한다. 
@@ -131,8 +164,13 @@ public:
 			tempCaretIdx = caretIdx + 1;
 		}
 		caretIdx = tempCaretIdx;
+		setCaretIdx(caretIdx, nodeLineNum, lc);
 	}
 
+	//3.3 상 // 위로 이동 // 아직 테스트 말자. 
+
+
+	//4. 캐럿의 출력
 	
 };
 #endif // !_mCaret_
