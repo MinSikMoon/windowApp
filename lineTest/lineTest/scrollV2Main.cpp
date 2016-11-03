@@ -48,7 +48,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 		//1.3 C방식으로 파일을 읽기 모드로 열기
 		_wfopen_s(&fp, OFN.lpstrFile, TEXT("rt")); //파일 읽기 모드로 오픈
 												   //1.4 loop 돌면서 한행씩 vector에 넣어보기
-		while (fgets(buf, 1024, fp) != NULL) {
+		while (fgets(buf, 1024, fp) != NULL) {	
 			TCHAR* temp = toWC(buf);
 			//printf("%d \n", _tcslen(temp));
 			v1.push_back(temp);
@@ -82,12 +82,15 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 		//노드 안에서 몇째줄인가
 		int out_lineNum =0;
-		int loopCnt = autoLineSwitch(hdc, v1, rect.right, wordHeight, yPos, nodeLineNum, lc1); //개행 함수 //총 몇 줄 나오는지 리턴해줌.
-		textHeight = (loopCnt)* wordHeight; //텍스트의 높이 계산// 이게 yMax가 된다. 
+		g_totalLineCnt = autoLineSwitch(hdc, v1, rect.right, wordHeight, yPos, nodeLineNum, lc1); //개행 함수 //총 몇 줄 나오는지 리턴해줌.
+		textHeight = (g_totalLineCnt)* wordHeight; //텍스트의 높이 계산// 이게 yMax가 된다. 
+
 		nodeIdx = getNodeIdx(nodeLineNum, yPos, wordHeight, out_lineNum);//화면의 첫번째 문장이 몇번째 노드의 문장인지 알아보자.
-		printf("첫 문장은 %d번째 노드 소속입니다. %d번째 인덱스 줄 \n", nodeIdx, out_lineNum);
+		//여기서 캐럿 정보도 갱신해줌. 
+		
+		//printf("첫 문장은 %d번째 노드 소속입니다. %d번째 인덱스 줄 \n", nodeIdx, out_lineNum);
 		//loopCnt: 현재 총 라인수, // nodeLineNum[i]: i번째 노드 라인수
-		printf("0번째 노드의 1번 인덱스(2번째줄)은 몇 글자? => %d \n", lc1.getWordCnt(0, 1));
+		printf("4번째 노드의 4번 인덱스줄은 몇 글자? => %d/ 첫인덱스? = %d, 끝 인덱스 = %d \n", lc1.getWordCnt(4, 4), lc1.getFirstIdx(4,4), lc1.getLastIdx(4,4));
 		
 															
 															
@@ -112,13 +115,48 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 
 
+	//---------------------------캐럿관련
+	//1. 포커스 잃을 때
+	case WM_KILLFOCUS: {
+		DestroyCaret(); //포커스를 잃으면 현재 윈도우에 장착된 캐럿을 없앤다. 
+		break;
+	}
+	
+	//2. 포커스 받을 때 //캐럿은 이 때 만들어야 한다. 
+	case WM_SETFOCUS: {
+		CreateCaret(hwnd, NULL, 2, wordHeight); //캐럿 만들기// 2번째 비트맵이 NULL이니까, 캐럿은 2, 16 폭과 높이(문자 높이)로 만들어진다. 
+		ShowCaret(hwnd); //앞에서 hwnd에 캐럿을 만들었으므로, ShowCaret()하면 캐럿이 보여진다.(깜빡깜빡)
+		break;
+	}
+	
+	//3. 방향키 움직이는 데로 옮겨보자.
+	case WM_KEYDOWN: {
+		switch (wParam) {
+		//1. 상 //현재 라인을 --시킨다. --라인이 0보다 작아지면 이전 노드의 마지막으로 이동, 노드도 0, 줄도 0이면 안 올라간다. 
+		case VK_UP: {
 
+			break;
+		}
+		//2. 하
+		case VK_DOWN: {
 
+			break;
+		}
+		//3. 좌
+		case VK_LEFT: {
 
+			break;
+		}
+		//4. 우
+		case VK_RIGHT: {
 
+			break;
+		}
 
-
-
+		}
+		InvalidateRect(hwnd, NULL, TRUE);
+		break;
+	}
 
 
 

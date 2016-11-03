@@ -80,15 +80,19 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 		map<int, int> nodeLineNum; //노드 하나당 몇 라인을 쓰는지 저장할 맵
 
-		int loopCnt = autoLineSwitch(hdc, v1, rect.right, wordHeight, yPos, nodeLineNum); //개행 함수 //총 몇 줄 나오는지 리턴해줌.
-		textHeight = (loopCnt)* wordHeight; //텍스트의 높이 계산// 이게 yMax가 된다. //loopCnt: 현재 총 라인수, // nodeLineNum[i]: i번째 노드 라인수
-		nodeIdx = getNodeIdx(nodeLineNum, yPos, wordHeight);//화면의 첫번째 문장이 몇번째 노드의 문장인지 알아보자. 	printf("첫 문장은 %d번째 노드 소속입니다. \n", nodeIdx);
+								   //노드 안에서 몇째줄인가
+		int out_lineNum = 0;
+		int loopCnt = autoLineSwitch(hdc, v1, rect.right, wordHeight, yPos, nodeLineNum, lc1); //개행 함수 //총 몇 줄 나오는지 리턴해줌.
+		textHeight = (loopCnt)* wordHeight; //텍스트의 높이 계산// 이게 yMax가 된다. 
+
+		nodeIdx = getNodeIdx(nodeLineNum, yPos, wordHeight, out_lineNum);//화면의 첫번째 문장이 몇번째 노드의 문장인지 알아보자.
+																		 //printf("첫 문장은 %d번째 노드 소속입니다. %d번째 인덱스 줄 \n", nodeIdx, out_lineNum);
+																		 //loopCnt: 현재 총 라인수, // nodeLineNum[i]: i번째 노드 라인수
+																		 //printf("4번째 노드의 0번 인덱스줄은 몇 글자? => %d/ 첫인덱스? = %d \n", lc1.getWordCnt(4, 4), lc1.getFirstIdx(4,4));
 
 
 
-
-
-															//비례 스크롤바 호출
+																		 //비례 스크롤바 호출
 		yMax = textHeight;
 		si.cbSize = sizeof(SCROLLINFO);
 		si.fMask = SIF_ALL; //sif nocontroll 없애주니까 첫번째 부터 스크롤바 나온다. //아마 ypos가 0이면 숨기는듯.

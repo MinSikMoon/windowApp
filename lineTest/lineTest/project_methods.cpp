@@ -51,10 +51,9 @@ int autoLineSwitch( HDC hdc, vector<TCHAR*> v1, int screenWidth, int wordHeight,
 				textOutCustom(hdc, 0, loopCnt*wordHeight - yPos, testStr, startIdx, lastIdx);
 				//i: 몇번째 노드인가// 여기서 nodeLineCnt-1하면 노드안에서 몇번째 줄인지// lastIdx-startIdx+1하면 한 줄에 글자 몇개인지
 				//startIdx: 문장의 첫글자의 인덱스는 몇인가?// 맵에 1차원 배열을 key 값으로 받을 수 있는지 조사.
-				//실험 //인자로 lineContainer를 받아보자. 
 				//printf("%d 번 노드의 %d 번째 라인인데 길이는 %d 입니다. \n", i, j, lastIdx - startIdx + 1); //여기는 잘 나옴.
-				lc1.setData(i, j, lastIdx - startIdx + 1, startIdx);
-				//printf("함수 안에서의 0,1은 %d \n", lc1.getWordCnt(0,1));
+				lc1.setData(i, j, lastIdx - startIdx + 1, startIdx, lastIdx);
+			
 				startIdx = lastIdx + 1;
 				loopCnt++;
 				nodeLineCnt++;
@@ -64,11 +63,8 @@ int autoLineSwitch( HDC hdc, vector<TCHAR*> v1, int screenWidth, int wordHeight,
 		}
 		else {
 			TextOut(hdc, 0, loopCnt*wordHeight - yPos, testStr, getLen(testStr));
-			//i: 몇번째 노드인가// 여기서 nodeLineCnt-1하면 노드안에서 몇번째 줄인지// lastIdx-startIdx+1하면 한 줄에 글자 몇개인지
-			//startIdx: 문장의 첫글자의 인덱스는 몇인가?// 맵에 1차원 배열을 key 값으로 받을 수 있는지 조사.
-			//실험 //인자로 lineContainer를 받아보자. 
-			//printf("그냥 넣습니다. \n");
-			lc1.setData(i, 0, getLen(testStr), 0);
+		
+			lc1.setData(i, 0, getLen(testStr), 0, getLen(testStr)-1);
 
 			loopCnt++;
 			nodeLineCnt++;

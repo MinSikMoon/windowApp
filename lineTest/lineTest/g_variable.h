@@ -18,7 +18,7 @@ int wordHeight = 16;
 int avgCharWidth2;
 int textHeight;
 int curScreenLineNum; //현재 화면에 보이는 글자 라인수 
-
+int g_totalLineCnt; //현재 화면에 총 몇 줄이 출력되는가?
 //-------------------------------------------------------------------------------------스크롤
 int xMax, yMax; //스크롤 범위 최대치 지정
 int xPos, yPos; //썸의 위치
