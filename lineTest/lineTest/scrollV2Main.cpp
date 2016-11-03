@@ -115,7 +115,22 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 		EndPaint(hwnd, &ps);
 		break;
 	}
+	
+	//문자 입력 시 //실험중
+	case WM_CHAR: {
+		//1. 현재 캐럿이 있는 v1의 문자열을 복사해온다. 
+		TCHAR* tempStr = cloneTchar(v1.at(caret.getCurNodeIdx()));  //임시 복사 문자열
+		TCHAR tempChar = (TCHAR)wParam;
+		tempStr = insertChar(tempStr, tempChar, caret.getRealIdx()+1);
+		v1.erase(v1.begin() + caret.getCurNodeIdx());
+		v1.insert(v1.begin() + caret.getCurNodeIdx(), tempStr);
+		caret.moveRight(lc1, nodeLineNum, v1);
+		//v1[caret.getCurNodeIdx] = NULL; //비워주고
+		//v1[caret.getCurNodeIdx] = tempStr; //다시 연결
 
+		InvalidateRect(hwnd, NULL, TRUE);
+		break;
+	}
 
 
 	//---------------------------캐럿관련

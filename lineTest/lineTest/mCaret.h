@@ -175,6 +175,16 @@ public:
 	int getYpixel(HDC hdc, int wordHeight) {
 		return wordHeight*upperLineCnt;
 	}
+
+
+	//7. getters
+	int getCurNodeIdx() {
+		return curNodeIdx;
+	}
+	
+	int getRealIdx() {
+		return frontWordIdxInNode;
+	}
 	
 };
 #endif // !_mCaret_
