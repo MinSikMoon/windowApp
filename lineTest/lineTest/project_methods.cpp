@@ -23,6 +23,40 @@ int getNodeIdx(map<int, int> v, int yPos, int wordHeight, int& out_lineNum) {
 
 };
 
+//1.5 getNodeIdx의 두번째 버젼 오버로딩 //몇 번째 노드의 몇번째 라인(out_lineNum)인지 뽑아준다. 
+int getNodeIdx(map<int, int> nodeLineNum, int upperLineCnt, int& out_lineNum) {
+	int sum = 0;
+	int tempSum = 0;
+	int nodeIdx = 0;
+	
+	for (unsigned int i = 0; i < nodeLineNum.size(); i++) {
+
+		tempSum += nodeLineNum[i];
+		if (upperLineCnt >= sum &&upperLineCnt < tempSum) {
+			nodeIdx = i;
+			out_lineNum = upperLineCnt - sum;
+			break;
+		}
+		sum = tempSum;
+	}
+
+	return nodeIdx;
+}
+
+//2. 마지막 노드인덱스와 라인 알아내보기. // 
+int getLastScreenNodeIdx(map<int, int> nodeLineNum, int totalLineCnt, int upperLineCnt, int restLineCnt, int screenAvailableCnt, int& out_lineNum) {
+	//1. 필터 : 마지막 라인까지 출력되는데 화면 크기가 더 클때 //무조건 마지막 노드의 마지막 라인 배출
+	int tempUpperCnt;
+	if (upperLineCnt + screenAvailableCnt > totalLineCnt) {
+		tempUpperCnt = totalLineCnt - 1;
+		return getNodeIdx(nodeLineNum, tempUpperCnt, out_lineNum);
+	}
+	else { //화면 안에서 텍스트 여분이 없고 화면 밑으로 텍스트가 더 남아있을 때
+		tempUpperCnt = upperLineCnt + screenAvailableCnt - 1;
+		return getNodeIdx(nodeLineNum, tempUpperCnt, out_lineNum);
+	}
+}
+
 
 //2. 화면에 맞추어 개행시켜 보여주는 로직
 int autoLineSwitch( HDC hdc, vector<TCHAR*> v1, int screenWidth, int wordHeight, int yPos, map<int,int>& nodeLineNum, lineContainer& lc1) {

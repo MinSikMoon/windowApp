@@ -2,3 +2,14 @@
 
 1. getlineinnode
 2. getupperlinecnt
+
+
+
+<변수 정리>
+1. 화면의 총 라인수 = g_totalLineCnt;
+2. 노드당 차지하는 라인수 = map_nodeLineNum 
+3. 화면의 첫라인의 노드와 노드라인 = nodeIdx, out_lineNum : wm_paint의 지역변수임
+4. 현재 화면에 몇 줄이 보이는가? = curScreenLineNum : 현재 화면에 몇 줄이 보이나
+5. 현재 화면의 끝줄은 몇 노드의 몇 라인인가? => 만들어야함.
+6. 현재 자신의 줄을 포함해서 밑으로 몇줄 남았나? => 만들어야함.
+7. 현재 화면 위로 몇 줄이 보이나? => g_upperLineCnt;

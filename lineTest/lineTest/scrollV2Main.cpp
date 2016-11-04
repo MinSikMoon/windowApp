@@ -83,13 +83,21 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 		//노드 안에서 몇째줄인가
 		int out_lineNum =0;
+		int out_lineNumLast = 0;
 		g_totalLineCnt = autoLineSwitch(hdc, v1, rect.right, wordHeight, yPos, nodeLineNum, lc1); //개행 함수 //총 몇 줄 나오는지 리턴해줌.
+		g_upperLineCnt = yPos / wordHeight;
+		g_restLineCnt = g_totalLineCnt - g_upperLineCnt;
 		textHeight = (g_totalLineCnt)* wordHeight; //텍스트의 높이 계산// 이게 yMax가 된다. 
 
 		nodeIdx = getNodeIdx(nodeLineNum, yPos, wordHeight, out_lineNum);//화면의 첫번째 문장이 몇번째 노드의 문장인지 알아보자.
+		lastNodeIdx = getLastScreenNodeIdx(nodeLineNum, g_totalLineCnt, g_upperLineCnt, g_restLineCnt, curScreenLineNum, out_lineNumLast);
 		//여기서 캐럿 정보도 갱신해줌. 
 		
-		//printf("첫 문장은 %d번째 노드 소속입니다. %d번째 인덱스 줄 \n", nodeIdx, out_lineNum);
+		printf("첫 문장은 %d번째 노드 소속입니다. %d번째 인덱스 줄 \n", nodeIdx, out_lineNum);
+		printf("현재 화면에는 %d 줄이 출력가능합니다. \n", curScreenLineNum);
+		printf("현재 위로는 %d 줄이 있습니다. \n", g_upperLineCnt);
+		printf("현재줄 포함 %d 줄 남았습니다. \n", g_restLineCnt);
+		printf("마지막 문장은 %d번째 노드의 %d 번째 라인입니다. \n",lastNodeIdx, out_lineNumLast); //이제 화면 마지막 문장이 몇 노드의 몇 라인인지도 안다. 
 		//loopCnt: 현재 총 라인수, // nodeLineNum[i]: i번째 노드 라인수
 		//printf("0노드의 라인 수 %d \n", nodeLineNum[0]);
 		//printf("4번째 노드의 4번 인덱스줄은 몇 글자? => %d/ 첫인덱스? = %d, 끝 인덱스 = %d \n", lc1.getWordCnt(4, 4), lc1.getFirstIdx(4,4), lc1.getLastIdx(4,4));
@@ -125,9 +133,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 		v1.erase(v1.begin() + caret.getCurNodeIdx());
 		v1.insert(v1.begin() + caret.getCurNodeIdx(), tempStr);
 		caret.moveRight(lc1, nodeLineNum, v1);
-		//v1[caret.getCurNodeIdx] = NULL; //비워주고
-		//v1[caret.getCurNodeIdx] = tempStr; //다시 연결
-
+		
+		//2. 문자열 갱신 끝나고 화면 출력
 		InvalidateRect(hwnd, NULL, TRUE);
 		break;
 	}
