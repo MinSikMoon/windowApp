@@ -159,7 +159,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 		switch (wParam) {
 		//1. 상 //현재 라인을 --시킨다. --라인이 0보다 작아지면 이전 노드의 마지막으로 이동, 노드도 0, 줄도 0이면 안 올라간다. 
 		case VK_UP: {
-			
+			hdc = GetDC(hwnd);
+			caret.moveUp(hdc, nodeLineNum, lc1, v1, 8);
+			ReleaseDC(hwnd, hdc);
 			break;
 		}
 		//2. 하

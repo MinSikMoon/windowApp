@@ -13,3 +13,56 @@
 5. 현재 화면의 끝줄은 몇 노드의 몇 라인인가? => 만들어야함.
 6. 현재 자신의 줄을 포함해서 밑으로 몇줄 남았나? => 만들어야함.
 7. 현재 화면 위로 몇 줄이 보이나? => g_upperLineCnt;
+
+<mCaret 변수들>
+//입력 관련
+int curNodeIdx; //1. 캐럿이 어떤 노드에 속해있는가? (노드 인덱스)
+int frontWordIdxInNode; //캐럿 앞에 몇글자 있는가? (캐럿 인덱스와 헷갈리지 말자. 이거는 철저히 입력용으로 문자열 인덱스-1과 호환됨.
+	//출력 관련 
+int upperLineCnt; //캐럿 위로 몇 줄이나 있나?
+int caretIdx; //캐럿은 strlen(노드의 문자열) + 줄수 의 범위를 가진다. 
+int caretLineIdxInNode; //캐럿이 현재 노드안에서 몇 번째 라인에 있느냐?
+
+
+
+<debug>
+
+1. 0노드 0라인의 0캐럿인덱스에 글자 쓰면 insertchar에서 힙 코럽션 생김.
+
+
+//startidx에는 문장의 첫 인덱스가 들어가겠지.
+	int getFitWordNum(HDC hdc, TCHAR* targetStr, int limitPixelWidth, int startIdx, int avgCharWidth) {
+		int tempIdx;
+		if (getStrPixelWidth(hdc, targetStr, startIdx, _tcslen(targetStr) - 1) <= limitPixelWidth) {
+			tempIdx = (_tcslen(targetStr) - 1);
+			return tempIdx-startIdx + 1; //문장의 처음부터 마지막 까지의 갯수를 배출 
+		}
+		//1. 평균 글자 너비를 이용해서 limitWidth 안에 총 몇글자 정도 들어갈지 예상해본다.
+		int estWordNum = limitPixelWidth / avgCharWidth + 1;
+		//2. 그 정도 글자로 만든 새로운 문자열 만들기
+		int tempEndIdx = startIdx + estWordNum - 1;
+		TCHAR* tempStr = subTchar(targetStr, startIdx, tempEndIdx);
+		//3. 실제 limitWidth와 비교하면서 가감해본다.
+		if (strPxWidth(hdc, tempStr) > limitPixelWidth) { //길면 빼줘야지 한글자씩 
+			while (1) {
+				tempEndIdx--;
+				TCHAR* cleaner = tempStr;
+				tempStr = subTchar(targetStr, startIdx, tempEndIdx);
+				delete cleaner;
+				if (strPxWidth(hdc, tempStr) <= limitPixelWidth)
+					break;
+			}
+		}
+		else {
+			while (1) {
+				tempEndIdx++;
+				TCHAR* cleaner = tempStr;
+				tempStr = subTchar(targetStr, startIdx, tempEndIdx);
+				delete cleaner;
+				if (strPxWidth(hdc, tempStr) >= limitPixelWidth)
+					break;
+			}
+		}
+		delete tempStr; //힙영역 해제
+		return tempIdx - startIdx + 1; //갯수를 리턴해줌.
+	}

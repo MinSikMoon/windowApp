@@ -1,5 +1,8 @@
 #include <tchar.h>
 #include "mstring.h"
+#include <cstdio>
+#include <cstdlib>
+#include <iostream>
 
 
 //1. 길이 구하기
@@ -52,6 +55,10 @@ TCHAR* insertChar(const TCHAR* sourceStr, TCHAR inChar, int targetIdx) {
 	TCHAR* temp3;
 	TCHAR* charStr = charToStr(inChar);
 	TCHAR* result;
+	//실험
+	//printf("***mstring insertchar에서 targetidx = %d \n", targetIdx);// -1이 들어오네. //교정해주자. 
+	if (targetIdx < 0)
+		targetIdx = 0;
 
 	tmpStr1 = subTchar(sourceStr, 0, targetIdx - 1);
 	tmpStr2 = subTchar(sourceStr, targetIdx, _tcslen(sourceStr) - 1);
