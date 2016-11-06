@@ -69,7 +69,7 @@ int autoLineSwitch( HDC hdc, vector<TCHAR*> v1, int screenWidth, int wordHeight,
 	int avgCharWidth2;
 	TCHAR* testStr;
 
-	
+	//printf("여기 오토라인 스위친데!!!!!! v1사이즈가 %d야. \n", v1.size());
 	for (i = 0; i < v1.size(); i++) { //노드 하나당 돈다. 
 		testStr = NULL; //testStr 비워주기
 		testStr = v1[i];

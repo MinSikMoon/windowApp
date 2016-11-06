@@ -266,12 +266,7 @@ public:
 	int getLastLineIdxInNode(int nodeIdx, map<int, int>& nodeLineNum) {
 		return nodeLineNum[nodeIdx] - 1;
 	}
-
-	//////6. 현재 노드,라인의 첫번째 캐럿인덱스는 무엇인가
-	/*int getFirstCaretIdx(int nodeIdx, int lineIdx, lineContainer& lc) {
-		return lc.getFirstIdx(nodeIdx, lineIdx) + lineIdx;
-	}*/
-
+	
 	//3.4 상
 	void moveUp(HDC hdc, map<int,int>& nodeLineNum, lineContainer& lc, vector<TCHAR*>& v1, int avgCharWidth) {
 		int tempCaretIdx;
@@ -338,10 +333,121 @@ public:
 		curNodeIdx = tempNodeIdx;
 		caretIdx = tempCaretIdx;
 		setCaretIdx(caretIdx, nodeLineNum, lc);
+	}
+	//===========================================================================================================
+	//노드와 라인을 넣으면 그게 해당 노드의 마지막 라인인지 검출해주는 함수
+	bool isLastLine(map<int, int>& nodeLineNum, int NodeIdx, int lineIdx) {
+		int temp = nodeLineNum[NodeIdx] - 1;
 
+		if (lineIdx == temp) {
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 
+	//3.5 하 // 아래로 움직이기
+	void moveDown(HDC hdc, map<int, int>& nodeLineNum, lineContainer& lc, vector<TCHAR*>& v1, int avgCharWidth) {
+		int tempCaretIdx;
+		int tempNodeIdx;
+		int tempLineIdx;
+		int tempCurXwidth;
+		int tempNextXwidth;
+		
+		int tempLastNodeIdx = v1.size() - 1; //마지막 노드 검출하는 변수 //왜 5, -1이 나올까. //하나 빼줘야함. 
+		int tempLastLineIdx = getLastLineIdxInNode(tempLastNodeIdx, nodeLineNum); //마지막 라인
+		
+		printf("마지막 노드인덱스는 ==> %d , 라인은 %d \n", tempLastNodeIdx, tempLastLineIdx);
+		//1. 전체 텍스트의 마지막 노드, 마지막 라인이면 아무일도 일어나지 않는다. 
+		if (curNodeIdx == tempLastNodeIdx && caretLineIdxInNode == tempLastLineIdx) {
+			return;
+		}
+		else { //1.1 노드가 이동한다.
+			if (isLastLine(nodeLineNum, curNodeIdx, caretLineIdxInNode)) {//캐럿이 해당 노드의 마지막 줄에 있는가도 검출이 가능해야 되네. // lineNodeNum[curNodeIdx] - 1 하면 나옴.
+				tempNodeIdx = curNodeIdx + 1; //다음 노드로 ㄱ ㄱ
+				tempLineIdx = 0; //노드가 올라가면 다음 줄은 무조건 인덱스가 0이니까. 
+
+				//1.1.1 해당 라인의 첫째 캐럿이면 다음 노드 첫째줄의 첫째 캐럿으로(0) ㄱ ㄱ 
+				if (isLineFirst(lc, nodeLineNum)) {
+					tempCaretIdx = 0;
+				}
+				else { //1.1.2 문장의 첫째 캐럿이 아니라면 사이즈 비교하면서 옮긴다. 
+								
+					int tempNextStartIdx = lc.getFirstIdx(tempNodeIdx, tempLineIdx) ;
+					int tempNextEndIdx = lc.getLastIdx(tempNodeIdx, tempLineIdx); //tempLineIdx는 0 이겠지.
+
+					tempCurXwidth = getXpixel(hdc, v1, lc, nodeLineNum);// 현재 캐럿이 있는 곳의 xpixel // limit width가 된다. 
+					tempNextXwidth = getStrPixelWidth(hdc, v1.at(tempNodeIdx), tempNextStartIdx, tempNextEndIdx); //다음 문장 길이를 임시로 구함.
+					//1.1.2.1 다음 문장 길이가 현재 캐럿있는 문장보다 짧으면 그냥 마지막 캐럿으로 ㄱ ㄱ
+					if (tempNextXwidth < tempCurXwidth) {
+						tempCaretIdx = getLastCaretIdx(tempNodeIdx, tempLineIdx, lc);
+					}
+					else { //1.1.2.2 다음 문장이 현재 문장보다 길이가 같거나 길다면 
+						int tempCnt = getFitWordNum(hdc, v1.at(tempNodeIdx), tempCurXwidth, tempNextStartIdx, avgCharWidth);
+						tempCaretIdx = tempCnt; //0 + tempCnt // 다음 노드라면 무조건 캐럿인덱스도 0에서 시작하잖아. 
+					}
+				}
+			}
+			else { //1.2 노드가 이동하지 않는다. 
+				tempNodeIdx = curNodeIdx; //노드가 이동하지 않는다. 
+				tempLineIdx = caretLineIdxInNode + 1;
+
+				int tempNextStartIdx = lc.getFirstIdx(tempNodeIdx, tempLineIdx);
+				int tempNextEndIdx = lc.getLastIdx(tempNodeIdx, tempLineIdx);
+				
+				//1.1.1 해당 라인의 첫째 캐럿이면 다음 라인의 첫째 캐럿으로 ㄱ ㄱ 
+				if (isLineFirst(lc, nodeLineNum)) {
+					tempCaretIdx = getFirstCaretIdx(tempNodeIdx, tempLineIdx, lc);
+				}
+				else { //1.1.2 문장의 첫째 캐럿이 아니라면 사이즈 비교하면서 옮긴다. 
+					int tempNextStartIdx = lc.getFirstIdx(tempNodeIdx, tempLineIdx);
+					int tempNextEndIdx = lc.getLastIdx(tempNodeIdx, tempLineIdx); //tempLineIdx는 0 이겠지.
+
+					tempCurXwidth = getXpixel(hdc, v1, lc, nodeLineNum);// 현재 캐럿이 있는 곳의 xpixel // limit width가 된다. 
+					tempNextXwidth = getStrPixelWidth(hdc, v1.at(tempNodeIdx), tempNextStartIdx, tempNextEndIdx); //다음 문장 길이를 임시로 구함.
+					//1.1.2.1 다음 문장 길이가 현재 캐럿있는 문장보다 짧으면 그냥 마지막 캐럿으로 ㄱ ㄱ
+					if (tempNextXwidth < tempCurXwidth) {
+						tempCaretIdx = getLastCaretIdx(tempNodeIdx, tempLineIdx, lc);
+					}
+					else { //1.1.2.2 다음 문장이 현재 문장보다 길이가 같거나 길다면 
+						int tempCnt = getFitWordNum(hdc, v1.at(tempNodeIdx), tempCurXwidth, tempNextStartIdx, avgCharWidth);
+						tempCaretIdx = getFirstCaretIdx(tempNodeIdx, tempLineIdx, lc) + tempCnt; //0 + tempCnt // 다음 노드라면 무조건 캐럿인덱스도 0에서 시작하잖아. 
+					}
+				}
+				//if (tempNextXwidth < tempCurXwidth) {
+				//	tempCaretIdx = getLastCaretIdx(tempNodeIdx, tempLineIdx, lc);
+				//}
+				//else { //1.2.2.2 다음 문장이 현재 문장보다 길이가 같거나 길다면 
+				//	int tempCnt = getFitWordNum(hdc, v1.at(tempNodeIdx), tempCurXwidth, tempNextStartIdx, avgCharWidth);
+				//	tempCaretIdx = tempCnt; //0 + tempCnt // 다음 노드라면 무조건 캐럿인덱스도 0에서 시작하잖아. 
+				//}
+
+
+			}
+		}
+		curNodeIdx = tempNodeIdx;
+		caretIdx = tempCaretIdx;
+		setCaretIdx(caretIdx, nodeLineNum, lc);
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	//4. 캐럿의 출력
+
 	//5. getXpixel //현재 캐럿의 x픽셀 값 추출, 
 	int getXpixel(HDC hdc, vector<TCHAR*>& v1, lineContainer& lc, map<int,int>& nodeLineNum) {
 		int result;

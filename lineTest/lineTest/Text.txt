@@ -66,3 +66,86 @@ int caretLineIdxInNode; //캐럿이 현재 노드안에서 몇 번째 라인에 있느냐?
 		delete tempStr; //힙영역 해제
 		return tempIdx - startIdx + 1; //갯수를 리턴해줌.
 	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		//3.4 상
+	void moveUp(HDC hdc, map<int,int>& nodeLineNum, lineContainer& lc, vector<TCHAR*>& v1, int avgCharWidth) {
+		int tempCaretIdx;
+		int tempNodeIdx;
+		int tempLineIdx;
+		int tempCurXwidth;
+		int tempPrevXwidth;
+
+		//1. 전체 텍스트의 첫번째 줄이면 아무일도 일어나지 않는다.
+		if (curNodeIdx == 0 && caretLineIdxInNode == 0) {
+			return;
+		}
+		else { //첫째줄이 아니면 노드가 이동할 것이냐 아니냐로 또 나뉜다. ----------------- 노드가 하나 전으로 간다. 
+			if (caretLineIdxInNode == 0) { //첫째줄이라 노드가 이동하는 경우 //이안에서도 첫째 캐럿이냐 아니냐로 나뉘겠지.
+				tempNodeIdx = curNodeIdx - 1; //노드가 이전 노드로 이동 한다. 
+
+				if (isLineFirst(lc, nodeLineNum)) { //첫째캐럿? //전노드 마지막줄 첫째 캐럿으로 ㄱ ㄱ
+					tempLineIdx = getLastLineIdxInNode(tempNodeIdx, nodeLineNum); //이전 노드의 마지막 라인
+					tempCaretIdx = getFirstCaretIdx(tempNodeIdx, tempLineIdx, lc); //이전 노드 마지막 라인의 첫째 캐럿
+				}
+				else { //첫째 캐럿이 아니면 이제 사이즈 비교해가면서 옮겨보자. // getfitwordnum 테스트
+					//1. 현재 캐럿이 위치하는 곳까지의 xpixel을 구한다. 이게 limit width가 될 것이다. 
+					tempLineIdx = getLastLineIdxInNode(tempNodeIdx, nodeLineNum); //이전 노드의 마지막 라인
+					
+					int tempPrevStartIdx = lc.getFirstIdx(tempNodeIdx, tempLineIdx); //이전문장의 첫째글자 인덱스
+					int tempPrevEndIdx = lc.getLastIdx(tempNodeIdx, tempLineIdx); //이전 문장의 마지막 글자 인덱스
+					tempCurXwidth = getXpixel(hdc, v1, lc, nodeLineNum); //현재 캐럿이 있는 곳의 xpixel 구해짐. //limit width가 된다.
+					tempPrevXwidth = getStrPixelWidth(hdc, v1.at(tempNodeIdx), tempPrevStartIdx, tempPrevEndIdx); //이전 문장의 길이를 가상으로 구함.
+
+					if (tempPrevXwidth < tempCurXwidth) { //이전 문장의 길이가  현재 캐럿이 있는 문장보다 짧다면 이전 문장의 마지막 캐럿으로 
+						tempCaretIdx = getLastCaretIdx(tempNodeIdx, tempLineIdx, lc);
+					}
+					else { //아니고 이전 문장이 현재 문장보다 길이가 같거다 길다면 
+						int tempCnt = getFitWordNum(hdc, v1.at(tempNodeIdx), tempCurXwidth, tempPrevStartIdx, avgCharWidth);
+						tempCaretIdx = getFirstCaretIdx(tempNodeIdx, tempLineIdx, lc) + tempCnt; //이전 문장 첫째 인덱스에서 갯수 더해준만큼
+					}
+
+				}
+			}
+			else { //--------------------------------------------------노드는 바뀌지 않는다. //라인도 정해짐
+				tempNodeIdx = curNodeIdx; //노드는 바뀌지 않겠지.
+				tempLineIdx = caretLineIdxInNode - 1; //현재 노드안에서 이전 문장 // 여기서 라인 정해줌.
+
+				if (isLineFirst(lc, nodeLineNum)) { //첫째캐럿?
+					tempCaretIdx = getFirstCaretIdx(tempNodeIdx, tempLineIdx, lc); //이전 노드 마지막 라인의 첫째 캐럿
+				}
+				else {
+					int tempPrevStartIdx = lc.getFirstIdx(tempNodeIdx, tempLineIdx); //이전문장의 첫째글자 인덱스
+					int tempPrevEndIdx = lc.getLastIdx(tempNodeIdx, tempLineIdx); //이전 문장의 마지막 글자 인덱스
+					tempCurXwidth = getXpixel(hdc, v1, lc, nodeLineNum); //현재 캐럿이 있는 곳의 xpixel 구해짐. //limit width가 된다.
+					tempPrevXwidth = getStrPixelWidth(hdc, v1.at(tempNodeIdx), tempPrevStartIdx, tempPrevEndIdx); //이전 문장의 길이를 가상으로 구함.
+
+					if (tempPrevXwidth < tempCurXwidth) { //이전 문장의 길이가  현재 캐럿이 있는 문장보다 짧다면 이전 문장의 마지막 캐럿으로 
+						tempCaretIdx = getLastCaretIdx(tempNodeIdx, tempLineIdx, lc);
+					}
+					else { //아니고 이전 문장이 현재 문장보다 길이가 같거다 길다면 
+						int tempCnt = getFitWordNum(hdc, v1.at(tempNodeIdx), tempCurXwidth, tempPrevStartIdx, avgCharWidth);
+						tempCaretIdx = getFirstCaretIdx(tempNodeIdx, tempLineIdx, lc) + tempCnt; //이전 문장 첫째 인덱스에서 갯수 더해준만큼
+					}
+				}
+			}
+			
+		}
+		curNodeIdx = tempNodeIdx;
+		caretIdx = tempCaretIdx;
+		setCaretIdx(caretIdx, nodeLineNum, lc);
+	}

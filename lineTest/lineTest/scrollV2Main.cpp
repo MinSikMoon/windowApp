@@ -166,7 +166,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 		}
 		//2. го
 		case VK_DOWN: {
-
+			hdc = GetDC(hwnd);
+			caret.moveDown(hdc, nodeLineNum, lc1, v1, 8);
+			ReleaseDC(hwnd, hdc);
 			break;
 		}
 		//3. аб
