@@ -1,6 +1,7 @@
 #include <iostream>
 #include <tchar.h>
 #include <Windows.h>
+#include <locale.h>
 typedef int size_m;
 
 
@@ -8,7 +9,7 @@ class mString {
 	//MEMBERS : private
 	TCHAR* str;
 	size_m length;
-
+	
 public:
 	//1. CONSTRUCTOR : const TCHAR가 들어왔을 때// 복사해서 붙여준다. //즉 깊은 복사가 일어난다. 
 	//1.1 문자열이 들어왔을 때
@@ -77,7 +78,7 @@ public:
 		
 		size_m tempLength = endIdx - startIdx + 1; //단순히 잘려진 문자의 갯수일 뿐, 인덱스와 헷갈리지 말자.  
 		size_m bufferSize = (length + 1) * sizeof(TCHAR); //버퍼는 nul 공간까지 더해서 생성해주자. //주의 사항 str보다 무조건 같거나 커야함.
-		printf("디버깅중: tempLength는 %d, buffersize는 %d \n", tempLength, bufferSize);
+		//printf("디버깅중: tempLength는 %d, buffersize는 %d \n", tempLength, bufferSize);
 		TCHAR* tempStr = new TCHAR[bufferSize]; //임시 문자열 공간
 		
 		_tcscpy_s(tempStr, bufferSize, str + startIdx);
@@ -91,8 +92,51 @@ public:
 		return subFromTo(startIdx, length - 1);
 	}
 
+	//------------------------------------ <3. insertInto : 문자열의 특정 위치에 새로운 문자열을 삽입> ---------------------------------
+	//3.1 특정 인덱스에 새로운 문자열을 삽입해서 str을 새로 갱신한다. 
+	void insertInto(size_m targetIdx, const TCHAR* _inStr) {
+		if (targetIdx < 0 || targetIdx >(length - 1)) {
+			printf("!!!!!!==============> 잘못된 범위 지정 in insertInto()/ targetIdx : %d \n", targetIdx);
+			system("pause");
+			exit(-1);
+		}
 
+		size_m tempLength = length + _tcslen(_inStr); //두 문장 길이를 더한 것이 새로운 길이겟지. 
+													
+		//3.1.1 처음에 갖다 붙이려 할때
+		if (targetIdx == 0) {
+			
+			mString tempStr(_inStr); //_inStr로 임시 mString을 만들고 여기에 역으로 나의 str을 붙여줄 것.
+			tempStr.add(str); //붙여줌. 나의 str이 이제 tempStr의 str이 되어야 함. 
+			delete str;
+			str = tempStr.cloneStr(); //원래 문자열 해제하고 새 문자열로 교체
+		}//3.1.2 마지막에 갖다 붙이려 할때// 이거는 그냥 add랑 같다. 
+		else if (targetIdx == (length - 1)) {
+			add(_inStr);
+		}//3.1.3 사이 어딘가에 갖다 붙이는 케이스 
+		else {
+			TCHAR* temp1 = subFromTo(0, targetIdx - 1); //맨 앞단 문자열 분리
+			TCHAR* temp3 = subFromToEnd(targetIdx); //맨 뒷단 문자열 분리
+			mString temp2(temp1); //mString으로 만들고
+			temp2.add(_inStr); //_inStr 갖다 붙이기
+			temp2.add(temp3); //이제 temp2의 str은 우리가 원하는 결과를 가지게 되었다. 
+			
+			delete str; 
+			str = temp2.cloneStr();//str 갱신
+			delete temp1;
+			delete temp3; //자원 해제
+		}
+		length = tempLength;
+	}
 	
+	//-------------------------------------- <4. cloneStr : Str을 복제해서 문자열로 리턴해줌.> -----------------
+	TCHAR* cloneStr() {
+		int bufferSize = (length + 1) * sizeof(TCHAR);
+		TCHAR* tempStr = new TCHAR[bufferSize]; //버퍼 사이즈만큼 힙공간 생성
+		_tcscpy_s(tempStr, bufferSize, str);
+		return tempStr;
+	}
+
 	//-------------GETTER----------------------
 	//1. str포인터 리턴
 	TCHAR* getStr() {
@@ -118,8 +162,7 @@ public:
 	
 	//debugging : show
 	void show() {
-		wprintf(L"%s", str);
-		printf("\n");
+		_tprintf(TEXT("%ls\n"), str);
 		printf("문자열 길이는 : %d \n", length);
 		
 	}
@@ -130,8 +173,13 @@ public:
 
 
 int main() {
-	mString m1 = TEXT("HI");
-	mString m2 = TEXT("bye");
+	_wsetlocale(LC_ALL, _T("korean"));
+	mString m1 = TEXT("가나다라");
+	m1.insertInto(0, TEXT("qqqq"));
+	m1.show();
+
+
+	/*mString m2 = TEXT("bye");
 	
 	m1.add(m2);
 	m1.add(TEXT("what"));
@@ -143,6 +191,7 @@ int main() {
 	mString m3 = L"abcd";
 	m3.show();
 	wprintf(L"%ls \n", m3.subFromTo(0, 0));
+	wprintf(L"%ls \n", m3.cloneStr());*/
 	//wprintf(L"%ls \n", m3.subFromToEnd(5));
 
 	
