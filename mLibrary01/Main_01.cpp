@@ -128,6 +128,43 @@ public:
 		}
 		length = tempLength;
 	}
+
+	//3.2 insertInto : mString이 인자로 들어올 경우
+	void insertInto(size_m targetIdx, mString& _inMstr) {
+		if (targetIdx < 0 || targetIdx >(length - 1)) {
+			printf("!!!!!!==============> 잘못된 범위 지정 in insertInto()/ targetIdx : %d \n", targetIdx);
+			system("pause");
+			exit(-1);
+		}
+		TCHAR* _inStr = _inMstr.cloneStr(); //자원 해제 해주자.
+		size_m tempLength = length + _tcslen(_inStr); //두 문장 길이를 더한 것이 새로운 길이겟지. 
+
+													  //3.1.1 처음에 갖다 붙이려 할때
+		if (targetIdx == 0) {
+
+			mString tempStr(_inStr); //_inStr로 임시 mString을 만들고 여기에 역으로 나의 str을 붙여줄 것.
+			tempStr.add(str); //붙여줌. 나의 str이 이제 tempStr의 str이 되어야 함. 
+			delete str;
+			str = tempStr.cloneStr(); //원래 문자열 해제하고 새 문자열로 교체
+		}//3.1.2 마지막에 갖다 붙이려 할때// 이거는 그냥 add랑 같다. 
+		else if (targetIdx == (length - 1)) {
+			add(_inStr);
+		}//3.1.3 사이 어딘가에 갖다 붙이는 케이스 
+		else {
+			TCHAR* temp1 = subFromTo(0, targetIdx - 1); //맨 앞단 문자열 분리
+			TCHAR* temp3 = subFromToEnd(targetIdx); //맨 뒷단 문자열 분리
+			mString temp2(temp1); //mString으로 만들고
+			temp2.add(_inStr); //_inStr 갖다 붙이기
+			temp2.add(temp3); //이제 temp2의 str은 우리가 원하는 결과를 가지게 되었다. 
+
+			delete str;
+			str = temp2.cloneStr();//str 갱신
+			delete temp1;
+			delete temp3; //자원 해제
+		}
+		delete _inStr;
+		length = tempLength;
+	}
 	
 	//-------------------------------------- <4. cloneStr : Str을 복제해서 문자열로 리턴해줌.> -----------------
 	TCHAR* cloneStr() {
@@ -146,20 +183,7 @@ public:
 	size_m getLength() {
 		return length;
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+			
 	//debugging : show
 	void show() {
 		_tprintf(TEXT("%ls\n"), str);
@@ -174,9 +198,17 @@ public:
 
 int main() {
 	_wsetlocale(LC_ALL, _T("korean"));
+		
 	mString m1 = TEXT("가나다라");
-	m1.insertInto(0, TEXT("qqqq"));
+	mString m2 = TEXT("ABCD");
+	m1.insertInto(2, m2);
 	m1.show();
+	m2.show();
+		
+	/*m1.insertInto(2, TEXT("qqqq"));
+	m1.show();
+	m1.insertInto(2, TEXT("3번째당 IN 2"));
+	m1.show();*/
 
 
 	/*mString m2 = TEXT("bye");
@@ -184,10 +216,8 @@ int main() {
 	m1.add(m2);
 	m1.add(TEXT("what"));
 	m1.add('7');
-	
 	m1.show();
-
-
+	
 	mString m3 = L"abcd";
 	m3.show();
 	wprintf(L"%ls \n", m3.subFromTo(0, 0));
