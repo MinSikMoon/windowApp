@@ -48,7 +48,7 @@ public:
 	}
 	//4. insertTextAt : 원하는 노드 인덱스에 문단을 추가한다. //나머지는 뒤로 밀려남. //주의사항: 처음이 0이 아닌 1이다. 
 	void insertTextAt(size_m nodeIdx, TCHAR* _inStr) {
-		if (nodeIdx < 0 || nodeIdx > textNum) {
+		if (nodeIdx < 0 || nodeIdx >(textNum - 1)) {
 			printf("============================>잘못된 범위 in insertTextAt() : nodeIdx => %d \n", nodeIdx);
 			system("pause");
 			exit(-1);
@@ -70,7 +70,7 @@ public:
 		textNum++;
 	}
 	void insertTextAt(size_m nodeIdx, const TCHAR* _inStr) {
-		if (nodeIdx < 0 || nodeIdx > textNum) {
+		if (nodeIdx < 0 || nodeIdx >(textNum - 1)) {
 			printf("============================>잘못된 범위 in insertTextAt() : nodeIdx => %d \n", nodeIdx);
 			system("pause");
 			exit(-1);
@@ -94,7 +94,7 @@ public:
 		textNum++;
 	}
 	void insertTextAt(size_m nodeIdx, mString& mStr) {
-		if (nodeIdx < 0 || nodeIdx > textNum) {
+		if (nodeIdx < 0 || nodeIdx > (textNum-1)) {
 			printf("============================>잘못된 범위 in insertTextAt() : nodeIdx => %d \n", nodeIdx);
 			system("pause");
 			exit(-1);
@@ -116,6 +116,27 @@ public:
 
 		//4. textNum 갱신
 		textNum++;
+	}
+	
+	//5. eraseText : 인덱스가 가리키는 곳의 데이터를 삭제한다. 
+	void eraseTextAt(size_m nodeIdx) {
+		if (nodeIdx < 0 || nodeIdx > (textNum-1)) {
+			printf("============================>잘못된 범위 in eraseTextAt() : nodeIdx => %d \n", nodeIdx);
+			system("pause");
+			exit(-1);
+		}
+
+		//1. iterator를 구한다. 
+		text::iterator itr = (*textSource).begin();
+		for (int i = 0; i < nodeIdx; i++) {
+			++itr;
+		}
+
+		//2. erase()
+		(*textSource).erase(itr);
+		
+		//3. 문단 갯수 줄이기
+		textNum--;
 	}
 
 
