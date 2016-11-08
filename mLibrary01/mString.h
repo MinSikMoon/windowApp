@@ -33,6 +33,13 @@ wchar_t* toWC(const char *str_param) {
 	return wc;
 }
 
+//3. const tchar 문자열을 그냥 tchar로 복제
+TCHAR* cloneStr(const TCHAR* _inStr) {
+	int bufferSize = (_tcslen(_inStr) + 1) * sizeof(TCHAR);
+	TCHAR* tempStr = new TCHAR[bufferSize];
+	_tcscpy_s(tempStr, bufferSize, _inStr);
+	return tempStr;
+}
 
 //////////////////////////////////////////// mString 클래스 ///////////////////////////////////////////////////////
 class mString {
@@ -205,6 +212,7 @@ public:
 		_tcscpy_s(tempStr, bufferSize, str);
 		return tempStr;
 	}
+
 
 	//-------------------------------------- <5. replaceStr : str을 다른 문자열로 교체해준다. > -------------------
 	void replaceStr(TCHAR* _inStr) {

@@ -1,4 +1,5 @@
 #pragma once
+#include "mHeaders.h"
 #include "mString.h"
 
 //1. mString을 받아서 픽셀 가로길이를 리턴해주는 함수
@@ -73,7 +74,7 @@ int getScreenEndIdx(HDC hdc, mString& mStr, int limitWidth, int startIdx, int av
 		while (1) { //짧으면 한개씩 더해준다. 
 			tempEndIdx++;
 			tempStr.replaceStr(mStr.subFromTo(startIdx, tempEndIdx)); //새걸로 교체 
-			if (getMstrPixelWidthFull(hdc, tempStr) >= limitWidth)
+			if (getMstrPixelWidthFull(hdc, tempStr) > limitWidth)
 				break;
 		}
 	}
