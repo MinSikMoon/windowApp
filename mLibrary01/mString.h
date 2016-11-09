@@ -1,5 +1,10 @@
+
 #pragma once
-#include "mHeaders.h"
+#include <tchar.h>
+#include <Windows.h>
+
+typedef int size_m;
+
 
 //1. 일반 전역 함수들
 //1. TCHAR에 대한 sub
@@ -48,6 +53,14 @@ class mString {
 	size_m length;
 
 public:
+	mString() { //빈 문자열을 기본 생성
+		size_m tempLength = 1; //바로 null을 저장하기 위해 0의 위치에 
+		size_m bufferSize = tempLength * sizeof(TCHAR); // 유니코드를 대비해 2배로 잡아준다. 
+		str = new TCHAR[bufferSize];
+		_tcscpy_s(str, bufferSize, TEXT(""));
+		length = 0;
+	}
+
 	//1. CONSTRUCTOR : const TCHAR가 들어왔을 때// 복사해서 붙여준다. //즉 깊은 복사가 일어난다. 
 	//1.1 문자열이 들어왔을 때
 	mString(const TCHAR* _inStr) {
@@ -127,7 +140,7 @@ public:
 	//2.2 from인덱스부터 끝까지 자르기
 	TCHAR* subFromToEnd(size_m startIdx) {
 		return subFromTo(startIdx, length - 1);
-	}
+	} //startIdx가 1이고 length도 1이면 에러
 
 
 
@@ -221,6 +234,72 @@ public:
 		length = _tcslen(_inStr); //길이도 교체
 	}
 
+	//------------------------------------- <6. eraseCharAt, eraseStrFromTo : 어디부터 어디까지의 인덱스 범위를 삭제한다. > ----------------
+	void eraseCharAt(size_m targetIdx) {
+		if (targetIdx < 0 || targetIdx >(length - 1) || length == 0) {
+			printf("!!!!!!==============> 잘못된 범위 지정 in eraseCharAt()/ targetIdx : %d \n", targetIdx);
+			system("pause");
+			exit(-1);
+		}
+
+		if (targetIdx == 0) {
+		
+			TCHAR* tempStr = (*this).subFromToEnd(1);
+			(*this).replaceStr(tempStr);
+		}
+		else if (targetIdx == length - 1) {
+			TCHAR* tempStr = (*this).subFromTo(0, length - 2);
+			(*this).replaceStr(tempStr);
+		}
+		else {
+			TCHAR* tempStr1 = (*this).subFromTo(0, targetIdx - 1);
+			TCHAR* tempStr2 = (*this).subFromTo(targetIdx + 1, length - 1);
+			(*this).replaceStr(tempStr1);
+			(*this).add(tempStr2);
+		}
+	}
+
+	void eraseLastChar() {
+		if (length == 0) {
+			printf("!!!!!!==============> 잘못된 범위 지정 in eraseLastChar()/ 현재길이가 0 \n");
+			system("pause");
+			exit(-1);
+		}
+		if (length == 1) { //한 글자 들어있으면 그냥 빈 문자열 만들어 준다. 
+			mString tempStr;
+			(*this).replaceStr(tempStr.cloneStr());
+			length = 0;
+			return; //여기서 안 빠져 나가서 오류 났었음. 
+		}
+
+		eraseCharAt(length - 1);
+	}
+	void eraseFirstChar() {
+		if (length == 0) {
+			printf("!!!!!!==============> 잘못된 범위 지정 in eraseFirstChar()/ 현재길이가 0 \n");
+			system("pause");
+			exit(-1);
+		}
+		eraseCharAt(0);
+	}
+
+	//void eraseStrFromTo(size_m startIdx, size_m endIdx) {
+	//	if (startIdx < 0 || endIdx >(length - 1) || length == 0) {
+	//		printf("!!!!!!==============> 잘못된 범위 지정 in eraseCharAt()/ startIdx : %d, endIdx: %d \n", startIdx, endIdx);
+	//		system("pause");
+	//		exit(-1);
+	//	}
+
+
+
+	//	if (startIdx == 0) { //처음부터 어디까지 지운다면  //처음부터 끝까지 지울 경우가 에러
+	//		TCHAR* tempStr = (*this).subFromToEnd(endIdx + 1);
+	//		(*this).replaceStr(tempStr);
+	//	}
+	//	else if(endIdx == (length-1)) { //어디서 부터 끝가지 지운다면 
+	//		
+	//	}
+	//}
 	//-------------GETTER----------------------
 	//1. str포인터 리턴
 	TCHAR* getStr() {
@@ -233,8 +312,9 @@ public:
 
 	//debugging : show
 	void show() {
+		printf("\n ** < mString 정보 > ** \n");
 		_tprintf(TEXT("%ls\n"), str);
-		printf("문자열 길이는 : %d \n", length);
+		printf("문자열 길이는 length : %d \n", length);
 
 	}
 
