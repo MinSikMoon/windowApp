@@ -39,8 +39,16 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 		prevComposingStat = FALSE; //이전 단계의 IME 통과여부 
 		break;
 	}
-
+	case WM_IME_ENDCOMPOSITION: { //한글 입력하다가 한영키 눌렀을때 tempStr을 비워준다. 
+		//printf("endcomposition \n");
+		prevComposingStat = curComposingStat;
+		curComposingStat = FALSE;
+		memset(tempStr, 0, 2); //tempStr에 아무것도 넣지 않는다. 
+		break;
+	}
 	case WM_IME_COMPOSITION: { //IME 통과 
+		
+
 		hImc = ImmGetContext(hwnd);
 		memset(tempCompleteStr, 0, 2);
 	
@@ -56,48 +64,52 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 			tempStr[1] = 0;
 			isCompleted = TRUE; //현재 완성된 문자가 저장되어있음을 알려줌.
 		}
-
+		
+			
+			
 		ImmReleaseContext(hwnd, hImc);
 	}
-
+	
+	
 	case WM_CHAR: { //mStr에 글자를 더해주는 로직
 		if (!prevComposingStat) { //이전 뤂이 ime를 통과하지 않았는데 //그냥 뒤에 덧붙여주는 것.
-			printf("=> 1 \n");
+			
 			if (curComposingStat) { //현재는 ime를 통과했을 때, tempStr을 붙여준다. 
+				//printf("=> 1 \n");
 				mStr.add(tempStr); //tempStr을 더해주고 invalidate
 			}
 			else { //현재도 ime를 통과하지 않았다면 wParam을 붙여준다. 
-				printf("=> 2 \n");
+				//printf("=> 2 \n");
 				mStr.add((TCHAR)wParam);
 			}
 		}
 		else { //이전 뤂이 한글 입력 이었다면 
 			if (curComposingStat) { //이전 뤂도 한글입력, 지금도 한글입력 => 완성된 글자가 있는지 판단 
 				if (isCompleted) { //완성 글자가 있다면 
-					printf("=> 3 \n");
+					//printf("=> 3 \n");
 					//한영 변환키를 스킵한다. 
-					_tprintf(L"3에서 한영변환키 : %lc \n", (TCHAR)wParam);
+					_tprintf(L"3에서 한영변환키 : %ls \n", tempCompleteStr);
 					mStr.eraseLastChar(); //지금 글자 지우고 
 					mStr.add(tempCompleteStr); //완성된 글자 넣고
 					isCompleted = FALSE; //완성된거 꺼내씀.
 					mStr.add(tempStr); //조립중인 글자도 넣고 
 				}
 				else { //이전 뤂이 한글 입력, 지금도 한글입력 => 완성 글자는 없다면 
-					printf("=> 4\n");
+					//printf("=> 4\n");
 					mStr.eraseLastChar();
 					mStr.add(tempStr); //조립중인 글자만 넣는다. 
 				}
 			}
 			else { //이전 뤂이 한글 입력인데, 지금은 아닐때 
 				   if (isCompleted) { //완성 글자가 있다면 
-					   printf("=> 5 \n");
+					//printf("=> 5 \n");
 				   	mStr.eraseLastChar(); //지금 글자 지우고 
 					mStr.add(tempCompleteStr); //완성된 글자 넣고
 					isCompleted = FALSE; //완성된거 꺼내씀.
 				   	mStr.add((TCHAR)wParam);
 				   }
 				   else { //완성 글자 없으면 조립중인 거 넣어줘야지.
-					printf("=> 6 \n");
+					//printf("=> 6 \n");
 					mStr.eraseLastChar(); //한영키를 누르면 이것도 들어가기 때문에 
 					//mStr.add(tempStr); //조립중인 글자 넣고
 					mStr.add((TCHAR)wParam);
@@ -111,12 +123,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 		InvalidateRect(hwnd, NULL, TRUE);
 		break;
 	}
-	
-	
-
-	
-
-	
+		
 
 	case WM_PAINT: {
 		hdc = BeginPaint(hwnd, &ps);
@@ -124,6 +131,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 		if (mStr.getLength() > 0) //문자열 길이가 0이면 출력안함.
 			textOutCustom(hdc, mStr, 0, mStr.getLength() - 1, 0, 0);
 		EndPaint(hwnd, &ps);
+		printf("현재 mstr의 길이: %d \n", mStr.getLength());
 		break;
 	}
 
