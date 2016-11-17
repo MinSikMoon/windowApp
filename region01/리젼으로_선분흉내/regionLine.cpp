@@ -1,54 +1,75 @@
-ï»¿#include <cstdio>
+#include <cstdio>
 #include <iostream>
 
 #include "locale.h"
 #include <windows.h>
 #include <tchar.h>
+#include <wingdi.h>
 
 #ifdef _DEBUG
 #pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
 #endif
 using namespace std;
 
-//ì „ì—­ ë³€ìˆ˜ë“¤
+//Àü¿ª º¯¼öµé
 HINSTANCE g_Inst;
 HWND hChild;
 HRGN hWndRgn;
 POINT p1[4];
-
+POINT p2[4];
 //////////////////////////////////////////////WIN PROC/////////////////////////////////////////////////////////////////////////////////////
 /* This is where all the input to the window goes to */
 LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
 	switch (Message) {
 	case WM_CREATE: {
-		POINT tp1 = { 101,100 };
-		POINT tp2 = { 100, 101 };
-		POINT tp3 = { 199, 200 };
-		POINT tp4 = { 200, 199 };
+		//1. »ó´ëÀû À§Ä¡¸¦ Àû¾î¾ß µÇ´Â °Í °°À½. ÀÚ½Ä À©µµ¿ì ¾È¿¡¼­ÀÇ 
+		POINT tp1 = { 1,0 };
+		POINT tp2 = { 0, 1 };
+		POINT tp3 = { 99, 100 };
+		POINT tp4 = { 100, 99 };
 		p1[0] = tp1;
 		p1[1] = tp2;
 		p1[2] = tp3;
 		p1[3] = tp4;
+		POINT tp5 = { 11, 10 };
+		POINT tp6 = { 10, 11 };
+		POINT tp7 = { 59, 60 };
+		POINT tp8 = { 60, 59 };
+		p2[0] = tp5;
+		p2[1] = tp6;
+		p2[2] = tp7;
+		p2[3] = tp8;
 
-		//1. child í•œë²ˆ ë§Œë“¤ì–´ë³´ê¸° //100,100ì— ë„ˆë¹„ 100, ë†’ì´ 100ì§œë¦¬
+		//1. child ÇÑ¹ø ¸¸µé¾îº¸±â //100,100¿¡ ³Êºñ 100, ³ôÀÌ 100Â¥¸®
 		hChild = CreateWindow(TEXT("child01"), NULL, WS_CHILD | WS_VISIBLE, 100, 100, 100, 100, hwnd, (HMENU)NULL, g_Inst, NULL);
 
-		//2. í´ë¦¬ê³¤ ë¦¬ì ¼ í•˜ë‚˜ ë§Œë“¤ê¸°
+		//2. Æú¸®°ï ¸®Á¯ ÇÏ³ª ¸¸µé±â
 		hWndRgn = CreatePolygonRgn(p1, 4, ALTERNATE);
-		SetWindowRgn(hwnd, hWndRgn, TRUE); 
+		SetWindowRgn(hChild, hWndRgn, TRUE);
+
+		//3. ÀÚ½Ä À©µµ¿ì ¿Å°Üº¸±â //¸®Á¯µµ °°ÀÌ µû¶ó¼­ ¿òÁ÷ÀÎ´Ù. 
+		MoveWindow(hChild, 0, 0, 100, 100, TRUE);
+
+		//4. ¸®Á¯ offset Å×½ºÆ®ÇØº¸±â // ¸®Á¯µµ ¿òÁ÷ÀÏ±î
+		OffsetRgn(hWndRgn, 10, 10); //10,10 ¿òÁ÷¿©¶ó?
+		SetWindowRgn(hChild, hWndRgn, TRUE); //¾È¿òÁ÷ÀÌ´Â ±º ±×·¯¸é point¸¦ ´Ù½Ã ¸¸µé¾îÁÙ±î.
+
+		//5. »õ·Î¿î point ¹è¿­·Î ´Ù½Ã ¸®Á¯À» ¼³Á¤ÇØº¼±î? //¿òÁ÷ÀÎ´Ù =========>
+		hWndRgn = CreatePolygonRgn(p2, 4, ALTERNATE);
+		SetWindowRgn(hChild, hWndRgn, TRUE);
 		break;
 	}
 
 
 
-		//======================ë§ˆì§€ë§‰ì—” ì½˜ì†” ì—†ì• ì£¼ê¸°======================== 
+					//======================¸¶Áö¸·¿£ ÄÜ¼Ö ¾ø¾ÖÁÖ±â======================== 
 	case WM_DESTROY: {
 
 		PostQuitMessage(0);
 		break;
 	}
 
-	/* All other messages (a lot of them) are processed using default procedures */
+					 /* All other messages (a lot of them) are processed using default procedures */
 	default:
 		return DefWindowProc(hwnd, Message, wParam, lParam);
 	}
@@ -71,7 +92,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	wc.cbSize = sizeof(WNDCLASSEX);
 	wc.lpfnWndProc = WndProc; /* This is where we will send messages to */
 	wc.hInstance = hInstance;
-	wc.hCursor = LoadCursor(NULL, IDC_CROSS);
+	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
 
 	/* White, COLOR_WINDOW is just a #define for a system color, try Ctrl+Clicking it */
 	wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
@@ -84,14 +105,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		return 0;
 	}
 
-	//child01 class //ê²€ì€ ìƒ‰ì˜ ì•„ë¬´ê²ƒë„ ì—†ëŠ” child class
+	//child01 class //°ËÀº »öÀÇ ¾Æ¹«°Íµµ ¾ø´Â child class
 	wc.lpszClassName = TEXT("child01");
 	wc.hCursor = LoadCursor(NULL, IDC_CROSS);
 	wc.hbrBackground = (HBRUSH)GetStockObject(LTGRAY_BRUSH);
-	//procì€ winProcì„ ì“°ì.
+	//procÀº winProcÀ» ¾²ÀÚ.
 	RegisterClassEx(&wc);
 
-	hwnd = CreateWindowEx(WS_EX_CLIENTEDGE, _T("WindowClass"), _T("Caption"), WS_VISIBLE | WS_OVERLAPPEDWINDOW ,
+	hwnd = CreateWindowEx(WS_EX_CLIENTEDGE, _T("WindowClass"), _T("Caption"), WS_VISIBLE | WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, /* x */
 		CW_USEDEFAULT, /* y */
 		640, /* width */
