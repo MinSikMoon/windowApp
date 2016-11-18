@@ -19,11 +19,11 @@
 using namespace std;
 
 
+//전역 변수들 
+mKeyboard mk1; //1. 키보드
+mTextSource textSource; //2. 본문 문단들이 달려있는 리스트 (이게 출력됨)
 
-mKeyboard mk1;
-mString m1;
-mTextSource textSource;
-//bool isProced = FALSE;
+
 //////////////////////////////////////////////WIN PROC/////////////////////////////////////////////////////////////////////////////////////
 /* This is where all the input to the window goes to */
 LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
@@ -34,14 +34,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 	switch (Message) {
 	case WM_CREATE: {
-		//1. textSource에 하나 넣어보자. 그러고 textSource를 출력한다. 
-		textSource.addText(TEXT("안녕하세요 저는 문민식입니다."));
-		textSource.addText(TEXT("안녕하세요 두번째 입니당 ㅎㅎ"));
-		mString m1(TEXT("abcdefghijklmnopABCDEFGH가나다IJKLMNOPqrstuv1234567890ABCZQLEMONHIHIHI"));
-		textSource.replaceTextAt(0, TEXT("안녕하세요 세번째 입니당 ㅎㅎ"));
-		textSource.addText(m1);
-		textSource.show();
-		//_tprintf(TEXT("%ls \n"), textSource.getTextAt(0));
+		textSource.addText(mk1.getMstr());	//mk1의 mstr을 기본적으로 textSource에 넣어둔다.
 		break;
 	}
 
@@ -49,6 +42,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 	case WM_IME_COMPOSITION:
 	case WM_CHAR: {
 		mk1.mProc(hwnd, Message, wParam, lParam);
+		textSource.replaceTextAt(0, mk1.getMstr()); //mk1에 들어있는 mstr로 textsource를 교체한다. 
 		break;
 	}
 
@@ -61,13 +55,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 	case WM_PAINT: {
 		hdc = BeginPaint(hwnd, &ps);
-		
-		
-		//현재 mk1, 즉 키보드에 담긴 문자열을 출력하고 있잖아. 
-		//if (mk1.getMstrLength() > 0) //문자열 길이가 0이면 출력안함.
-		//int t = autoLineSwitch(hdc, textSource.getTextAt(1), rect.right, -32, 16);
-		//textSource.showAllText(hdc, rect.right, 0, 16); //100떨어진 곳부터 textSource 전체를 개행
-		//printf("loopcnt  = %d \n", t);
+	
+		textSource.showAllText(hdc, rect.right, 0, 16); 
+	
 		EndPaint(hwnd, &ps);
 		break;
 	}
