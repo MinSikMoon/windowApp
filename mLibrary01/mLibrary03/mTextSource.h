@@ -46,7 +46,7 @@ public:
 		(*textSource).push_back(tempStr);
 		textNum++;
 	}
-	//4. insertTextAt : 원하는 노드 인덱스에 문단을 추가한다. //나머지는 뒤로 밀려남. //주의사항: 처음이 0이 아닌 1이다. 
+	//4. insertTextAt : 원하는 노드 인덱스에 문단을 추가한다. //나머지는 뒤로 밀려남. // 
 	void insertTextAt(size_m nodeIdx, TCHAR* _inStr) {
 		if (nodeIdx < 0 || nodeIdx >(textNum - 1)) {
 			printf("============================>잘못된 범위 in insertTextAt() : nodeIdx => %d \n", nodeIdx);
@@ -142,6 +142,11 @@ public:
 	
 	//5.1 itr 얻는게 너무 귀찮아서 인덱스 가리키는 itr 하나 만들자. 
 	text::iterator getItrAt(size_m nodeIdx) {
+		if (nodeIdx < 0 || nodeIdx >(textNum - 1)) {
+			printf("============================>잘못된 범위 in replaceTextAt() : getItrAt => %d \n", nodeIdx);
+			system("pause");
+			exit(-1);
+		}
 		text::iterator itr = (*textSource).begin();
 		for (int i = 0; i < nodeIdx; i++) {
 			itr++;
@@ -149,11 +154,46 @@ public:
 		return itr;
 	}
 
-	//6. getTextAt() : 인덱스가 가리키는 곳의 노드 데이터를 가지고 온다. 
+	//6. getTextAt() : 인덱스가 가리키는 곳의 노드 데이터, 즉 문자열을 가지고 온다. 
 	TCHAR* getTextAt(size_m nodeIdx) {
+		if (nodeIdx < 0 || nodeIdx >(textNum - 1)) {
+			printf("============================>잘못된 범위 in replaceTextAt() :  getnodeIdx => %d \n", nodeIdx);
+			system("pause");
+			exit(-1);
+		}
 		text::iterator itr = getItrAt(nodeIdx);
 		return (*itr);
 		//_tprintf(TEXT("%ls \n"), (*itr));
+	}
+
+	//7. replaceTextAt() : 인덱스가 가리키는 노드의 문자열을 새로운 문자열로 갈아끼운다. 
+	void replaceTextAt(size_m nodeIdx, TCHAR* _newStr) {
+		if (nodeIdx < 0 || nodeIdx >(textNum - 1)) {
+			printf("============================>잘못된 범위 in replaceTextAt() : nodeIdx => %d \n", nodeIdx);
+			system("pause");
+			exit(-1);
+		}
+		insertTextAt(nodeIdx, _newStr); //밀어넣고 
+		eraseTextAt(nodeIdx + 1); //뒤로 밀려난 기존 문장을 삭제
+	}
+	void replaceTextAt(size_m nodeIdx, const TCHAR* _newStr) {
+		if (nodeIdx < 0 || nodeIdx >(textNum - 1)) {
+			printf("============================>잘못된 범위 in replaceTextAt() : nodeIdx => %d \n", nodeIdx);
+			system("pause");
+			exit(-1);
+		}
+		TCHAR* tempStr = cloneStr(_newStr);
+		replaceTextAt(nodeIdx, tempStr);
+	}
+	void replaceTextAt(size_m nodeIdx, mString& _newStr) {
+		if (nodeIdx < 0 || nodeIdx >(textNum - 1)) {
+			printf("============================>잘못된 범위 in replaceTextAt() : nodeIdx => %d \n", nodeIdx);
+			system("pause");
+			exit(-1);
+		}
+		TCHAR* tempStr = _newStr.cloneStr();
+		replaceTextAt(nodeIdx, tempStr);
+		
 	}
 
 

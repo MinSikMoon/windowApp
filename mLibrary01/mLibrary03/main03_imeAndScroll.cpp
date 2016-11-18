@@ -35,6 +35,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 		//1. textSource에 하나 넣어보자. 그러고 textSource를 출력한다. 
 		textSource.addText(TEXT("안녕하세요 저는 문민식입니다."));
 		textSource.addText(TEXT("안녕하세요 두번째 입니당 ㅎㅎ"));
+		mString m1(TEXT("abcdefghijklmnopABCDEFGH가나다IJKLMNOPqrstuv1234567890ABCZQLEMONHIHIHI"));
+		textSource.replaceTextAt(0, TEXT("안녕하세요 세번째 입니당 ㅎㅎ"));
 		textSource.show();
 		//_tprintf(TEXT("%ls \n"), textSource.getTextAt(0));
 		break;
@@ -60,7 +62,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 		
 		//현재 mk1, 즉 키보드에 담긴 문자열을 출력하고 있잖아. 
 		//if (mk1.getMstrLength() > 0) //문자열 길이가 0이면 출력안함.
-		//	mScreenTextController::autoLineSwitch(hdc, mk1.getMstr(), rect.right, 0, 16);
+			mScreenTextController::autoLineSwitch(hdc, textSource.getTextAt(1), rect.right, 0, 16);
 
 		EndPaint(hwnd, &ps);
 		break;

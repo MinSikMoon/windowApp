@@ -28,6 +28,8 @@ public:
 		prevComposingStat = FALSE; //이전 단계의 IME 통과여부 
 		isBacked = FALSE;
 	}
+	//1.2 파괴자
+	
 
 	//메소드 1. ime endcomposition:
 	void endComposition() {
