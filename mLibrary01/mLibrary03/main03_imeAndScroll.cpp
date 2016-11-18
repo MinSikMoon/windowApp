@@ -1,3 +1,4 @@
+
 #include <cstdio>
 #include <iostream>
 
@@ -5,11 +6,12 @@
 #include <windows.h>
 #include <tchar.h>
 #include <imm.h> //이걸 꼭 포함시키자. 
+#include "mTextSource.h"
 #include "mstring.h"
 #include "mTextPixel.h"
 #include "mKeyboard.h"
-#include "mScreenTextController.h"
-#include "mTextSource.h"
+#include "mLineMethods.h"
+
 
 #ifdef _DEBUG
 #pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
@@ -62,8 +64,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 		
 		//현재 mk1, 즉 키보드에 담긴 문자열을 출력하고 있잖아. 
 		//if (mk1.getMstrLength() > 0) //문자열 길이가 0이면 출력안함.
-			mScreenTextController::autoLineSwitch(hdc, textSource.getTextAt(1), rect.right, 0, 16);
-
+		//int t = autoLineSwitch(hdc, textSource.getTextAt(1), rect.right, -32, 16);
+		textSource.showAllText(hdc, rect.right, 0, 16); //100떨어진 곳부터 textSource 전체를 개행
+		//printf("loopcnt  = %d \n", t);
 		EndPaint(hwnd, &ps);
 		break;
 	}

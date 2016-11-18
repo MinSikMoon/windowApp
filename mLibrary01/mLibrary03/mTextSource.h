@@ -1,6 +1,8 @@
+
 #pragma once
-#include "mHeaders.h"
 #include "mString.h"
+#include "mLineMethods.h"
+
 typedef list<TCHAR*> text;
 
 /*==========================inner method==================================*/
@@ -196,6 +198,20 @@ public:
 		
 	}
 
+	//8. showAllText : 이제 autoLineSwitch를 이용해서 화면에 모든 노드들이 출력되는 함수를 만들어보자. 
+	void showAllText(HDC hdc, size_m screenWidth, int firstLinePos, size_m wordHeight) {
+		if (textNum == 0) //비었으면 그냥 리턴
+			return;
+
+		int totalLoopCnt = 0;
+		
+		for (text::iterator itr = (*textSource).begin(); itr != (*textSource).end(); itr++) {
+			totalLoopCnt += autoLineSwitch(hdc, (*itr), screenWidth, (firstLinePos + totalLoopCnt*wordHeight)*(-1), wordHeight);
+			//printf("totalloopcnt = %d \n", totalLoopCnt);
+			//_tprintf(TEXT("%ls \n"), (*itr));
+		}
+
+	}
 
 	//debugging : show
 	void show() {

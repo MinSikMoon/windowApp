@@ -1,7 +1,8 @@
-#include "mHeaders.h"
+
 #include "mTextSource.h"
 #include "mScreenLineContainer.h"
 #pragma once
+
 class mScreenTextController {
 	//0. 본문 자체를 가지고 있는 클래스
 	mTextSource textSource;
