@@ -1,16 +1,15 @@
 
 #include <cstdio>
 #include <iostream>
-
-#include "locale.h"
+#include <locale>
 #include <windows.h>
 #include <tchar.h>
 #include <imm.h> //이걸 꼭 포함시키자. 
+
 #include "mTextSource.h"
 #include "mstring.h"
-#include "mTextPixel.h"
 #include "mKeyboard.h"
-#include "mLineMethods.h"
+#include "mCaretMaster.h"
 
 
 #ifdef _DEBUG
@@ -18,11 +17,15 @@
 #endif
 using namespace std;
 
+//전역 변수들
+int caretWidth = 2;
+int wordHeight = 16; //전역적으로 쓰일 글자 높이
 
-//전역 변수들 
+//전역 객체들
 mKeyboard mk1; //1. 키보드
 mTextSource textSource; //2. 본문 문단들이 달려있는 리스트 (이게 출력됨)
-
+mScreenLineContainer screenLineContainer; //3. 화면상 보이는 줄 정보 관리 : 노드당 몇줄?
+mCaretMaster caret(caretWidth, wordHeight); //4. 캐럿
 
 //////////////////////////////////////////////WIN PROC/////////////////////////////////////////////////////////////////////////////////////
 /* This is where all the input to the window goes to */
@@ -35,6 +38,20 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 	switch (Message) {
 	case WM_CREATE: {
 		textSource.addText(mk1.getMstr());	//mk1의 mstr을 기본적으로 textSource에 넣어둔다.
+		caret.show();
+		break;
+	}
+	//---------------------------캐럿관련
+	//1. 포커스 잃을 때
+	case WM_KILLFOCUS: {
+		DestroyCaret(); //포커스를 잃으면 현재 윈도우에 장착된 캐럿을 없앤다. 
+		break;
+	}
+
+	//2. 포커스 받을 때 //캐럿은 이 때 만들어야 한다. 
+	case WM_SETFOCUS: {
+		CreateCaret(hwnd, NULL, caret.getWidth(), caret.getHeight()); //캐럿 만들기// 2번째 비트맵이 NULL이니까, 캐럿은 2, 16 폭과 높이(문자 높이)로 만들어진다. 
+		ShowCaret(hwnd); //앞에서 hwnd에 캐럿을 만들었으므로, ShowCaret()하면 캐럿이 보여진다.(깜빡깜빡)
 		break;
 	}
 
@@ -55,9 +72,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 	case WM_PAINT: {
 		hdc = BeginPaint(hwnd, &ps);
-	
-		textSource.showAllText(hdc, rect.right, 0, 16); 
-	
+		textSource.showAllText(hdc, rect.right, 0, wordHeight); //textSource 다 출력
+		
+		SetCaretPos(caret.getXpixel(), caret.getYpixel()); //캐럿 위치 조정 후 출력
+
 		EndPaint(hwnd, &ps);
 		break;
 	}
@@ -69,7 +87,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 		break;
 	}
 	default:
-		//printf("wparam: %d \n", wParam);
+		
 		return DefWindowProc(hwnd, Message, wParam, lParam);
 	}
 	return 0;

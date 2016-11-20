@@ -213,6 +213,8 @@ public:
 
 	}
 
+	//테스트 : showAllText원리를 이용해서  노드당 라인이 몇개인지 판별해보자. 
+
 	//debugging : show
 	void show() {
 		printf("cur list size : %d \n", (*textSource).size());
