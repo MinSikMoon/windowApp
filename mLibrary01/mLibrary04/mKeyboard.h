@@ -1,7 +1,5 @@
 
 #pragma once
-#include "mHeaders.h"
-#include "mstring.h"
 #include "mTextPixel.h"
 
 

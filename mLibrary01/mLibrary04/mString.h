@@ -118,7 +118,6 @@ public:
 	//------------------------------------ <2. subMstr : 문자열 잘라서 새로운 mString 배출 > ------------------------------
 	//2.1 from인덱스부터 to인덱스까지 잘라서(인덱스 포함) 새로운 문자열 리턴.
 	TCHAR* subFromTo(size_m startIdx, size_m endIdx) {
-
 		if (startIdx < 0 || endIdx >(length - 1) || startIdx > endIdx) { //필터 for 잘못된 입력
 			printf("!!!!!!!!!********>>>>잘못된 범위 지정 in subFromTo() : sIdx: %d, eIdx: %d \n", startIdx, endIdx);
 			system("pause");
@@ -287,23 +286,7 @@ public:
 		eraseCharAt(0);
 	}
 
-	//void eraseStrFromTo(size_m startIdx, size_m endIdx) {
-	//	if (startIdx < 0 || endIdx >(length - 1) || length == 0) {
-	//		printf("!!!!!!==============> 잘못된 범위 지정 in eraseCharAt()/ startIdx : %d, endIdx: %d \n", startIdx, endIdx);
-	//		system("pause");
-	//		exit(-1);
-	//	}
-
-
-
-	//	if (startIdx == 0) { //처음부터 어디까지 지운다면  //처음부터 끝까지 지울 경우가 에러
-	//		TCHAR* tempStr = (*this).subFromToEnd(endIdx + 1);
-	//		(*this).replaceStr(tempStr);
-	//	}
-	//	else if(endIdx == (length-1)) { //어디서 부터 끝가지 지운다면 
-	//		
-	//	}
-	//}
+	
 	//-------------GETTER----------------------
 	//1. str포인터 리턴
 	TCHAR* getStr() {
