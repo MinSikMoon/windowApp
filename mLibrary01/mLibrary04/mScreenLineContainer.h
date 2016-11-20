@@ -1,5 +1,4 @@
 #pragma once
-#include <map>
 #include "mString.h"
 
 
@@ -80,6 +79,7 @@ public:
 
 	//debugging
 	void show() {
+		printf("============라인컨테이너 디버깅============= \n");
 		printf("cur totalLineNum = %d \n", totalLineNum);
 		for (int i = 0; i < textSourceNodeNum; i++) {
 			printf("[%d]노드의 라인갯수는 %d \n", i, nodeLineNumInfo[i]);
@@ -91,6 +91,8 @@ public:
 			}
 			
 		}
+
+		printf("===========================================\n \n");
 
 	}
 

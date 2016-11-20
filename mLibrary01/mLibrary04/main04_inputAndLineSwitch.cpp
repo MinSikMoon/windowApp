@@ -1,13 +1,5 @@
 
-#include <cstdio>
-#include <iostream>
-#include <locale>
-#include <windows.h>
-#include <tchar.h>
-#include <imm.h> //이걸 꼭 포함시키자. 
-
 #include "mTextSource.h"
-#include "mstring.h"
 #include "mKeyboard.h"
 #include "mCaretMaster.h"
 

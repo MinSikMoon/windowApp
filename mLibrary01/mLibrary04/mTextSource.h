@@ -1,8 +1,8 @@
 
 #pragma once
-#include "mString.h"
+
 #include "mLineMethods.h"
-#include "mScreenLineContainer.h"
+
 
 typedef list<TCHAR*> text;
 
@@ -230,7 +230,7 @@ public:
 			tempLineNumInNode = 0;
 			tempLineNumInNode += autoLineSwitch(hdc, (*itr), screenWidth, (firstLinePos + totalLoopCnt*wordHeight)*(-1), wordHeight, screenLineContainer, tempNodeIdx);
 			totalLoopCnt += tempLineNumInNode;
-			printf("tempLineNum = %d \n", tempLineNumInNode);
+			//printf("tempLineNum = %d \n", tempLineNumInNode);
 			screenLineContainer.setNodeLineNumInfo(tempNodeIdx++, tempLineNumInNode); //노드당 몇 라인을 가지고 있는지 저장.
 		}
 		screenLineContainer.setTotalLineNum(totalLoopCnt); //텍스트 전체 라인이 몇개인지 저장. 
@@ -253,7 +253,7 @@ public:
 			tempLineNumInNode = 0;
 			tempLineNumInNode += autoLineSwitch(hdc, (*itr), screenWidth, firstLineXpos, (firstLineYpos + totalLoopCnt*wordHeight)*(-1), wordHeight, screenLineContainer, tempNodeIdx);
 			totalLoopCnt += tempLineNumInNode;
-			printf("tempLineNum = %d \n", tempLineNumInNode);
+			//printf("tempLineNum = %d \n", tempLineNumInNode);
 			screenLineContainer.setNodeLineNumInfo(tempNodeIdx++, tempLineNumInNode); //노드당 몇 라인을 가지고 있는지 저장.
 		}
 		screenLineContainer.setTotalLineNum(totalLoopCnt); //텍스트 전체 라인이 몇개인지 저장. 

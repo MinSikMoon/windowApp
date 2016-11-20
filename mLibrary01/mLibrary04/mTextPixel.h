@@ -1,7 +1,6 @@
 #pragma once
-#include "mHeaders.h"
 #include "mString.h"
-#include "mTextSource.h"
+
 
 //1. mString을 받아서 픽셀 가로길이를 리턴해주는 함수
 size_m getMstrPixelWidth(HDC hdc, mString& mStr, size_m startIdx, size_m endIdx) {
@@ -90,20 +89,3 @@ int getScreenEndIdx(HDC hdc, mString& mStr, int limitWidth, int startIdx, int av
 	return tempEndIdx - detailCustom; //하나 빼줘야 화면 바깥으로 안 나가더라.
 }
 
-////5. getScreenEndIdx를 응용해서 개행 함수 
-//size_m autoLineSwitch(HDC hdc, size_m screenLimitWidth, size_m thumbYpos, size_m wordHeight, mTextSource& textSource, map<int, int>& nodeLineNum, mScreenLineContainer& lc) {
-//	int startIdx = 0;
-//	int lastIdx = 0;
-//	int sentenceNum;
-//	unsigned int i, j;
-//	int loopCnt = 0;
-//	int avgCharWidth;
-//	mString tempStr; //빈 문자열 생성
-//
-//	for (i = 0; i < textSource.getTextNum(); i++) { //문단의 갯수만큼 돈다. 
-//		tempStr = 
-//
-//	}
-//
-//
-//}
