@@ -38,6 +38,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 	switch (Message) {
 	case WM_CREATE: {
 		textSource.addText(mk1.getMstr());	//mk1의 mstr을 기본적으로 textSource에 넣어둔다.
+		textSource.addText(TEXT("이것은 덧붙인 텍스트입니다. 노드1이 되겟네"));
 		caret.show();
 		break;
 	}
@@ -72,10 +73,16 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 	case WM_PAINT: {
 		hdc = BeginPaint(hwnd, &ps);
-		textSource.showAllText(hdc, rect.right, 0, wordHeight); //textSource 다 출력
-		
+		textSource.showAllText(hdc, rect.right, 0, wordHeight, screenLineContainer);
 		SetCaretPos(caret.getXpixel(), caret.getYpixel()); //캐럿 위치 조정 후 출력
-
+		//디버깅
+		screenLineContainer.show();
+		
+		
+		
+		
+		
+		
 		EndPaint(hwnd, &ps);
 		break;
 	}
