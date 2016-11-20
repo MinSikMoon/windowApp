@@ -73,8 +73,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 	case WM_PAINT: {
 		hdc = BeginPaint(hwnd, &ps);
-		textSource.showAllText(hdc, rect.right, 0, wordHeight, screenLineContainer);
+		textSource.showAllText(hdc, rect.right, 50, 100, wordHeight, screenLineContainer);
 		SetCaretPos(caret.getXpixel(), caret.getYpixel()); //캐럿 위치 조정 후 출력
+		
 		//디버깅
 		screenLineContainer.show();
 		

@@ -208,37 +208,12 @@ public:
 		
 		for (text::iterator itr = (*textSource).begin(); itr != (*textSource).end(); itr++) {
 			totalLoopCnt += autoLineSwitch(hdc, (*itr), screenWidth, (firstLinePos + totalLoopCnt*wordHeight)*(-1), wordHeight);
-			//printf("totalloopcnt = %d \n", totalLoopCnt);
-			//_tprintf(TEXT("%ls \n"), (*itr));
+		
 		}
 
 	}
 
-	//showAllText원리를 이용해서  노드당 라인이 몇개인지 판별해보자. //라인 컨테이너가 들어와서 라인에 대한 모든 정보를 받아간다. 
-	//전체 라인수와 노드당 몇 라인을 가지는지 알 수 있는 showAllText
-	//void showAllText(HDC hdc, size_m screenWidth, int firstLinePos, size_m wordHeight, mScreenLineContainer& screenLineContainer) {
-	//	screenLineContainer.setTextSourceNodeNum(textNum); //노드가 몇개인지 전달해준다. 
-
-	//	//필터
-	//	if (textNum == 0) //비었으면 그냥 리턴
-	//		return;
-
-	//	//본론
-	//	int totalLoopCnt = 0;
-	//	int tempNodeIdx = 0; //노드 인덱스 검출 변수
-	//	int tempLineNumInNode; //노드 라인 인덱스 갯수 검출 변수, 루프당 초기화 되어야함. 루프 하나가 노드 하나이기 때문
-
-	//	for (text::iterator itr = (*textSource).begin(); itr != (*textSource).end(); itr++) {
-	//		tempLineNumInNode = 0;
-	//		tempLineNumInNode += autoLineSwitch(hdc, (*itr), screenWidth, (firstLinePos + totalLoopCnt*wordHeight)*(-1), wordHeight);
-	//		totalLoopCnt += tempLineNumInNode;
-	//		printf("tempLineNum = %d \n", tempLineNumInNode);
-	//		screenLineContainer.setNodeLineNumInfo(tempNodeIdx++, tempLineNumInNode); //노드당 몇 라인을 가지고 있는지 저장.
-	//	}
-	//	screenLineContainer.setTotalLineNum(totalLoopCnt); //텍스트 전체 라인이 몇개인지 저장. 
-	//}
-
-	//showAllText2 만들기
+	//showAllText : 이제 노드당 첫인덱스, 끝인덱스, 글자수 다 알아냄.
 	void showAllText(HDC hdc, size_m screenWidth, int firstLinePos, size_m wordHeight, mScreenLineContainer& screenLineContainer) {
 		screenLineContainer.setTextSourceNodeNum(textNum); //노드가 몇개인지 전달해준다. 
 
@@ -253,7 +228,6 @@ public:
 
 		for (text::iterator itr = (*textSource).begin(); itr != (*textSource).end(); itr++) {
 			tempLineNumInNode = 0;
-			//tempLineNumInNode += autoLineSwitch(hdc, (*itr), screenWidth, (firstLinePos + totalLoopCnt*wordHeight)*(-1), wordHeight);
 			tempLineNumInNode += autoLineSwitch(hdc, (*itr), screenWidth, (firstLinePos + totalLoopCnt*wordHeight)*(-1), wordHeight, screenLineContainer, tempNodeIdx);
 			totalLoopCnt += tempLineNumInNode;
 			printf("tempLineNum = %d \n", tempLineNumInNode);
@@ -262,6 +236,28 @@ public:
 		screenLineContainer.setTotalLineNum(totalLoopCnt); //텍스트 전체 라인이 몇개인지 저장. 
 	}
 
+	//showAllText2 : x좌표 시작점도 넣어주는 버젼:이제 노드당 첫인덱스, 끝인덱스, 글자수 다 알아냄.
+	void showAllText(HDC hdc, size_m screenWidth, int firstLineXpos, int firstLineYpos, size_m wordHeight, mScreenLineContainer& screenLineContainer) {
+		screenLineContainer.setTextSourceNodeNum(textNum); //노드가 몇개인지 전달해준다. 
+
+														   //필터
+		if (textNum == 0) //비었으면 그냥 리턴
+			return;
+
+		//본론
+		int totalLoopCnt = 0;
+		int tempNodeIdx = 0; //노드 인덱스 검출 변수
+		int tempLineNumInNode; //노드 라인 인덱스 갯수 검출 변수, 루프당 초기화 되어야함. 루프 하나가 노드 하나이기 때문
+
+		for (text::iterator itr = (*textSource).begin(); itr != (*textSource).end(); itr++) {
+			tempLineNumInNode = 0;
+			tempLineNumInNode += autoLineSwitch(hdc, (*itr), screenWidth, firstLineXpos, (firstLineYpos + totalLoopCnt*wordHeight)*(-1), wordHeight, screenLineContainer, tempNodeIdx);
+			totalLoopCnt += tempLineNumInNode;
+			printf("tempLineNum = %d \n", tempLineNumInNode);
+			screenLineContainer.setNodeLineNumInfo(tempNodeIdx++, tempLineNumInNode); //노드당 몇 라인을 가지고 있는지 저장.
+		}
+		screenLineContainer.setTotalLineNum(totalLoopCnt); //텍스트 전체 라인이 몇개인지 저장. 
+	}
 
 
 
