@@ -92,13 +92,15 @@ public:
 
 	//5. show
 	virtual void show(HDC hdc) = 0; //왜 virtual 붙였는 지 알것
-
-
-
+	//6. showText
 	void showText(HDC hdc) {
 		textEditor.showAllText(hdc, editorWidth, editorX, editorY);
 		
 	}
+
+	//7. showProgress
+	virtual void  showProgress(HDC hdc, int ulX, int ulY, int drX, int drY) = 0;
+
 
 };
 
@@ -129,6 +131,11 @@ public:
 
 	}
 
+	//4. showProgress
+	void showProgress(HDC hdc, int ulX, int ulY, int drX, int drY) {
+		Rectangle(hdc, ulX, ulY, drX, drY);
+	}
+
 
 };
 
@@ -155,6 +162,11 @@ public:
 		showText(hdc);
 	}
 
+	//4. showProgress
+	void showProgress(HDC hdc, int ulX, int ulY, int drX, int drY) {
+		Ellipse(hdc, ulX, ulY, drX, drY);
+	}
+
 };
 
 class mLine : public mShape {
@@ -175,6 +187,12 @@ public:
 	//4. mProc
 	void mProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
 		return;
+	}
+
+	//4. showProgress
+	void showProgress(HDC hdc, int ulX, int ulY, int drX, int drY) {
+		MoveToEx(hdc, ulX, ulY, NULL);
+		LineTo(hdc, drX, drY);
 	}
 
 };
@@ -228,6 +246,12 @@ public:
 	bool isEmpty() {
 		return shapeNum == 0 ? true : false;
 	}
+
+	////7. showProgressAt
+	//void showProgressAt(HDC hdc, int _idx, int ulX, int ulY, int drX, int drY) {
+	//	mShape* temp = shapeVector[_idx];
+	//	temp->showProgress(hdc, ulX, ulY, drX, drY);
+	//}
 };
 
 class mMouse {
@@ -346,6 +370,8 @@ mShapeContainer msc;
 mMouse mouse;
 int orderFlag = -1;
 
+int curX, curY;
+
 namespace Flag {
 	enum Type {
 		CIRCLE,
@@ -411,7 +437,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 		mouse.setNewX(tempX);
 		mouse.setNewY(tempY);
 
-
 		switch (orderFlag) {
 		case Flag::CIRCLE : {
 			msc.add(new mCircle(mouse.getUpLeft().x, mouse.getUpLeft().y, mouse.getRightDown().x, mouse.getRightDown().y));
@@ -435,6 +460,20 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 		break;
 	}
+
+	case WM_MOUSEMOVE: {
+		if (mouse.getGrapped()) { //그리는 중이라면
+			int tempX = LOWORD(lParam);
+			int tempY = HIWORD(lParam);
+
+			mouse.setNewX(tempX);
+			mouse.setNewY(tempY);
+
+			InvalidateRect(hwnd, NULL, TRUE);
+		}
+
+		break;
+	}
 	
 	case WM_IME_ENDCOMPOSITION:
 	case WM_IME_COMPOSITION:
@@ -446,6 +485,23 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 	case WM_PAINT: {
 		hdc = BeginPaint(hwnd, &ps);
+
+		switch (orderFlag) {
+		case Flag::CIRCLE: {
+			mCircle().showProgress(hdc, mouse.getUpLeft().x, mouse.getUpLeft().y, mouse.getRightDown().x, mouse.getRightDown().y);
+			break;
+		}
+		case Flag::RECTANGLE: {
+			mRectangle().showProgress(hdc, mouse.getUpLeft().x, mouse.getUpLeft().y, mouse.getRightDown().x, mouse.getRightDown().y);
+			break;
+		}
+		case Flag::LINE: {
+			mLine().showProgress(hdc, mouse.getOldPos().x, mouse.getOldPos().y, mouse.getNewPos().x, mouse.getNewPos().y);
+			break;
+		}
+
+		}
+
 		SetBkMode(hdc, TRANSPARENT);
 		msc.showAll(hdc);
 		EndPaint(hwnd, &ps);
