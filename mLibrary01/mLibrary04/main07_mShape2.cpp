@@ -7,13 +7,56 @@
 #endif
 using namespace std;
 
+class mRectangle {
+private:
+	POINT upLeft, downRight; //좌상단 우하단 좌표
+	mTextEditor textEditor;
+	int diff = 2;
+
+public:
+	//1. 생성자
+	mRectangle() {
+		textEditor.make(2, 16); 
+	}
+
+	mRectangle(int _upLeftX, int _upLeftY, int _downRightX, int _downRightY) {
+		textEditor.make(2, 16);
+		upLeft.x = _upLeftX;
+		upLeft.y = _upLeftY;
+		downRight.x = _downRightX;
+		downRight.y = _downRightY;
+	}
+
+	void make(int _upLeftX, int _upLeftY, int _downRightX, int _downRightY) {
+		textEditor.make(2, 16);
+		upLeft.x = _upLeftX;
+		upLeft.y = _upLeftY;
+		downRight.x = _downRightX;
+		downRight.y = _downRightY;
+	}
+	
+	//2. proc
+	void mProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
+		textEditor.mProc(hwnd, Message, wParam, lParam);
+		textEditor.replaceCurText(0);
+	}
+
+	//3. show
+	void show(HDC hdc) {
+		Rectangle(hdc, upLeft.x, upLeft.y, downRight.x, downRight.y);
+		textEditor.showAllText(hdc, downRight.x - upLeft.x - diff*2, upLeft.x + diff, upLeft.y + diff);
+		
+	}
+
+
+};
 
 
 //전역 객체 
 //테스트 엠텍스트에디터
-mTextEditor textEditor(2,16);
-mTextEditor textEditor2(2, 16);
 
+mRectangle m1(10, 10, 100, 100);
+mRectangle m2(100, 100, 300, 300);
 //////////////////////////////////////////////WIN PROC/////////////////////////////////////////////////////////////////////////////////////
 /* This is where all the input to the window goes to */
 LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
@@ -22,17 +65,18 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 	PAINTSTRUCT ps;
 	static RECT rect;
 
+
 	switch (Message) {
 	case WM_CREATE: {
-		textEditor.addText(TEXT("두번째 텍스트 에디터 입니다."));
+		
 		break;
 	}
-	
+
 	case WM_IME_ENDCOMPOSITION:
 	case WM_IME_COMPOSITION:
 	case WM_CHAR: {
-		textEditor2.mProc(hwnd, Message, wParam, lParam);
-		textEditor2.replaceCurText(0);
+		//m1.mProc(hwnd, Message, wParam, lParam);
+		m2.mProc(hwnd, Message, wParam, lParam);
 		break;
 	}
 
@@ -45,9 +89,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 	case WM_PAINT: {
 		hdc = BeginPaint(hwnd, &ps);
+		m1.show(hdc);
+		m2.show(hdc);
 		
-		textEditor2.showAllText(hdc, 100, 100, 100);
-		textEditor.showAllText(hdc, rect.right, 0, 0); //맨 마지막에 호출된 녀석이 제일 TOP으로 올라가는 것을 볼 수 있다. 
 		EndPaint(hwnd, &ps);
 		break;
 	}
@@ -104,7 +148,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	/* White, COLOR_WINDOW is just a #define for a system color, try Ctrl+Clicking it */
 	//wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-	wc.hbrBackground = (HBRUSH)NULL_BRUSH;
+	wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
 	wc.lpszClassName = _T("WindowClass");
 	wc.hIcon = LoadIcon(NULL, IDI_APPLICATION); /* Load a standard icon */
 	wc.hIconSm = LoadIcon(NULL, IDI_APPLICATION); /* use the name "A" to use the project icon */

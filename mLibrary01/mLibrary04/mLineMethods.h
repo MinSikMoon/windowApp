@@ -1,9 +1,7 @@
 
 #pragma once
-
 #include "mTextPixel.h"
 #include "mScreenLineContainer.h"
-
 
 //1. 일단 static으로 autoLineSwitch를 만들어 보자. 
 //1. mString이 들어오면 개행해서 출력해준다. //기본 함수

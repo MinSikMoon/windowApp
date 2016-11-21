@@ -41,6 +41,7 @@ private:
 	//라인 정보에 관련된 것들은 캐럿안에서 하지말고 분리시키자. 
 	//라인 정보에 관련된 linecontainer와 라인 리스트를 만들자. lineContainer안에 라인 리스트까지 다 멤버로 넣자. 
 public:
+	mCaretMaster() {}
 	mCaretMaster(size_m width, size_m height) {
 		caretIdx = 0;
 		caretNodeIdx = 0;
@@ -51,6 +52,18 @@ public:
 		yPixel = 0;
 		this->width = width;
 		this->height = height;
+	}
+
+	void make(size_m width, size_m height) {
+		caretIdx = 0;
+		caretNodeIdx = 0;
+		caretLineIdxInNode = 0;
+		frontWordNumInNode = 0;
+		upperLineNum = 0;
+		xPixel = 0;
+		yPixel = 0;
+		this->width = width;
+		this->height;
 	}
 
 	size_m getXpixel() {

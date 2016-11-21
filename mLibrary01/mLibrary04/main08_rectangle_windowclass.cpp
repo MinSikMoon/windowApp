@@ -7,12 +7,74 @@
 #endif
 using namespace std;
 
+class mRectangle {
+private:
+	POINT upLeft, downRight; //좌상단 우하단 좌표
+	mTextEditor textEditor;
+	int diff = 2;
+
+	//윈도우 클래스 테스트
+	HWND hCanvas;
+	int ID_CANVAS;
+
+public:
+	//1. 생성자
+	mRectangle() {
+		textEditor.make(2, 16);
+	}
+
+	mRectangle(const TCHAR* _wndClassName, HWND hwnd, HINSTANCE hInstance, int _ID_CANVAS, int _upLeftX, int _upLeftY, int _downRightX, int _downRightY) {
+		textEditor.make(2, 16);
+		upLeft.x = _upLeftX;
+		upLeft.y = _upLeftY;
+		downRight.x = _downRightX;
+		downRight.y = _downRightY;
+
+		hCanvas = CreateWindow(_wndClassName, NULL, WS_CHILD | WS_VISIBLE,
+			upLeft.x, upLeft.y, downRight.x, downRight.y, hwnd, (HMENU)ID_CANVAS, hInstance, NULL);
+	}
+
+	void make(const TCHAR* _wndClassName, HWND hwnd, HINSTANCE hInstance, int _ID_CANVAS, int _upLeftX, int _upLeftY, int _downRightX, int _downRightY) {
+		textEditor.make(2, 16);
+		upLeft.x = _upLeftX;
+		upLeft.y = _upLeftY;
+		downRight.x = _downRightX;
+		downRight.y = _downRightY;
+
+		hCanvas = CreateWindow(TEXT("static"), NULL, WS_CHILD | WS_VISIBLE,
+			upLeft.x, upLeft.y, downRight.x, downRight.y, hwnd, (HMENU)ID_CANVAS, hInstance, NULL);
+	}
+
+	void make(int _upLeftX, int _upLeftY, int _downRightX, int _downRightY) {
+		textEditor.make(2, 16);
+		upLeft.x = _upLeftX;
+		upLeft.y = _upLeftY;
+		downRight.x = _downRightX;
+		downRight.y = _downRightY;
+	}
+
+	//2. proc
+	void mProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
+		textEditor.mProc(hwnd, Message, wParam, lParam);
+		textEditor.replaceCurText(0);
+	}
+
+	//3. show
+	void show(HDC hdc) {
+		Rectangle(hdc, upLeft.x, upLeft.y, downRight.x, downRight.y);
+		textEditor.showAllText(hdc, downRight.x - upLeft.x - diff * 2,  upLeft.x + diff, upLeft.y + diff);
+
+	}
+
+
+};
 
 
 //전역 객체 
 //테스트 엠텍스트에디터
-mTextEditor textEditor(2,16);
-mTextEditor textEditor2(2, 16);
+HINSTANCE g_Inst;
+
+mRectangle m1;
 
 //////////////////////////////////////////////WIN PROC/////////////////////////////////////////////////////////////////////////////////////
 /* This is where all the input to the window goes to */
@@ -22,17 +84,18 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 	PAINTSTRUCT ps;
 	static RECT rect;
 
+
 	switch (Message) {
 	case WM_CREATE: {
-		textEditor.addText(TEXT("두번째 텍스트 에디터 입니다."));
+		m1.make(TEXT("child"), hwnd, g_Inst, 100, 0, 10, 100, 100);
 		break;
 	}
-	
+
 	case WM_IME_ENDCOMPOSITION:
 	case WM_IME_COMPOSITION:
 	case WM_CHAR: {
-		textEditor2.mProc(hwnd, Message, wParam, lParam);
-		textEditor2.replaceCurText(0);
+		m1.mProc(hwnd, Message, wParam, lParam);
+	
 		break;
 	}
 
@@ -45,9 +108,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 	case WM_PAINT: {
 		hdc = BeginPaint(hwnd, &ps);
-		
-		textEditor2.showAllText(hdc, 100, 100, 100);
-		textEditor.showAllText(hdc, rect.right, 0, 0); //맨 마지막에 호출된 녀석이 제일 TOP으로 올라가는 것을 볼 수 있다. 
+		m1.show(hdc);
+	
+
 		EndPaint(hwnd, &ps);
 		break;
 	}
@@ -90,6 +153,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 /* The 'main' function of Win32 GUI programs: this is where execution starts */
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 	_wsetlocale(LC_ALL, _T("korean"));
+	g_Inst = hInstance;
 
 	WNDCLASSEX wc; /* A properties struct of our window */
 	HWND hwnd; /* A 'HANDLE', hence the H, or a pointer to our window */
@@ -104,7 +168,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	/* White, COLOR_WINDOW is just a #define for a system color, try Ctrl+Clicking it */
 	//wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-	wc.hbrBackground = (HBRUSH)NULL_BRUSH;
+	wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
 	wc.lpszClassName = _T("WindowClass");
 	wc.hIcon = LoadIcon(NULL, IDI_APPLICATION); /* Load a standard icon */
 	wc.hIconSm = LoadIcon(NULL, IDI_APPLICATION); /* use the name "A" to use the project icon */
@@ -113,6 +177,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		MessageBox(NULL, _T("Window Registration Failed!"), _T("Error!"), MB_ICONEXCLAMATION | MB_OK);
 		return 0;
 	}
+	//childCanvas만들기
+	wc.lpszClassName = TEXT("child");
+	wc.hCursor = LoadCursor(NULL, IDC_CROSS);
+	wc.hbrBackground = (HBRUSH)NULL_BRUSH;
+	RegisterClassEx(&wc);
 
 	hwnd = CreateWindowEx(WS_EX_CLIENTEDGE, _T("WindowClass"), _T("Caption"), WS_VISIBLE | WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, /* x */
