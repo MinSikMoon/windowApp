@@ -36,6 +36,7 @@ void textOutCustom(HDC hdc, mString& mStr, size_m startIdx, size_m endIdx, int x
 	int tempLength = _tcslen(tempStr);
 
 	TextOut(hdc, xPos, yPos, tempStr, tempLength);
+	SetBkMode(hdc, TRANSPARENT);
 	delete tempStr;
 }
 

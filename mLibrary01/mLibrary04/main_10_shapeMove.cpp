@@ -92,10 +92,11 @@ public:
 	//5. show
 	virtual void show(HDC hdc) = 0; //왜 virtual 붙였는 지 알것
 
-	
+
 
 	void showText(HDC hdc) {
 		textEditor.showAllText(hdc, editorWidth, editorX, editorY);
+		
 	}
 
 };
@@ -118,7 +119,7 @@ public:
 		setEditorY(_upLeftY + getDiff());
 	}
 
-	
+
 	//3. show
 	void show(HDC hdc) {
 		Rectangle(hdc, getUpLeftX(), getUpLeftY(), getDownRightX(), getDownRightY());
@@ -131,13 +132,13 @@ public:
 };
 
 class mCircle : public mShape {
-public :
+public:
 	//1. 생성자
 	mCircle() {}
 	mCircle(int _upLeftX, int _upLeftY, int _downRightX, int _downRightY) : mShape(_upLeftX, _upLeftY, _downRightX, _downRightY) {
 		setEditorWidth((_downRightX - _upLeftX) / 10 * 8 - getDiff() * 2);
 		setEditorX(_upLeftX + (getEditorWidth() / 10) + getDiff() + 5);
-		setEditorY(_upLeftY + ((_downRightY - _upLeftY)/4)+getDiff());
+		setEditorY(_upLeftY + ((_downRightY - _upLeftY) / 4) + getDiff());
 	}
 	void make(int _upLeftX, int _upLeftY, int _downRightX, int _downRightY) {
 		mShape::make(_upLeftX, _upLeftY, _downRightX, _downRightY);
@@ -148,10 +149,9 @@ public :
 
 	//3. show
 	void show(HDC hdc) {
+		//SelectObject(hdc, GetStockObject(NULL_BRUSH));
 		Ellipse(hdc, getUpLeftX(), getUpLeftY(), getDownRightX(), getDownRightY());
-		//printf("%d %d %d %d \n", getUpLeftX(), getUpLeftY(), getDownRightX(), getDownRightY());
 		showText(hdc);
-
 	}
 
 };
@@ -159,12 +159,12 @@ public :
 class mLine : public mShape {
 public:
 	//1. 생성자
-	mLine(){}
+	mLine() {}
 	mLine(int _upLeftX, int _upLeftY, int _downRightX, int _downRightY) : mShape(_upLeftX, _upLeftY, _downRightX, _downRightY) {}
 	void make(int _upLeftX, int _upLeftY, int _downRightX, int _downRightY) {
 		mShape::make(_upLeftX, _upLeftY, _downRightX, _downRightY);
 	}
-	
+
 	//2. show
 	void show(HDC hdc) {
 		MoveToEx(hdc, getUpLeftX(), getUpLeftY(), NULL);
@@ -182,12 +182,12 @@ private:
 public:
 	//1. 생성자
 	mShapeContainer() : shapeNum(0) {}
-	~mShapeContainer(){
+	~mShapeContainer() {
 		for (vector<mShape*>::iterator itr = shapeVector.begin(); itr != shapeVector.end(); itr++) {
 			delete *itr;
 		}
 	}
-	
+
 	//2. add
 	void add(mShape* _newShape) {
 		shapeVector.push_back(_newShape);
@@ -196,9 +196,14 @@ public:
 
 	//3. showAll
 	void showAll(HDC hdc) {
-		for (int i = 0; i < shapeNum; i++) {
-			mShape* temp = shapeVector[i];
-			temp->show(hdc);
+		if (isEmpty()) {
+			return;
+		}
+		else {
+			for (int i = 0; i < shapeNum; i++) {
+				mShape* temp = shapeVector[i];
+				temp->show(hdc);
+			}
 		}
 	}
 
@@ -207,13 +212,129 @@ public:
 		mShape* temp = shapeVector[_idx];
 		temp->mProc(hwnd, Message, wParam, lParam);
 	}
+
+	//5. getShapeNum
+	int getShapeNum() {
+		return shapeNum;
+	}
+
+	//6. isEmpty(){
+	bool isEmpty() {
+		return shapeNum == 0 ? true : false;
+	}
 };
 
+class mMouse {
+private:
+	POINT oldPos;
+	POINT newPos;
+	bool grapped;
 
-//mRectangle m1(10, 10, 100, 100);
-//mCircle m2(100, 100, 300, 300);
-//mLine m3(200, 200, 400, 200);
+public:
+	mMouse(){
+		oldPos.x = 0;
+		oldPos.y = 0;
+		newPos.x = 0;
+		newPos.y = 0;
+		grapped = false;
+	}
+
+	//1. 좌상단, 우하단 알아서 뱉어주는 함수
+	POINT getUpLeft() {
+		int tempLeftX;
+		int tempUpY;
+		POINT tempPoint;
+
+		//1. x정해주기
+		if (oldPos.x < newPos.x) {
+			tempLeftX = oldPos.x;
+		}
+		else if (oldPos.x == newPos.x) {
+			tempLeftX = oldPos.x;
+		}
+		else {
+			tempLeftX = newPos.x;
+		}
+
+		//2. y정해주기
+		if (oldPos.y < newPos.y) {
+			tempUpY = oldPos.y;
+		}
+		else if (oldPos.y == newPos.y) {
+			tempUpY = oldPos.x;
+		}
+		else {
+			tempUpY = newPos.y;
+		}
+
+		tempPoint.x = tempLeftX;
+		tempPoint.y = tempUpY;
+
+		return tempPoint;
+	}
+	POINT getRightDown() {
+		int tempRightX;
+		int tempDownY;
+		POINT tempPoint;
+
+		//1. x정해주기
+		if (oldPos.x < newPos.x) {
+			tempRightX = newPos.x;
+		}
+		else if (oldPos.x == newPos.x) {
+			tempRightX = oldPos.x;
+		}
+		else {
+			tempRightX = oldPos.x;
+		}
+
+		//2. y정해주기
+		if (oldPos.y < newPos.y) {
+			tempDownY = newPos.y;
+		}
+		else if (oldPos.y == newPos.y) {
+			tempDownY = oldPos.x;
+		}
+		else {
+			tempDownY = oldPos.y;
+		}
+
+		tempPoint.x = tempRightX;
+		tempPoint.y = tempDownY;
+		return tempPoint;
+	}
+
+	void setOldX(int _x) {
+		oldPos.x = _x;
+	}
+	void setOldY(int _y) {
+		oldPos.y = _y;
+	}
+	void setNewX(int _x) {
+		newPos.x = _x;
+	}
+	void setNewY(int _y) {
+		newPos.y = _y;
+	}
+
+	POINT getOldPos() {
+		return oldPos;
+	}
+	POINT getNewPos() {
+		return newPos;
+	}
+	
+	void setGrap(bool grap) {
+		grapped = grap;
+	}
+	
+	bool getGrapped() {
+		return grapped;
+	}
+	
+};
 mShapeContainer msc;
+mMouse mouse;
 
 //////////////////////////////////////////////WIN PROC/////////////////////////////////////////////////////////////////////////////////////
 /* This is where all the input to the window goes to */
@@ -226,27 +347,70 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 	switch (Message) {
 	case WM_CREATE: {
-		msc.add(new mCircle(100, 100, 300, 300));
-		msc.add(new mRectangle(10, 10, 100, 100));
+		
+		break;
+	}
+	
+	case WM_LBUTTONDOWN: {
+		mouse.setGrap(true);
+		
+		int tempX = LOWORD(lParam);
+		int tempY = HIWORD(lParam);
+
+		mouse.setOldX(tempX);
+		mouse.setOldY(tempY);
+		
+	
+		break;
+	}
+	case WM_LBUTTONUP: {
+		mouse.setGrap(false);
+		
+		int tempX = LOWORD(lParam);
+		int tempY = HIWORD(lParam);
+		
+		mouse.setNewX(tempX);
+		mouse.setNewY(tempY);
+
+		//msc.add(new mLine(mouse.getOldPos().x, mouse.getOldPos().y, mouse.getNewPos().x, mouse.getNewPos().y));
+		msc.add(new mCircle(mouse.getUpLeft().x, mouse.getUpLeft().y, mouse.getRightDown().x, mouse.getRightDown().y));
+		InvalidateRect(hwnd, NULL, TRUE);
+
+
+		break;
+	}
+	
+	case WM_MOUSEMOVE: {
+		int tempX = LOWORD(lParam);
+		int tempY = HIWORD(lParam);
+
+	
+		
+		
+
+	
+
+
 		break;
 	}
 
 	case WM_IME_ENDCOMPOSITION:
 	case WM_IME_COMPOSITION:
 	case WM_CHAR: {
-		msc.procAt(hwnd, Message, wParam, lParam, 0);
+		msc.procAt(hwnd, Message, wParam, lParam, msc.getShapeNum()-1);
 		break;
 	}
 
 
 	case WM_SIZE: {
-		GetClientRect(hwnd, &rect);
-		InvalidateRect(hwnd, &rect, TRUE);
+	/*	GetClientRect(hwnd, &rect);
+		InvalidateRect(hwnd, &rect, TRUE);*/
 		break;
 	}
 
 	case WM_PAINT: {
 		hdc = BeginPaint(hwnd, &ps);
+		SetBkMode(hdc, TRANSPARENT);
 		msc.showAll(hdc);
 
 		EndPaint(hwnd, &ps);
@@ -258,7 +422,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 				   //======================마지막엔 콘솔 없애주기======================== 
 	case WM_DESTROY: {
-		
+
 		PostQuitMessage(0);
 		break;
 	}
