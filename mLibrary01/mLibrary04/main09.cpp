@@ -1,6 +1,6 @@
 //텍스트 에디터 클래스화 시키기
 #include "mTextEditor.h"
-
+#include <vector>
 
 #ifdef _DEBUG
 #pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
@@ -90,7 +90,8 @@ public:
 	}
 
 	//5. show
-	void show(HDC hdc) {}
+	virtual void show(HDC hdc) = 0; //왜 virtual 붙였는 지 알것
+
 	void showText(HDC hdc) {
 		textEditor.showAllText(hdc, editorWidth, editorX, editorY);
 	}
@@ -153,11 +154,64 @@ public :
 
 };
 
-//전역 객체 
-//테스트 엠텍스트에디터
+class mLine : public mShape {
+public:
+	//1. 생성자
+	mLine(){}
+	mLine(int _upLeftX, int _upLeftY, int _downRightX, int _downRightY) : mShape(_upLeftX, _upLeftY, _downRightX, _downRightY) {}
+	void make(int _upLeftX, int _upLeftY, int _downRightX, int _downRightY) {
+		mShape::make(_upLeftX, _upLeftY, _downRightX, _downRightY);
+	}
+	
+	//2. show
+	void show(HDC hdc) {
+		MoveToEx(hdc, getUpLeftX(), getUpLeftY(), NULL);
+		LineTo(hdc, getDownRightX(), getDownRightY());
+	}
 
-mRectangle m1(10, 10, 100, 100);
-mCircle m2(100, 100, 300, 300);
+};
+
+class mShapeContainer {
+private:
+	vector<mShape*> shapeVector;
+	int shapeNum;
+	int focusedIdx;
+
+public:
+	//1. 생성자
+	mShapeContainer() : shapeNum(0) {}
+	~mShapeContainer(){
+		for (vector<mShape*>::iterator itr = shapeVector.begin(); itr != shapeVector.end(); itr++) {
+			delete *itr;
+		}
+	}
+	
+	//2. add
+	void add(mShape* _newShape) {
+		shapeVector.push_back(_newShape);
+		shapeNum++;
+	}
+
+	//3. showAll
+	void showAll(HDC hdc) {
+		for (int i = 0; i < shapeNum; i++) {
+			mShape* temp = shapeVector[i];
+			temp->show(hdc);
+		}
+	}
+
+	//4. procAt
+	void procAt(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam, int _idx) {
+		mShape* temp = shapeVector[_idx];
+		temp->mProc(hwnd, Message, wParam, lParam);
+	}
+};
+
+
+//mRectangle m1(10, 10, 100, 100);
+//mCircle m2(100, 100, 300, 300);
+//mLine m3(200, 200, 400, 200);
+mShapeContainer msc;
 
 //////////////////////////////////////////////WIN PROC/////////////////////////////////////////////////////////////////////////////////////
 /* This is where all the input to the window goes to */
@@ -170,7 +224,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 	switch (Message) {
 	case WM_CREATE: {
-
+		msc.add(new mCircle(100, 100, 300, 300));
 		break;
 	}
 
@@ -178,7 +232,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 	case WM_IME_COMPOSITION:
 	case WM_CHAR: {
 		//m1.mProc(hwnd, Message, wParam, lParam);
-		m2.mProc(hwnd, Message, wParam, lParam);
+		msc.procAt(hwnd, Message, wParam, lParam, 0);
 		break;
 	}
 
@@ -191,8 +245,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 	case WM_PAINT: {
 		hdc = BeginPaint(hwnd, &ps);
-		m1.show(hdc);
-		m2.show(hdc);
+		msc.showAll(hdc);
 
 		EndPaint(hwnd, &ps);
 		break;
@@ -203,6 +256,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 				   //======================마지막엔 콘솔 없애주기======================== 
 	case WM_DESTROY: {
+		
 		PostQuitMessage(0);
 		break;
 	}
