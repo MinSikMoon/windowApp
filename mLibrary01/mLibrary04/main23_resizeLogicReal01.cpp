@@ -868,19 +868,48 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 				//현재 마우스 포지션이 원래 위치보다 초과하면 안되니까 필터링 해준다. //아직 필터링은 안함. 
 				POINT tempUl, tempRd;
 				printf("사이즈 조절 중");
-				if (g_resizePoint == 1) { //좌상단만 변해준다. 
+				if (g_resizePoint == 1) { //좌상단만 변해준다.  
+					//필터
+				/*	if (tempX > g_rd.x) { //라인에서만 사이즈 조절 제한이 없어야 한다. 메소드 단위에서 해결해야 할듯. 
+						tempX = g_rd.x;
+					} 
+					if (tempY > g_rd.y) {
+						tempY = g_rd.y;
+					}*/
+
 					tempUl = { tempX, tempY };
 					tempRd = g_rd;
 				}
 				else if (g_resizePoint == 2) {
+					//필터
+					/*if (tempX < g_ul.x) {
+						tempX = g_ul.x;
+					}
+					if (tempY > g_rd.y) {
+						tempY = g_rd.y;
+					}*/
 					tempUl = { g_ul.x, tempY };
 					tempRd = { tempX, g_rd.y };
 				}
 				else if (g_resizePoint == 3) { //우하단만 변경
+					//필터
+				/*	if (tempX < g_ul.x) {
+						tempX = g_ul.x;
+					}
+					if (tempY < g_ul.y) {
+						tempY = g_ul.y;
+					}*/
 					tempUl = g_ul;
 					tempRd = { tempX, tempY };
 				}
 				else {
+					//필터
+				/*	if (tempX > g_rd.x) {
+						tempX = g_rd.x;
+					}
+					if (tempY < g_ul.y) {
+						tempY = g_ul.y;
+					}*/
 					tempUl = { tempX, g_ul.y };
 					tempRd = { g_rd.x, tempY };
 				}
