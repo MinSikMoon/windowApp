@@ -115,6 +115,19 @@ public:
 	//10. isIn : 도형안에 마우스가 들어왔는지 판별해주는 것
 	virtual bool isIn(POINT mousePosition) { return false; }
 
+	//11. move //도형을 움직여 주자.
+	void move(int xDist, int yDist) {
+		upLeft.x += xDist;
+		upLeft.y += yDist;
+		downRight.x += xDist;
+		downRight.y += yDist;
+
+		editorX += xDist;
+		editorY += yDist;
+	};
+
+
+
 
 };
 
@@ -185,6 +198,8 @@ public:
 			return false;
 		}
 	}
+
+
 
 };
 
@@ -431,14 +446,16 @@ public:
 			return -1; //아무것도 없다는 뜻
 		}
 
+		int tempIdx = -1;
+
 		for (int i = 0; i < shapeNum; i++) {
 			mShape* temp = shapeVector[i];
 
 			if (temp->isIn(mousePoint))
-				return i;
+				tempIdx = i;
 
 		}
-		return -1; //아무것도 선택되지 않았다.
+		return tempIdx; //아무것도 선택되지 않았다.
 	}
 
 	//8. showDotAt
@@ -457,6 +474,30 @@ public:
 
 		mShape* temp = shapeVector[idx];
 		temp->show(hdc);
+	}
+
+	//10. moveAt
+	void moveAt(int idx, int xDist, int yDist) {
+		mShape* temp = shapeVector[idx];
+		temp->move(xDist, yDist);
+	}
+
+	//11. showProgressAt
+	void showProgressAt(HDC hdc, int idx, int luX, int luY, int rdX, int rdY) {
+		mShape* temp = shapeVector[idx];
+		temp->showProgress(hdc, luX, luY, rdX, rdY);
+	}
+
+	//12. getUpLeftPosAt
+	POINT getUpLeftPosAt(int idx) {
+		mShape* temp = shapeVector[idx];
+		POINT tempPoint{ temp->getUpLeftX(), temp->getUpLeftY() };
+		return tempPoint;
+	}
+	POINT getDownRightPosAt(int idx) {
+		mShape* temp = shapeVector[idx];
+		POINT tempPoint{ temp->getDownRightX(), temp->getDownRightY() };
+		return tempPoint;
 	}
 };
 
@@ -578,6 +619,11 @@ int orderFlag = -1;
 int focusedIdx = -1;
 int curX, curY;
 
+int g_oldX, g_oldY;
+int g_newX, g_newY;
+
+POINT g_ul, g_rd;
+
 namespace Flag {
 	enum Type {
 		CIRCLE,
@@ -628,14 +674,25 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 		int tempX = LOWORD(lParam);
 		int tempY = HIWORD(lParam);
+		POINT temp = { tempX, tempY };
 
 		if (orderFlag == Flag::NOTHING) { //클릭했는데, 아무것도 안하는 거면 도형을 선택하는 거다. 
-										  //1. 컨테이너를 돌면서 선택된 얘를 찾아준다. 
-			POINT temp = { tempX, tempY };
-			focusedIdx = msc.whoIsIn(temp);
+			focusedIdx = msc.whoIsIn(temp);  //1. 컨테이너를 돌면서 선택된 얘를 찾아준다. 
 			printf("selected: %d \n", focusedIdx); //어느 도형을 찍었는지 판별해준다 
 		}
 
+		if (focusedIdx != -1) { //어떤 도형이 선택되어 있고 
+			if (focusedIdx == msc.whoIsIn(temp)) { //현재 마우스가 그 도형위에 있는데, 거기다가 grap된 상태이면 움직인다는 뜻이다. 
+				g_oldX = tempX;
+				g_oldY = tempY;
+
+				g_ul = msc.getUpLeftPosAt(focusedIdx);
+				g_rd = msc.getDownRightPosAt(focusedIdx);
+
+				printf("%d를 움직이겠다. \n", focusedIdx);
+				orderFlag = Flag::MOVE; //움직이는 상태로 바꿔준다. 
+			}
+		}
 		mouse.setOldX(tempX);
 		mouse.setOldY(tempY);
 		break;
@@ -663,6 +720,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 			msc.add(new mLine(mouse.getOldPos().x, mouse.getOldPos().y, mouse.getNewPos().x, mouse.getNewPos().y));
 			break;
 		}
+		case Flag::MOVE: { //움직여 준다. 
+			int tempXdist = mouse.getNewPos().x - mouse.getOldPos().x;
+			int tempYdist = mouse.getNewPos().y - mouse.getOldPos().y;
+			msc.moveAt(focusedIdx, tempXdist, tempYdist);
+			break;
+		}
+
+		
 
 		}
 
@@ -682,8 +747,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 			mouse.setNewX(tempX);
 			mouse.setNewY(tempY);
 
+			g_newX = tempX;
+			g_newY = tempY;
+
 			InvalidateRect(hwnd, NULL, TRUE);
 		}
+
+		
 
 		break;
 	}
@@ -713,13 +783,28 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 			break;
 		}
 
+		case Flag::MOVE: {
+			int tempXdist, tempYdist, tempUlX, tempUlY, tempDrX, tempDrY;
+			
+			tempXdist = g_newX - g_oldX;
+			tempYdist = g_newY - g_oldY;
+			
+			tempUlX = g_ul.x + tempXdist;
+			tempUlY = g_ul.y + tempYdist;
+			tempDrX = g_rd.x + tempXdist;
+			tempDrY = g_rd.y + tempYdist;
+
+			msc.showProgressAt(hdc, focusedIdx, tempUlX, tempUlY, tempDrX, tempDrY);
+
+		
+			break;
+		}
+
 		}
 
 		//SetBkMode(hdc, TRANSPARENT);
 		msc.showAll(hdc);
-		//실험
 		msc.showAt(hdc, focusedIdx);
-
 		msc.showDotAt(hdc, focusedIdx);
 		EndPaint(hwnd, &ps);
 		break;
