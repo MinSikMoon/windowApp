@@ -112,6 +112,9 @@ public:
 		LineTo(hdc, x, y);
 	}
 
+	//10. isIn : 도형안에 마우스가 들어왔는지 판별해주는 것
+	virtual bool isIn(POINT mousePosition) { return false; }
+
 };
 
 class mRectangle : public mShape {
@@ -146,6 +149,7 @@ public:
 		Rectangle(hdc, ulX, ulY, drX, drY);
 	}
 
+	//5. showDot
 	void  showDot(HDC hdc) {
 		//setpixel 말고 lineto로 만들어보자. 
 		HPEN tempPen = CreatePen(PS_SOLID, 5, blueColor); //노란색
@@ -157,6 +161,29 @@ public:
 		SelectObject(hdc, oldPen);
 	};
 
+	//6. isIn : 도형안에 마우스가 들어왔는지 판별해주는 것
+	bool isIn(POINT mousePosition) {
+		POINT p1 = { getUpLeftX(), getUpLeftY() };
+		POINT p2 = { getDownRightX(), getDownRightY() };
+
+		bool isXSatisfied = false;
+		bool isYSatisfied = false;
+
+		if (mousePosition.x >= p1.x && mousePosition.x <= p2.x) {
+			isXSatisfied = true;
+		}
+
+		if (mousePosition.y >= p1.y && mousePosition.y <= p2.y) {
+			isYSatisfied = true;
+		}
+
+		if (isXSatisfied && isYSatisfied) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
 
 };
 
@@ -201,6 +228,25 @@ public:
 		SelectObject(hdc, oldPen);
 	};
 
+	bool isIn(POINT mousePosition) {
+		POINT p1 = { getUpLeftX(), getUpLeftY() };
+		POINT p2 = { getDownRightX(), getDownRightY() };
+
+		double a = (p2.x - p1.x) / 2.0;
+		double b = (p2.y - p1.y) / 2;
+		double alpha = p1.x + a;
+		double beta = p1.y + b;
+		double lValue = (mousePosition.x - alpha)*(mousePosition.x - alpha) / (a*a)
+			+
+			(mousePosition.y - beta)*(mousePosition.y - beta) / (b*b);
+
+		if (lValue <= 1) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
 };
 
 class mLine : public mShape {
@@ -237,6 +283,93 @@ public:
 		mSetPixel(hdc, getDownRightX(), getDownRightY()); // 우하단
 		SelectObject(hdc, oldPen);
 	};
+
+	bool isIn(POINT mousePosition) {
+		POINT p1 = { getUpLeftX(), getUpLeftY() };
+		POINT p2 = { getDownRightX(), getDownRightY() };
+		if (p1.x == p2.x) { // l 같은 선분
+			if (p1.y <= p2.y) {
+				if (mousePosition.x <= p1.x + 5 &&
+					mousePosition.x >= p1.x - 5 &&
+					mousePosition.y >= p1.y - 5 &&
+					mousePosition.y <= p2.y + 5) {
+					return true;
+				}
+				else {
+					return false;
+				}
+			}
+			else {
+				if (mousePosition.x <= p1.x + 5 &&
+					mousePosition.x >= p1.x - 5 &&
+					mousePosition.y <= p1.y + 5 &&
+					mousePosition.y >= p2.y - 5) {
+					return true;
+				}
+				else {
+					return false;
+				}
+			}
+		}
+		else if (p1.y == p2.y) { // ㅡ 같은 선분
+			if (p1.x <= p2.x) {
+				if (mousePosition.y <= p1.y + 5 &&
+					mousePosition.y >= p1.y - 5 &&
+					mousePosition.x >= p1.x - 5 &&
+					mousePosition.x <= p2.x + 5) {
+					return true;
+				}
+				else {
+					return false;
+				}
+			}
+			else {
+				if (mousePosition.y <= p1.y + 5 &&
+					mousePosition.y >= p1.y - 5 &&
+					mousePosition.x <= p1.x + 5 &&
+					mousePosition.x >= p2.x - 5) {
+					return true;
+				}
+				else {
+					return false;
+				}
+			}
+		}
+		else { // 나머지 선분
+			POINT vSP = { mousePosition.x - p1.x, mousePosition.y - p1.y };
+			POINT vSE = { p2.x - p1.x,p2.y - p1.y };
+			POINT vEP = { mousePosition.x - p2.x, mousePosition.y - p2.y };
+
+			if ((vSP.x*vSE.x + vSP.y*vSE.y) * (vEP.x*vSE.x + vEP.y*vSE.y) <= 0) {
+				int dSE = vSE.x*vSE.x + vSE.y*vSE.y;
+				int cp = vSP.x*vSE.y - vSP.y*vSE.x;
+				int fcp = (cp > 0) ? cp : cp*-1;
+
+				if (fcp*fcp / dSE <= 5 * 5) {
+					return true;
+				}
+				else {
+					return false;
+				}
+			}
+			else {
+				int dSP = vSP.x*vSP.x + vSP.y*vSP.y;
+				int dEP = vEP.x*vEP.x + vEP.y*vEP.y;
+
+				int min_dist = (dSP > dEP) ? dEP : dSP;
+				if (min_dist <= 5 * 5) {
+					return true;
+				}
+				else {
+					return false;
+				}
+			}
+
+			return false;
+		}
+	
+	
+	}
 
 };
 
@@ -290,6 +423,23 @@ public:
 	bool isEmpty() {
 		return shapeNum == 0 ? true : false;
 	}
+
+	//7. whoIsIn //마우스 포인터 찍은 곳에 누가 들어와있는지 idx로 가르쳐 주는 함수
+	int whoIsIn(POINT mousePoint) {
+		if (shapeNum == 0) {
+			return -1; //아무것도 없다는 뜻
+		}
+
+		for (int i = 0; i < shapeNum; i++) {
+			mShape* temp = shapeVector[i];
+		
+			if (temp->isIn(mousePoint))
+				return i;
+		
+		}
+		return -1; //아무것도 선택되지 않았다.
+	}
+	
 
 };
 
@@ -458,14 +608,16 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 	case WM_LBUTTONDOWN: {
 		mouse.setGrap(true);
-
-		if (orderFlag == Flag::NOTHING) { //잡긴 잡았는데, 아무것도 안하는 거면 선택하는 거다. 
-
-		}
-
 		int tempX = LOWORD(lParam);
 		int tempY = HIWORD(lParam);
 
+		if (orderFlag == Flag::NOTHING) { //클릭했는데, 아무것도 안하는 거면 도형을 선택하는 거다. 
+			//1. 컨테이너를 돌면서 선택된 얘를 찾아준다. 
+			POINT temp = { tempX, tempY };
+			printf("selected: %d \n", msc.whoIsIn(temp));
+		}
+
+	
 		mouse.setOldX(tempX);
 		mouse.setOldY(tempY);
 		break;
