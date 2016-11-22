@@ -7,6 +7,8 @@
 #pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
 #endif
 using namespace std;
+ DWORD blueColor = RGB(0, 0, 255);
+ DWORD yellowColor = RGB(255, 255, 224);
 
 class mShape {
 private:
@@ -92,15 +94,23 @@ public:
 
 	//5. show
 	virtual void show(HDC hdc) = 0; //왜 virtual 붙였는 지 알것
-	//6. showText
+									//6. showText
 	void showText(HDC hdc) {
 		textEditor.showAllText(hdc, editorWidth, editorX, editorY);
-		
+
 	}
 
 	//7. showProgress
 	virtual void  showProgress(HDC hdc, int ulX, int ulY, int drX, int drY) = 0;
 
+	//8. showDot //선택같은거 할때 점찍어서 보여주는것
+	virtual void  showDot(HDC hdc) = 0;
+
+	//9. dot쉽게 찍기
+	void mSetPixel(HDC hdc, int x, int y) {
+		MoveToEx(hdc, x, y, NULL);
+		LineTo(hdc, x, y);
+	}
 
 };
 
@@ -136,6 +146,17 @@ public:
 		Rectangle(hdc, ulX, ulY, drX, drY);
 	}
 
+	void  showDot(HDC hdc) {
+		//setpixel 말고 lineto로 만들어보자. 
+		HPEN tempPen = CreatePen(PS_SOLID, 5, blueColor); //노란색
+		HPEN oldPen = (HPEN)SelectObject(hdc, tempPen);
+		mSetPixel(hdc, getUpLeftX(), getUpLeftY()); //좌상단
+		mSetPixel(hdc, getUpLeftX(), getDownRightY()); //좌하단
+		mSetPixel(hdc, getDownRightX(), getUpLeftY()); //우상단
+		mSetPixel(hdc, getDownRightX(), getDownRightY()); // 우하단
+		SelectObject(hdc, oldPen);
+	};
+
 
 };
 
@@ -160,12 +181,25 @@ public:
 		//SelectObject(hdc, GetStockObject(NULL_BRUSH));
 		Ellipse(hdc, getUpLeftX(), getUpLeftY(), getDownRightX(), getDownRightY());
 		showText(hdc);
+		
 	}
 
 	//4. showProgress
 	void showProgress(HDC hdc, int ulX, int ulY, int drX, int drY) {
 		Ellipse(hdc, ulX, ulY, drX, drY);
 	}
+
+	//dot 보여주기
+	void  showDot(HDC hdc) {
+		//setpixel 말고 lineto로 만들어보자. 
+		HPEN tempPen = CreatePen(PS_SOLID, 5, blueColor); //노란색
+		HPEN oldPen = (HPEN)SelectObject(hdc, tempPen);
+		mSetPixel(hdc, getUpLeftX(), getUpLeftY()); //좌상단
+		mSetPixel(hdc, getUpLeftX(), getDownRightY()); //좌하단
+		mSetPixel(hdc, getDownRightX(), getUpLeftY()); //우상단
+		mSetPixel(hdc, getDownRightX(), getDownRightY()); // 우하단
+		SelectObject(hdc, oldPen);
+	};
 
 };
 
@@ -194,6 +228,15 @@ public:
 		MoveToEx(hdc, ulX, ulY, NULL);
 		LineTo(hdc, drX, drY);
 	}
+
+	void  showDot(HDC hdc) {
+		//setpixel 말고 lineto로 만들어보자. 
+		HPEN tempPen = CreatePen(PS_SOLID, 5, blueColor); //노란색
+		HPEN oldPen = (HPEN)SelectObject(hdc, tempPen);
+		mSetPixel(hdc, getUpLeftX(), getUpLeftY()); //좌상단
+		mSetPixel(hdc, getDownRightX(), getDownRightY()); // 우하단
+		SelectObject(hdc, oldPen);
+	};
 
 };
 
@@ -227,6 +270,7 @@ public:
 			for (int i = 0; i < shapeNum; i++) {
 				mShape* temp = shapeVector[i];
 				temp->show(hdc);
+				temp->showDot(hdc);
 			}
 		}
 	}
@@ -247,11 +291,6 @@ public:
 		return shapeNum == 0 ? true : false;
 	}
 
-	////7. showProgressAt
-	//void showProgressAt(HDC hdc, int _idx, int ulX, int ulY, int drX, int drY) {
-	//	mShape* temp = shapeVector[_idx];
-	//	temp->showProgress(hdc, ulX, ulY, drX, drY);
-	//}
 };
 
 class mMouse {
@@ -261,7 +300,7 @@ private:
 	bool grapped;
 
 public:
-	mMouse(){
+	mMouse() {
 		oldPos.x = 0;
 		oldPos.y = 0;
 		newPos.x = 0;
@@ -353,15 +392,15 @@ public:
 	POINT getNewPos() {
 		return newPos;
 	}
-	
+
 	void setGrap(bool grap) {
 		grapped = grap;
 	}
-	
+
 	bool getGrapped() {
 		return grapped;
 	}
-	
+
 };
 
 
@@ -395,7 +434,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 
 	switch (Message) {
-	
+
 	case WM_COMMAND: {
 		switch (LOWORD(wParam)) {
 		case ID_40001: { //원
@@ -416,10 +455,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 		break;
 	}
-	
+
 	case WM_LBUTTONDOWN: {
 		mouse.setGrap(true);
-				
+
+		if (orderFlag == Flag::NOTHING) { //잡긴 잡았는데, 아무것도 안하는 거면 선택하는 거다. 
+
+		}
+
 		int tempX = LOWORD(lParam);
 		int tempY = HIWORD(lParam);
 
@@ -430,15 +473,15 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 	case WM_LBUTTONUP: {
 		mouse.setGrap(false);
-		
+
 		int tempX = LOWORD(lParam);
 		int tempY = HIWORD(lParam);
-		
+
 		mouse.setNewX(tempX);
 		mouse.setNewY(tempY);
 
 		switch (orderFlag) {
-		case Flag::CIRCLE : {
+		case Flag::CIRCLE: {
 			msc.add(new mCircle(mouse.getUpLeft().x, mouse.getUpLeft().y, mouse.getRightDown().x, mouse.getRightDown().y));
 			break;
 		}
@@ -450,11 +493,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 			msc.add(new mLine(mouse.getOldPos().x, mouse.getOldPos().y, mouse.getNewPos().x, mouse.getNewPos().y));
 			break;
 		}
-		
+
 		}
-		
+
 		orderFlag = Flag::NOTHING;
-		
+
 		InvalidateRect(hwnd, NULL, TRUE);
 
 
@@ -474,12 +517,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 		break;
 	}
-	
+
 	case WM_IME_ENDCOMPOSITION:
 	case WM_IME_COMPOSITION:
 	case WM_CHAR: {
-		if(!msc.isEmpty())
-			msc.procAt(hwnd, Message, wParam, lParam, msc.getShapeNum()-1);
+		if (!msc.isEmpty())
+			msc.procAt(hwnd, Message, wParam, lParam, msc.getShapeNum() - 1);
 		break;
 	}
 
