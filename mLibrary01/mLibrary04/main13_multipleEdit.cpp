@@ -7,8 +7,8 @@
 #pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
 #endif
 using namespace std;
- DWORD blueColor = RGB(0, 0, 255);
- DWORD yellowColor = RGB(255, 255, 224);
+DWORD blueColor = RGB(0, 0, 255);
+DWORD yellowColor = RGB(255, 255, 224);
 
 class mShape {
 private:
@@ -115,6 +115,7 @@ public:
 	//10. isIn : 도형안에 마우스가 들어왔는지 판별해주는 것
 	virtual bool isIn(POINT mousePosition) { return false; }
 
+
 };
 
 class mRectangle : public mShape {
@@ -139,6 +140,9 @@ public:
 	//3. show
 	void show(HDC hdc) {
 		Rectangle(hdc, getUpLeftX(), getUpLeftY(), getDownRightX(), getDownRightY());
+		//printf("%d %d %d %d \n", getUpLeftX(), getUpLeftY(), getDownRightX(), getDownRightY());
+		showText(hdc);
+
 	}
 
 	//4. showProgress
@@ -205,13 +209,13 @@ public:
 		//SelectObject(hdc, GetStockObject(NULL_BRUSH));
 		Ellipse(hdc, getUpLeftX(), getUpLeftY(), getDownRightX(), getDownRightY());
 		showText(hdc);
-		
 	}
 
 	//4. showProgress
 	void showProgress(HDC hdc, int ulX, int ulY, int drX, int drY) {
 		Ellipse(hdc, ulX, ulY, drX, drY);
 	}
+
 
 	//dot 보여주기
 	void  showDot(HDC hdc) {
@@ -271,7 +275,6 @@ public:
 		MoveToEx(hdc, ulX, ulY, NULL);
 		LineTo(hdc, drX, drY);
 	}
-
 	void  showDot(HDC hdc) {
 		//setpixel 말고 lineto로 만들어보자. 
 		HPEN tempPen = CreatePen(PS_SOLID, 5, blueColor); //노란색
@@ -364,10 +367,9 @@ public:
 
 			return false;
 		}
-	
-	
-	}
 
+
+	}
 };
 
 class mShapeContainer {
@@ -403,19 +405,12 @@ public:
 			}
 		}
 	}
-	//3.5 showAt
-	void showAt(HDC hdc, int idx) {
-		if (idx < 0)
-			return;
-		mShape* temp = shapeVector[idx];
-		temp->show(hdc);
-	}
 
 	//4. procAt
 	void procAt(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam, int _idx) {
-		if (_idx < 0)
+		if (_idx == -1) {
 			return;
-
+		}
 		mShape* temp = shapeVector[_idx];
 		temp->mProc(hwnd, Message, wParam, lParam);
 	}
@@ -438,25 +433,22 @@ public:
 
 		for (int i = 0; i < shapeNum; i++) {
 			mShape* temp = shapeVector[i];
-		
+
 			if (temp->isIn(mousePoint))
 				return i;
-		
+
 		}
 		return -1; //아무것도 선택되지 않았다.
 	}
-	
+
 	//8. showDotAt
-	void showDotAt(HDC hdc,int idx) {
+	void showDotAt(HDC hdc, int idx) {
 		if (idx < 0)
 			return;
 
 		mShape* temp = shapeVector[idx];
 		temp->showDot(hdc);
 	}
-
-
-
 };
 
 class mMouse {
@@ -574,10 +566,8 @@ public:
 mShapeContainer msc;
 mMouse mouse;
 int orderFlag = -1;
-
+int focusedIdx = -1;
 int curX, curY;
-
-int focusedIdx = -1; //현재 누가 focused 되어있는가?
 
 namespace Flag {
 	enum Type {
@@ -626,18 +616,18 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 	case WM_LBUTTONDOWN: {
 		mouse.setGrap(true);
+
 		int tempX = LOWORD(lParam);
 		int tempY = HIWORD(lParam);
 
 		if (orderFlag == Flag::NOTHING) { //클릭했는데, 아무것도 안하는 거면 도형을 선택하는 거다. 
-			//1. 컨테이너를 돌면서 선택된 얘를 찾아준다. 
+										  //1. 컨테이너를 돌면서 선택된 얘를 찾아준다. 
 			POINT temp = { tempX, tempY };
 			focusedIdx = msc.whoIsIn(temp);
 			InvalidateRect(hwnd, NULL, TRUE);
 			printf("selected: %d \n", focusedIdx); //어느 도형을 찍었는지 판별해준다 
 		}
 
-	
 		mouse.setOldX(tempX);
 		mouse.setOldY(tempY);
 		break;
@@ -700,7 +690,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 	case WM_PAINT: {
 		hdc = BeginPaint(hwnd, &ps);
-		
+
 		switch (orderFlag) {
 		case Flag::CIRCLE: {
 			mCircle().showProgress(hdc, mouse.getUpLeft().x, mouse.getUpLeft().y, mouse.getRightDown().x, mouse.getRightDown().y);
@@ -717,11 +707,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 		}
 
-		SetBkMode(hdc, TRANSPARENT);
+		//SetBkMode(hdc, TRANSPARENT);
 		msc.showAll(hdc);
-		msc.showAt(hdc, focusedIdx);
 		msc.showDotAt(hdc, focusedIdx);
-		printf("현재 msc size = %d \n", msc.getShapeNum());
 		EndPaint(hwnd, &ps);
 		break;
 	}
