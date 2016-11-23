@@ -1,7 +1,8 @@
 #pragma once
+#pragma once
 #include "mTextSource.h"
 #include "mKeyboard.h"
-#include "mCaretMaster.h"
+#include "newCarot01.h"
 
 
 class mTextEditor {
@@ -11,7 +12,7 @@ private:
 	mKeyboard keyboard; //키보드
 	mTextSource textSource; //본문
 	mScreenLineContainer lineContainer; //라인정보 컨테이너
-	mCaretMaster caret; //캐럿
+	newCarot caret; //캐럿
 	size_m CARET_WIDTH; //캐럿의 너비
 
 
@@ -59,9 +60,20 @@ public:
 		textSource.replaceTextAt(nodeIdx, keyboard.getMstr());
 	}
 
-	//4. 보여주기 
+	//4. 보여주기 //보여주면서 lc에 모든 정보들이 담겨진다. 
 	void showAllText(HDC hdc, size_m screenWidth, int firstLineXpos, int firstLineYpos) {
 		textSource.showAllText(hdc, screenWidth, firstLineXpos, firstLineYpos, 16, lineContainer);
 		lineContainer.show();
 	}
+
+	//5. 캐럿 정보 갱신하기 
+	void carotMoveRight() {
+		caret.moveRight(lineContainer);
+	}
+	
+	
+	void getCarotInfo() {
+		caret.show();
+	}
+	
 };

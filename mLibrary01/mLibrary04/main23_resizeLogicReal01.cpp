@@ -984,7 +984,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 		}
 
-		//SetBkMode(hdc, TRANSPARENT);
 		msc.showAll(hdc);
 		msc.showAt(hdc, focusedIdx);
 		msc.showDotAt(hdc, focusedIdx);

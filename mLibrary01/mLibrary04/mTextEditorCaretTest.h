@@ -6,6 +6,10 @@
 
 class mTextEditor {
 private:
+	//시작점 : 기본은 0,0 이겠지. 
+	int startX;
+	int startY;
+
 	//멤버들
 	size_m WORD_HEIGHT; //글자 높이
 	mKeyboard keyboard; //키보드
@@ -17,15 +21,29 @@ private:
 
 public:
 	//1. 생성자
-	mTextEditor() {}
+	mTextEditor() : startX(0), startY(0) {}
 
-	mTextEditor(size_m caretWidth, size_m wordHeight) :caret(caretWidth, wordHeight) {
+	mTextEditor(size_m caretWidth, size_m wordHeight) :caret(caretWidth, wordHeight), startX(0), startY(0) {
 		addText(keyboard.getMstr());
 	}
 
 	void make(size_m caretWidth, size_m wordHeight) {
+		startX = 0;
+		startY = 0;
 		caret.make(caretWidth, wordHeight);
 		addText(keyboard.getMstr());
+	}
+
+	//6. 시작점 바꿔주기 
+	void changeStartPoint(int x, int y) {
+		startX = x;
+		startY = y;
+	}
+	int getStartX() {
+		return startX;
+	}
+	int getStartY() {
+		return startY;
 	}
 
 	//메소드
@@ -56,12 +74,45 @@ public:
 	}
 
 	void replaceCurText(size_m nodeIdx) {
+		lineContainer.show();
 		textSource.replaceTextAt(nodeIdx, keyboard.getMstr());
+		printf("replace 중 \n");
+		textSource.show();
 	}
 
 	//4. 보여주기 
 	void showAllText(HDC hdc, size_m screenWidth, int firstLineXpos, int firstLineYpos) {
 		textSource.showAllText(hdc, screenWidth, firstLineXpos, firstLineYpos, 16, lineContainer);
+		//lineContainer.show();
+	}
+	void showAllText(HDC hdc, size_m screenWidth) {
+		textSource.showAllText(hdc, screenWidth, startX, startY, 16, lineContainer);
 		lineContainer.show();
+	}
+	
+
+	//5. 캐럿 관련
+	int getCaretXpixel(HDC hdc) {
+		return caret.getXpixel(hdc, textSource, lineContainer) + startX;
+	}
+	int getCaretYpixel() {
+		return caret.getYpixel() + startY;
+	}
+
+	//6. 텍스트 소스의 노드 정보
+	int getTextSourceNodeNum() {
+		return textSource.getTextNum();
+	}
+
+	//7. 캐럿 무빙
+	void moveCaretRight() {
+		
+		caret.moveRight(textSource, lineContainer);
+	}
+	
+
+	//디버깅
+	int getFrontWordNum() {
+		return caret.getFrontWordNum();
 	}
 };

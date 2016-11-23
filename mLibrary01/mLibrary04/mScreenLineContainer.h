@@ -66,6 +66,9 @@ public:
 
 	//'' 첫 인덱스를 구한다. 
 	int getFirstIdx(int nodeIdx, int lineIdx) {
+		if (lineIdx == 0) {
+			return 0;
+		}
 		return container[nodeIdx][lineIdx][1];
 	};
 

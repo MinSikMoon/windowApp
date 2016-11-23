@@ -261,6 +261,7 @@ public:
 
 
 
+
 	//debugging : show
 	void show() {
 		printf("cur list size : %d \n", (*textSource).size());
