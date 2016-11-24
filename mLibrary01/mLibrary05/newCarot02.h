@@ -75,7 +75,10 @@ private://=====================private 멤버
 		int realIdx = frontWordNum - 1;
 		return getLineIdxInNode(realIdx, nodeIdx, lc);
 	}
-
+	//5. frontWordNum으로 위로 몇줄 있나 구하기
+	size_m getUpperLineNumByFrontWordNum(size_m frontWordNum, size_m nodeIdx, mScreenLineContainer& lc) {
+		return getLineIdxByFrontWordNum(frontWordNum, nodeIdx, lc);
+	}
 
 
 
@@ -91,6 +94,10 @@ private://=====================private 멤버
 	}
 	void setCnodeIdx(size_m newIdx) {
 		cNodeIdx = newIdx;
+	}
+
+	void setUpperLineNum(size_m newNum) {
+		upperLineNum = newNum;
 	}
 
 	//1. bool 종류들
@@ -154,6 +161,7 @@ public:
 		//2. 새로운 frontWordNum기준으로 cIdx와 lineIdx를 정해준다. 
 		setClineIdx(getLineIdxByFrontWordNum(frontWordNum, cNodeIdx, lc));
 		setCidx(getCidxByFrontWordNum(frontWordNum, cNodeIdx, lc));
+		setUpperLineNum(getUpperLineNumByFrontWordNum(frontWordNum, cNodeIdx, lc));
 	}
 
 	//-삭제
