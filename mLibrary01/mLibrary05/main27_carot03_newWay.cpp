@@ -61,7 +61,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 		textEditor2.showAllText(hdc, 100, 100, 100); //여기서 항상 
 
-		SetCaretPos(textEditor2.getCaretXpixel(hdc), textEditor2.getCaretYpixel());
+		SetCaretPos(textEditor2.getCaretXpixel(hdc), textEditor2.getCaretYpixel()); //백스페이스 기능 때문에 백스페이스 하면 오류남. 
 		textEditor2.getCarotInfo();
 		EndPaint(hwnd, &ps);
 		break;

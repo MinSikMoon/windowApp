@@ -42,7 +42,13 @@ private://=====================private 멤버
 		int lastRealIdx = lc.getLastIdx(nodeIdx,lastLineIdx);
 		return lastRealIdx + lastLineIdx + 1;
 	}
+	size_m getPhysicalTotalFrontWordNum(size_m nodeIdx, mScreenLineContainer& lc) {
+		int lastLineIdx = lc.getNodeLineNumInfo(nodeIdx) - 1;
+		if (lc.getWordCnt(nodeIdx, lastLineIdx) == 0)
+			return 0;
 
+		return lc.getLastIdx(nodeIdx, lastLineIdx) + 1;
+	}
 
 
 	//1. 실제 idx로 실제 라인인덱스 알아내기
@@ -161,16 +167,24 @@ public:
 	//2. 이동과 입력 따로 만들어줘야 한다. 
 	//-1. 입력시  
 	void input(mScreenLineContainer& lc) {
+		//테스트
+		if (frontWordNum + 1 > getPhysicalTotalFrontWordNum(cNodeIdx, lc)) {
+			frontWordNum = getPhysicalTotalFrontWordNum(cNodeIdx, lc);
+		}
+		else {
+			frontWordNum++; //lc에는 글자가 들어와있고 캐럿은 가상의 글자 숫자다. lc에 아무런 영향을 못끼치니까 괜찮다. //nodeIdx도 나중에 먼저 갱신해줘야한다. 
+		}
+			
 		//1. 기존 frontWordNum에 한글자를 추가해준다. 
-		frontWordNum++; //lc에는 글자가 들어와있고 캐럿은 가상의 글자 숫자다. lc에 아무런 영향을 못끼치니까 괜찮다. //nodeIdx도 나중에 먼저 갱신해줘야한다. 
+		
 		//2. 새로운 frontWordNum기준으로 cIdx와 lineIdx를 정해준다. 
 		setClineIdx(getLineIdxByFrontWordNum(frontWordNum, cNodeIdx, lc));
 		//cIdx 걸러주기
-		int physicalLastCidx = getPhysicalLastCidx(cNodeIdx, lc);
+		//int physicalLastCidx = getPhysicalLastCidx(cNodeIdx, lc);
 		int newCidx = getCidxByFrontWordNum(frontWordNum, cNodeIdx, lc);
 
-		if (newCidx > physicalLastCidx)
-			newCidx = physicalLastCidx;
+		/*if (newCidx > physicalLastCidx)
+			newCidx = physicalLastCidx;*/
 
 		setCidx(newCidx);
 		setUpperLineNum(getUpperLineNumByFrontWordNum(frontWordNum, cNodeIdx, lc));
