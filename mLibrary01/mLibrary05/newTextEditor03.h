@@ -13,18 +13,23 @@ private:
 	mTextSource textSource; //본문
 	mScreenLineContainer lineContainer; //라인정보 컨테이너
 	newCarot caret; //캐럿
-	size_m CARET_WIDTH; //캐럿의 너비
-
+	
+	
+	//시작점 : 기본은 0,0 이겠지. 
+	int startX;
+	int startY;
 
 public:
 	//1. 생성자
-	mTextEditor() {}
+	mTextEditor(): startX(0), startY(0) {}
 
-	mTextEditor(size_m caretWidth, size_m wordHeight) :caret(caretWidth, wordHeight) {
+	mTextEditor(size_m caretWidth, size_m wordHeight) :caret(caretWidth, wordHeight), startX(0), startY(0) {
 		addText(keyboard.getMstr());
 	}
 
 	void make(size_m caretWidth, size_m wordHeight) {
+		startX = 0;
+		startY = 0;
 		caret.make(caretWidth, wordHeight);
 		addText(keyboard.getMstr());
 	}
@@ -66,11 +71,29 @@ public:
 		lineContainer.show();
 	}
 
+	//5. 시작 좌상단 좌표 바꾸기 
+	void changeStartPoint(int x, int y) {
+		startX = x;
+		startY = y;
+	}
+	int getStartX() {
+		return startX;
+	}
+	int getStartY() {
+		return startY;
+	}
+
 	//캐럿관련
 	void caretInput() {
 		caret.input(lineContainer);
 	}
 
+	size_m getCaretXpixel(HDC hdc) {
+		return caret.getXpixel(hdc, textSource, lineContainer) + startX;
+	}
+	size_m getCaretYpixel() {
+		return caret.getYpixel() + startY;
+	}
 
 	void getCarotInfo() {
 		caret.show(lineContainer);

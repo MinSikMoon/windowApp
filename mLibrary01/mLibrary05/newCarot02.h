@@ -93,7 +93,14 @@ private://=====================private 멤버
 		cNodeIdx = newIdx;
 	}
 
-
+	//1. bool 종류들
+	bool isLineFirst(mScreenLineContainer& lc) {
+		size_m firstCidx = lc.getFirstCaretIdx(cNodeIdx, cLineIdx);
+		if (cIdx == firstCidx) {
+			return true;
+		}
+		return false;
+	}
 
 
 
@@ -147,10 +154,29 @@ public:
 		//2. 새로운 frontWordNum기준으로 cIdx와 lineIdx를 정해준다. 
 		setClineIdx(getLineIdxByFrontWordNum(frontWordNum, cNodeIdx, lc));
 		setCidx(getCidxByFrontWordNum(frontWordNum, cNodeIdx, lc));
-
 	}
-	//-1. 오른쪽
-	
+
+	//-삭제
+	//-홈
+	//-엔드
+	//-상하좌우
+
+	//-출력 //여기서 문제가 생긴다.
+	size_m getXpixel(HDC hdc, mTextSource& textSource,mScreenLineContainer& lc) {
+		
+		int xPixel;
+		if (isLineFirst(lc)) {
+			xPixel = 0;
+		}
+		else {
+			int tempStartIdx = lc.getFirstIdx(cNodeIdx, cLineIdx); //첫번째 인덱스를 알아낸다.
+			xPixel = getMstrPixelWidth(hdc, mString(textSource.getTextAt(cNodeIdx)), tempStartIdx, frontWordNum-1); //길이를 알아낸다. 
+		}
+		return xPixel;
+	}
+	size_m getYpixel() {
+		return height*upperLineNum;
+	}
 
 
 
