@@ -36,7 +36,12 @@ private://=====================private 멤버
 		int curLineIdx = getLineIdxByCidx(cIdx, nodeIdx, lc);
 		return cIdx - curLineIdx;
 	} 
-	
+	//lc에 들어있는 실제 물리적 마지막 캐럿인덱스는 몇인가?
+	size_m getPhysicalLastCidx(size_m nodeIdx, mScreenLineContainer& lc) {
+		int lastLineIdx = lc.getNodeLineNumInfo(nodeIdx) - 1;
+		int lastRealIdx = lc.getLastIdx(nodeIdx,lastLineIdx);
+		return lastRealIdx + lastLineIdx + 1;
+	}
 
 
 
@@ -160,7 +165,14 @@ public:
 		frontWordNum++; //lc에는 글자가 들어와있고 캐럿은 가상의 글자 숫자다. lc에 아무런 영향을 못끼치니까 괜찮다. //nodeIdx도 나중에 먼저 갱신해줘야한다. 
 		//2. 새로운 frontWordNum기준으로 cIdx와 lineIdx를 정해준다. 
 		setClineIdx(getLineIdxByFrontWordNum(frontWordNum, cNodeIdx, lc));
-		setCidx(getCidxByFrontWordNum(frontWordNum, cNodeIdx, lc));
+		//cIdx 걸러주기
+		int physicalLastCidx = getPhysicalLastCidx(cNodeIdx, lc);
+		int newCidx = getCidxByFrontWordNum(frontWordNum, cNodeIdx, lc);
+
+		if (newCidx > physicalLastCidx)
+			newCidx = physicalLastCidx;
+
+		setCidx(newCidx);
 		setUpperLineNum(getUpperLineNumByFrontWordNum(frontWordNum, cNodeIdx, lc));
 	}
 

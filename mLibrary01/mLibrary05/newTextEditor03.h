@@ -49,6 +49,9 @@ public:
 	void mProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
 		keyboard.mProc(hwnd, Message, wParam, lParam);
 	}
+	/*int mProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
+		return keyboard.mProc(hwnd, Message, wParam, lParam);
+	}*/
 
 	//3. 문단 내용 교체
 	void replaceTextAt(size_m nodeIdx, TCHAR* _newStr) {

@@ -2,9 +2,9 @@
 #include "newTextEditor03.h"
 #include "newCarot02.h"
 
-//#ifdef _DEBUG
-//#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
-//#endif
+#ifdef _DEBUG
+#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
+#endif
 using namespace std;
 
 
@@ -32,7 +32,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 	case WM_IME_ENDCOMPOSITION:
 	case WM_IME_COMPOSITION:
 	case WM_CHAR: {
+		//int isBacked = 0;
 		textEditor2.mProc(hwnd, Message, wParam, lParam);
+		//printf("isbacked = %d \n", isBacked);
 		textEditor2.replaceCurText(0); //replace는 carot이 현재 가리키는 곳의 정보를 바꿔줘야 한다. 이걸 고쳐야함. 
 		textEditor2.changeStartPoint(100, 100);
 		SendMessage(hwnd, WM_PAINT, NULL, NULL); //lc에 새롭게 정렬된다. 
@@ -57,7 +59,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 	case WM_PAINT: {
 		hdc = BeginPaint(hwnd, &ps);
 
-		textEditor2.showAllText(hdc, 25, 100, 100); //여기서 항상 
+		textEditor2.showAllText(hdc, 100, 100, 100); //여기서 항상 
 
 		SetCaretPos(textEditor2.getCaretXpixel(hdc), textEditor2.getCaretYpixel());
 		textEditor2.getCarotInfo();
