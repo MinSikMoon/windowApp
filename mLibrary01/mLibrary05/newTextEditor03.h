@@ -85,6 +85,11 @@ public:
 	int getStartY() {
 		return startY;
 	}
+	//입력관련
+	//키보드 빈문자열로 리셋해주기 
+	void keyboardClean() {
+		keyboard.Clean();
+	}
 
 	//캐럿관련
 	void caretInput() {
@@ -106,4 +111,7 @@ public:
 		caret.show(lineContainer);
 	}
 
+	mString& getKeyboardStr(){
+		return keyboard.getMstr();
+	}
 };

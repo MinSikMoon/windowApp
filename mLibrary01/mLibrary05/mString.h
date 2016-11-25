@@ -54,7 +54,7 @@ class mString {
 public:
 	mString() { //빈 문자열을 기본 생성
 		size_m tempLength = 1; //바로 null을 저장하기 위해 0의 위치에 
-		size_m bufferSize = tempLength * sizeof(TCHAR); // 유니코드를 대비해 2배로 잡아준다. 
+		size_m bufferSize = (tempLength + 1 ) * sizeof(TCHAR); // 유니코드를 대비해 2배로 잡아준다. //tempLength에 1더해줌
 		str = new TCHAR[bufferSize];
 		_tcscpy_s(str, bufferSize, TEXT(""));
 		length = 0;
@@ -91,13 +91,18 @@ public:
 	//------------------------------ < 1. ADD : 오버로딩들 > ------------------------------------------
 	//1.1. mString끼리 더하기
 	void add(mString& _inStr) {
+		
 		size_m tempLength = length + _inStr.getLength(); //일단 길이를 임시 계산
 		size_m bufferSize = (tempLength + 1) * sizeof(TCHAR); //두개를 합친 임시 공간 사이즈
 		TCHAR* tempStr = new TCHAR[bufferSize]; //임시 공간을 만든다. 
 
 		_tcscpy_s(tempStr, bufferSize, str); //가상 공간에 str을 복사
 		_tcscat_s(tempStr, tempLength + 1, _inStr.getStr()); //뒤에다가 붙인다. 
-		delete str; //현재 str을 해제시키고 
+		
+		if (_tcslen(str) != 0) { //str이 null만 들어있으면 오류가 나더라. 
+			delete str; //현재 str을 해제시키고 
+		}
+		//delete str;
 
 		str = tempStr; //tempStr로 갱신시킨다.
 		length = tempLength; //길이도 갱신 시킨다. 

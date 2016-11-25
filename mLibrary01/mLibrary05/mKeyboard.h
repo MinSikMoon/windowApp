@@ -112,46 +112,10 @@ public:
 		//printf("char 중\n");
 		InvalidateRect(hwnd, NULL, TRUE);
 	}
-	//testing
-	//void mProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
-	//	switch (Message) {
-	//
-	//	case WM_IME_ENDCOMPOSITION: { //한글 입력하다가 한영키 눌렀을때 tempStr을 비워준다. 
-	//		if (isBacked) {
-	//			SendMessage(hwnd, WM_CHAR, VK_BACK, VK_BACK);
-	//			isBacked = FALSE;
-	//			break;
-	//		}
-	//		//printf("is backed ==> %d \n", isBacked == TRUE ? 1 : 0);
-	//		printf("endcomposition \n");
-	//		endComposition();
-	//		break;
-	//	}
-	//	case WM_IME_COMPOSITION: { //IME 통과 
-	//		printf("compsitioning \n");
-	//		hImc = ImmGetContext(hwnd);
-	//		composition(hImc, hwnd, lParam);
-	//		ImmReleaseContext(hwnd, hImc);
-	//	}
-
-	//	case WM_CHAR: { //mStr에 글자를 더해주는 로직
-	//		switch (wParam) {
-	//		case VK_BACK: {
-	//			printf("back 스페이스 누름 isback true해줌 \n");
-	//			isBacked = TRUE;
-	//			mStr.eraseLastChar();
-	//			curComposingStat = FALSE;
-	//			prevComposingStat = curComposingStat;
-	//			InvalidateRect(hwnd, NULL, TRUE);
-	//			return;
-	//		}
-	//		}
-	//		printf("char \n");
-	//		makeChar(hwnd, wParam);
-	//		break;
-	//	}
-	//	}
-	//}
+	
+	void Clean() {
+		mStr.replaceStr(TEXT(""));
+	}
 
 	int mProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
 		switch (Message) {
@@ -185,6 +149,19 @@ public:
 				InvalidateRect(hwnd, NULL, TRUE);
 				return 1; //1이 배출되면 백스페이스라는 뜻.
 			}
+			//엔터처리 
+			case VK_RETURN: {
+				printf("엔터누름 \n");
+				//mProc을 지나서 현재 mstr을 모두 textSource에 넣어준 다음 리셋해줘야함. 
+				isCompleted = FALSE;
+				curComposingStat = FALSE; //현재 단계의 IME 통과여부 
+				prevComposingStat = FALSE; //이전 단계의 IME 통과여부 
+				isBacked = FALSE;
+				
+				return 2;
+			}
+
+
 			}
 			printf("char \n");
 			makeChar(hwnd, wParam);

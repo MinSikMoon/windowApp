@@ -2,9 +2,9 @@
 #include "newTextEditor03.h"
 #include "newCarot02.h"
 
-#ifdef _DEBUG
-#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
-#endif
+//#ifdef _DEBUG
+//#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
+//#endif
 using namespace std;
 
 
@@ -15,6 +15,8 @@ mTextEditor textEditor(2, 16);
 mTextEditor textEditor2(2, 16);
 newCarot carot;
 
+//테스트
+int g_nodeIdx = 0;
 //////////////////////////////////////////////WIN PROC/////////////////////////////////////////////////////////////////////////////////////
 /* This is where all the input to the window goes to */
 LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
@@ -39,37 +41,40 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 		if (keyFlag == 1) {
 			textEditor2.caretBackSpace();//백스페이스로 지워주는 신호면 백스페이스용 캐럿 처리 해줘야함.
 		}
-		else {
+		else if(keyFlag == 2){ //엔터가 눌려졌다면 //키보드의 문자열은 ""로 리셋된상태 //textSource에 빈문자열 하나 추가하고.  
+			//textEditor2.replaceCurText(g_nodeIdx); //현재 노드에 모든 문자열을 넣어주고. 
 			
+			textEditor2.addText(TEXT("")); //노드를 하나 추가 시키고 
+			textEditor2.keyboardClean(); //키보드를 리셋하고. 
+			g_nodeIdx++; //g_nodeIdx를 하나 올려준다. 
 		}
+		else {
+
+		}
+
 		
-		textEditor2.replaceCurText(0); //replace는 carot이 현재 가리키는 곳의 정보를 바꿔줘야 한다. 이걸 고쳐야함. 
-		
+		textEditor2.replaceCurText(g_nodeIdx); //replace는 carot이 현재 가리키는 곳의 정보를 바꿔줘야 한다. 이걸 고쳐야함. 
+
 		SendMessage(hwnd, WM_PAINT, NULL, NULL); //lc에 새롭게 정렬된다. 
 												 //textEditor2.carotMoveRight(); //right의 개념을 다시 만들자. 
 												 //1. lc가 새걸로 장착된다.
 												 //2. 새롭게 장착된 lc로 새로운 라인인덱스와 frontwordnum, cIdx가 새롭게 장착된다.
 												 //3. 이걸 기준으로 새로운 cIdx구하기.
 
-		textEditor2.caretInput();
+		//textEditor2.caretInput(); //여기서 캐럿 인덱스 재조정하고. 
 		printf("위에 sendmessage로 강제 print 해줌 하고 다시 invalidate \n ");
 		InvalidateRect(hwnd, &rect, TRUE);
 		break;
 	}
 
 
-	case WM_SIZE: {
-		GetClientRect(hwnd, &rect);
-		InvalidateRect(hwnd, &rect, TRUE);
-		break;
-	}
-
+	
 	case WM_PAINT: {
 		hdc = BeginPaint(hwnd, &ps);
 
 		textEditor2.showAllText(hdc, 100, 100, 100); //여기서 항상 
 
-		SetCaretPos(textEditor2.getCaretXpixel(hdc), textEditor2.getCaretYpixel()); //백스페이스 기능 때문에 백스페이스 하면 오류남. 
+		//SetCaretPos(textEditor2.getCaretXpixel(hdc), textEditor2.getCaretYpixel()); //백스페이스 기능 때문에 백스페이스 하면 오류남. 
 		textEditor2.getCarotInfo();
 		EndPaint(hwnd, &ps);
 		break;
@@ -82,17 +87,17 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 				   //캐럿 관련 테스트
 				   //---------------------------캐럿관련
 				   //1. 포커스 잃을 때
-	case WM_KILLFOCUS: {
-		DestroyCaret(); //포커스를 잃으면 현재 윈도우에 장착된 캐럿을 없앤다. 
-		break;
-	}
+	//case WM_KILLFOCUS: {
+	//	DestroyCaret(); //포커스를 잃으면 현재 윈도우에 장착된 캐럿을 없앤다. 
+	//	break;
+	//}
 
-					   //2. 포커스 받을 때 //캐럿은 이 때 만들어야 한다. 
-	case WM_SETFOCUS: {
-		CreateCaret(hwnd, NULL, 2, 16); //캐럿 만들기// 2번째 비트맵이 NULL이니까, 캐럿은 2, 16 폭과 높이(문자 높이)로 만들어진다. 
-		ShowCaret(hwnd); //앞에서 hwnd에 캐럿을 만들었으므로, ShowCaret()하면 캐럿이 보여진다.(깜빡깜빡)
-		break;
-	}
+	//				   //2. 포커스 받을 때 //캐럿은 이 때 만들어야 한다. 
+	//case WM_SETFOCUS: {
+	//	CreateCaret(hwnd, NULL, 2, 16); //캐럿 만들기// 2번째 비트맵이 NULL이니까, 캐럿은 2, 16 폭과 높이(문자 높이)로 만들어진다. 
+	//	ShowCaret(hwnd); //앞에서 hwnd에 캐럿을 만들었으므로, ShowCaret()하면 캐럿이 보여진다.(깜빡깜빡)
+	//	break;
+	//}
 	case WM_DESTROY: {
 		PostQuitMessage(0);
 		break;
