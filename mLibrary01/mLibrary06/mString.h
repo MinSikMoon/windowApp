@@ -266,9 +266,9 @@ public:
 	void eraseLastChar() {
 		if (length == 0) {
 			//그냥 빈문자열로 갱신
-			mString tempStr;
-			(*this).replaceStr(tempStr.cloneStr());
-			length = 0;
+			/*mString tempStr;
+			this->replaceStr(tempStr.cloneStr());
+			length = 0;*/
 			return; //여기서 안 빠져 나가서 오류 났었음. 
 					/*printf("!!!!!!==============> 잘못된 범위 지정 in eraseLastChar()/ 현재길이가 0 \n");
 					system("pause");

@@ -198,19 +198,53 @@ public:
 	}
 
 	//-2. 백스페이스 처리
-	void backSpace(mScreenLineContainer& lc) {
+	//void backSpace(mScreenLineContainer& lc) {
+	//	printf("캐럿 backspace 안에서의 lc상황: 현재 frontwordnum: %d, cNodeIdx: %d \n ", frontWordNum, cNodeIdx);
+
+
+	//	int tempFrontWordNum = frontWordNum - 1; //가상으로 한글자 감소 시켜줘본다. 
+	//	if (tempFrontWordNum < 0) { // temp 0보다 작아진다면 0번째 노드면 0으로 고정, 앞에 노드가 더 있다면 앞노드의 마지막 글자로 가자. 
+	//		//frontWordNum = 0;
+	//		if (cNodeIdx == 0) {
+	//			frontWordNum = 0;
+	//		}
+	//		else { //앞에 노드가 더 있다면 
+	//			cNodeIdx--; //전 노드로 이동
+	//			int tempLastLineIdx = lc.getNodeLineNumInfo(cNodeIdx) - 1; //갯수니까 하나빼서 인덱스
+	//			
+	//			frontWordNum = lc.getLastIdx(cNodeIdx,tempLastLineIdx) + 1;
+	//		}
+	//		
+	//	}
+	//	else {
+	//		frontWordNum = tempFrontWordNum; //한글자 감소한 값으로 새로 장착.
+	//	}
+
+	//	//2. 새로운 frontWordNum기준으로 cIdx와 lineIdx, upperLineNum을 정해준다. 
+	//	setClineIdx(getLineIdxByFrontWordNum(frontWordNum, cNodeIdx, lc));
+	//	setCidx(getCidxByFrontWordNum(frontWordNum, cNodeIdx, lc));
+	//	setUpperLineNum(getUpperLineNumByFrontWordNum(frontWordNum, cNodeIdx, lc));
+
+	//}
+
+	int backSpace(mScreenLineContainer& lc) {
+		printf("캐럿 backspace 안에서의 lc상황: 현재 frontwordnum: %d, cNodeIdx: %d \n ", frontWordNum, cNodeIdx);
+		int isNodeReduced = 0;
+
 		int tempFrontWordNum = frontWordNum - 1; //가상으로 한글자 감소 시켜줘본다. 
 		if (tempFrontWordNum < 0) { // temp 0보다 작아진다면 0번째 노드면 0으로 고정, 앞에 노드가 더 있다면 앞노드의 마지막 글자로 가자. 
-			frontWordNum = 0;
-			//if (cNodeIdx == 0) {
-			//	frontWordNum = 0;
-			//}
-			//else { //앞에 노드가 더 있다면 
-			//	cNodeIdx--; //전 노드로 이동
-			//	int tempLastLineIdx = lc.getNodeLineNumInfo(cNodeIdx) - 1; //노드 인덱스를 하나 
-			//	frontWordNum = lc.getLastIdx(cNodeIdx,tempLastLineIdx) + 1;
-			//}
-			//
+									//frontWordNum = 0;
+			if (cNodeIdx == 0) {
+				frontWordNum = 0;
+			}
+			else { //앞에 노드가 더 있다면 
+				cNodeIdx--; //전 노드로 이동 // 1로 알려준다. 
+				int tempLastLineIdx = lc.getNodeLineNumInfo(cNodeIdx) - 1; //갯수니까 하나빼서 인덱스
+
+				frontWordNum = lc.getLastIdx(cNodeIdx, tempLastLineIdx) + 1;
+				isNodeReduced = 1;
+			}
+
 		}
 		else {
 			frontWordNum = tempFrontWordNum; //한글자 감소한 값으로 새로 장착.
@@ -220,6 +254,7 @@ public:
 		setClineIdx(getLineIdxByFrontWordNum(frontWordNum, cNodeIdx, lc));
 		setCidx(getCidxByFrontWordNum(frontWordNum, cNodeIdx, lc));
 		setUpperLineNum(getUpperLineNumByFrontWordNum(frontWordNum, cNodeIdx, lc));
+		return isNodeReduced;
 
 	}
 
@@ -249,7 +284,7 @@ public:
 	}
 
 
-	size_m getXpixel(HDC hdc, mTextSource& textSource,mScreenLineContainer& lc) {
+size_m getXpixel(HDC hdc, mTextSource& textSource,mScreenLineContainer& lc) {
 		
 		int xPixel;
 		if (isLineFirst(lc)) {
@@ -257,6 +292,8 @@ public:
 		}
 		else {
 			int tempStartIdx = lc.getFirstIdx(cNodeIdx, cLineIdx); //첫번째 인덱스를 알아낸다.
+
+			
 			xPixel = getMstrPixelWidth(hdc, mString(textSource.getTextAt(cNodeIdx)), tempStartIdx, frontWordNum-1); //길이를 알아낸다. 
 		}
 		return xPixel;

@@ -69,8 +69,14 @@ public:
 	}
 
 	void replaceCurText() {
+		//wprintf(L"%d노드를 %ls로 replace \n", caret.getCnodeIdx(), keyboard.getMstr());
 		textSource.replaceTextAt(caret.getCnodeIdx(), keyboard.getMstr());
 	}
+	void eraseCurText() {
+
+		textSource.eraseTextAt(caret.getCnodeIdx());
+	}
+	
 
 	//4. 보여주기 //보여주면서 lc에 모든 정보들이 담겨진다. 
 	void showAllText(HDC hdc, size_m screenWidth, int firstLineXpos, int firstLineYpos) {
@@ -101,7 +107,15 @@ public:
 	}
 
 	void caretBackSpace() {
-		caret.backSpace(lineContainer);
+		int isNodeReduced = caret.backSpace(lineContainer);
+		//1. 캐럿노드가 하나 줄어들었다면
+		//키보드의 mstr이 전 노드의 마지막 라인으로 대체되어야 한다. 
+		if (isNodeReduced) {
+			_tprintf(TEXT("노드가 하나 줄었다. %ls \n"), textSource.getTextAt(caret.getCnodeIdx()));
+			keyboard.setMstr(textSource.cloneTextAt(caret.getCnodeIdx()));
+		}
+		
+		
 	}
 
 	void caretEnter() {

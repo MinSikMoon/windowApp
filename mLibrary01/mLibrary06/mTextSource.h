@@ -169,6 +169,13 @@ public:
 		//_tprintf(TEXT("%ls \n"), (*itr));
 	}
 
+	//6.5 cloneTextAt
+	TCHAR* cloneTextAt(size_m nodeIdx) {
+		mString* tempStr = new mString(getTextAt(nodeIdx));
+		TCHAR* temp = tempStr->cloneStr();
+		delete tempStr;
+		return temp;
+	}
 	//7. replaceTextAt() : 인덱스가 가리키는 노드의 문자열을 새로운 문자열로 갈아끼운다. 
 	void replaceTextAt(size_m nodeIdx, TCHAR* _newStr) {
 		if (nodeIdx < 0 || nodeIdx >(textNum - 1)) {

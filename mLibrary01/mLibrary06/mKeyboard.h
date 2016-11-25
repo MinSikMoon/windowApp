@@ -184,5 +184,9 @@ public:
 		return mStr;
 	}
 
+	void setMstr(TCHAR* _inStr) {
+		mStr.replaceStr(_inStr);
+	}
+
 
 };
