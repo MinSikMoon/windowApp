@@ -32,10 +32,18 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 	case WM_IME_ENDCOMPOSITION:
 	case WM_IME_COMPOSITION:
 	case WM_CHAR: {
-		//int isBacked = 0;
-		textEditor2.mProc(hwnd, Message, wParam, lParam);
-		//printf("isbacked = %d \n", isBacked);
+		int isBacked = 0;
+		isBacked = textEditor2.mProc(hwnd, Message, wParam, lParam);
+		printf("isbacked = %d \n", isBacked);
+		if (isBacked == 1) {
+			//백스페이스로 지워주는 신호면 백스페이스용 캐럿 처리 해줘야함.
+			textEditor2.caretBackSpace();
+		}
+		else {
+			
+		}
 		textEditor2.replaceCurText(0); //replace는 carot이 현재 가리키는 곳의 정보를 바꿔줘야 한다. 이걸 고쳐야함. 
+		
 		textEditor2.changeStartPoint(100, 100);
 		SendMessage(hwnd, WM_PAINT, NULL, NULL); //lc에 새롭게 정렬된다. 
 												 //textEditor2.carotMoveRight(); //right의 개념을 다시 만들자. 
@@ -70,16 +78,16 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 
 
-	//======================그 외 케이스======================== 
-	//캐럿 관련 테스트
-	//---------------------------캐럿관련
-	//1. 포커스 잃을 때
+				   //======================그 외 케이스======================== 
+				   //캐럿 관련 테스트
+				   //---------------------------캐럿관련
+				   //1. 포커스 잃을 때
 	case WM_KILLFOCUS: {
 		DestroyCaret(); //포커스를 잃으면 현재 윈도우에 장착된 캐럿을 없앤다. 
 		break;
 	}
 
-	//2. 포커스 받을 때 //캐럿은 이 때 만들어야 한다. 
+					   //2. 포커스 받을 때 //캐럿은 이 때 만들어야 한다. 
 	case WM_SETFOCUS: {
 		CreateCaret(hwnd, NULL, 2, 16); //캐럿 만들기// 2번째 비트맵이 NULL이니까, 캐럿은 2, 16 폭과 높이(문자 높이)로 만들어진다. 
 		ShowCaret(hwnd); //앞에서 hwnd에 캐럿을 만들었으므로, ShowCaret()하면 캐럿이 보여진다.(깜빡깜빡)

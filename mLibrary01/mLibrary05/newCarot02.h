@@ -167,30 +167,47 @@ public:
 	//2. 이동과 입력 따로 만들어줘야 한다. 
 	//-1. 입력시  
 	void input(mScreenLineContainer& lc) {
-		//테스트
-		if (frontWordNum + 1 > getPhysicalTotalFrontWordNum(cNodeIdx, lc)) {
-			frontWordNum = getPhysicalTotalFrontWordNum(cNodeIdx, lc);
+		
+		int tempFrontWordNum = frontWordNum + 1; //가상으로 하나 증가시켜줘본값.
+		int physicalFrontWordNum = getPhysicalTotalFrontWordNum(cNodeIdx, lc);
+		//1. 물리적 글자수보다 더 커지는 걸 방지
+		if (tempFrontWordNum > physicalFrontWordNum) {
+			frontWordNum = physicalFrontWordNum;
 		}
 		else {
-			frontWordNum++; //lc에는 글자가 들어와있고 캐럿은 가상의 글자 숫자다. lc에 아무런 영향을 못끼치니까 괜찮다. //nodeIdx도 나중에 먼저 갱신해줘야한다. 
+			frontWordNum = tempFrontWordNum; //lc에는 글자가 들어와있고 캐럿은 가상의 글자 숫자다. lc에 아무런 영향을 못끼치니까 괜찮다. //nodeIdx도 나중에 먼저 갱신해줘야한다. 
+							//1. 기존 frontWordNum에 한글자를 추가해준다. 
 		}
-			
-		//1. 기존 frontWordNum에 한글자를 추가해준다. 
-		
-		//2. 새로운 frontWordNum기준으로 cIdx와 lineIdx를 정해준다. 
+				
+		//2. 새로운 frontWordNum기준으로 cIdx와 lineIdx, upperLineNum을 정해준다. 
 		setClineIdx(getLineIdxByFrontWordNum(frontWordNum, cNodeIdx, lc));
-		//cIdx 걸러주기
-		//int physicalLastCidx = getPhysicalLastCidx(cNodeIdx, lc);
-		int newCidx = getCidxByFrontWordNum(frontWordNum, cNodeIdx, lc);
-
-		/*if (newCidx > physicalLastCidx)
-			newCidx = physicalLastCidx;*/
-
-		setCidx(newCidx);
+		setCidx(getCidxByFrontWordNum(frontWordNum, cNodeIdx, lc));
 		setUpperLineNum(getUpperLineNumByFrontWordNum(frontWordNum, cNodeIdx, lc));
 	}
 
-	//-삭제
+	//-2. 백스페이스 처리
+	void backSpace(mScreenLineContainer& lc) {
+		int tempFrontWordNum = frontWordNum - 1; //가상으로 한글자 감소 시켜줘본다. 
+		if (tempFrontWordNum < 0) {
+			frontWordNum = 0;
+		}
+		else {
+			frontWordNum = tempFrontWordNum; //한글자 감소한 값으로 새로 장착.
+		}
+
+		//2. 새로운 frontWordNum기준으로 cIdx와 lineIdx, upperLineNum을 정해준다. 
+		setClineIdx(getLineIdxByFrontWordNum(frontWordNum, cNodeIdx, lc));
+		setCidx(getCidxByFrontWordNum(frontWordNum, cNodeIdx, lc));
+		setUpperLineNum(getUpperLineNumByFrontWordNum(frontWordNum, cNodeIdx, lc));
+
+	}
+
+
+
+
+
+
+
 	//-홈
 	//-엔드
 	//-상하좌우
