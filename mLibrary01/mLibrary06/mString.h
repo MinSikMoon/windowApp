@@ -233,8 +233,13 @@ public:
 
 	//-------------------------------------- <5. replaceStr : str을 다른 문자열로 교체해준다. > -------------------
 	void replaceStr(TCHAR* _inStr) {
-		delete str; //str 해제
+		TCHAR* cleaner = str;
+
+			//delete str; //str 해제
+		
 		str = _inStr; //str 교체
+		//delete cleaner; //delete를 안해주면 어떻게 될까. delete때문에 문제가 계속 생긴다. 
+		
 		length = _tcslen(_inStr); //길이도 교체
 	}
 
