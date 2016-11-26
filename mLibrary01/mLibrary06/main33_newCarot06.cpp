@@ -33,7 +33,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 	case WM_IME_ENDCOMPOSITION:
 	case WM_IME_COMPOSITION:
 	case WM_CHAR: {
-		isChard = true;
+		//isChard = true;
 		int keyFlag;
 		hdc = GetDC(hwnd);
 		//int keyFlag = 0;
