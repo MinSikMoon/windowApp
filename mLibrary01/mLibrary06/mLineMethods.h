@@ -134,6 +134,9 @@ int autoLineSwitch(HDC hdc, TCHAR* _mStr, int screenWidth, int startXpos, int st
 
 		lastIdx = getScreenEndIdx(hdc, mStr, limitWidth, startIdx, estCharWidth, 1);
 
+		if (lastIdx < 0) // lastIdx가 -1인 경우가 생기더라. 
+			return 0;
+
 		tempLineWordCnt = (lastIdx - startIdx + 1);
 		wordCnt += tempLineWordCnt;
 		screenLineContainer.setNodeLineData(nodeIdx, loopCnt, tempLineWordCnt, startIdx, lastIdx);

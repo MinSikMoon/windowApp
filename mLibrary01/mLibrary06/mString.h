@@ -242,6 +242,7 @@ public:
 		
 		length = _tcslen(_inStr); //길이도 교체
 	}
+	
 
 	//------------------------------------- <6. eraseCharAt, eraseStrFromTo : 어디부터 어디까지의 인덱스 범위를 삭제한다. > ----------------
 	void eraseCharAt(size_m targetIdx) {
