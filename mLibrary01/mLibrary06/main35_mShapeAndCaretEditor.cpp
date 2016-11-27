@@ -314,7 +314,7 @@ public:
 
 	//3. show
 	void show(HDC hdc) {
-		//SelectObject(hdc, GetStockObject(NULL_BRUSH));
+		resize(getUpLeft(), getDownRight());
 		Ellipse(hdc, getUpLeftX(), getUpLeftY(), getDownRightX(), getDownRightY());
 		showText(hdc);
 	}
@@ -364,6 +364,15 @@ public:
 		setEditorHeight((newDownRight.y - newUpLeft.y) / 2 + getDiff());
 		setEditorX(newUpLeft.x + (getEditorWidth() / 10) + getDiff() + 8);
 		setEditorY(newUpLeft.y + ((newDownRight.y - newUpLeft.y) / 4) + getDiff());
+
+		if (getTextHeight() > getEditorHeight()) { //글자 높이가 더 크면 조정해줘야지. 
+			int midTextHeight = getTextHeight() / 2;
+			int midYpos = (newDownRight.y - ((newDownRight.y - newUpLeft.y) / 2));
+			int diffLineNum = ((getTextHeight() - getEditorHeight()) / getWordHeight() + 1); //몇 줄이나 튀어나갔나? 
+			setEditorY(midYpos - midTextHeight + getDiff());
+			setEditorHeight(getEditorHeight() + diffLineNum*getWordHeight() * 2);
+		}
+
 		printf("resize!!!!!!!!!!!!!!!!!!!!111\n");
 
 	}
@@ -406,14 +415,15 @@ public:
 
 	//6. isIn
 	bool isIn(POINT mousePosition) {
-		POINT p1 = { getUpLeftX(), getUpLeftY() };
-		POINT p2 = { getDownRightX(), getDownRightY() };
+		int checkDist = 7;
+		POINT p1 = getUpLeft();
+		POINT p2 = getDownRight();
 		if (p1.x == p2.x) { // l 같은 선분
 			if (p1.y <= p2.y) {
-				if (mousePosition.x <= p1.x + 5 &&
-					mousePosition.x >= p1.x - 5 &&
-					mousePosition.y >= p1.y - 5 &&
-					mousePosition.y <= p2.y + 5) {
+				if (mousePosition.x <= p1.x + checkDist &&
+					mousePosition.x >= p1.x - checkDist &&
+					mousePosition.y >= p1.y - checkDist &&
+					mousePosition.y <= p2.y + checkDist) {
 					return true;
 				}
 				else {
@@ -421,10 +431,10 @@ public:
 				}
 			}
 			else {
-				if (mousePosition.x <= p1.x + 5 &&
-					mousePosition.x >= p1.x - 5 &&
-					mousePosition.y <= p1.y + 5 &&
-					mousePosition.y >= p2.y - 5) {
+				if (mousePosition.x <= p1.x + checkDist &&
+					mousePosition.x >= p1.x - checkDist &&
+					mousePosition.y <= p1.y + checkDist &&
+					mousePosition.y >= p2.y - checkDist) {
 					return true;
 				}
 				else {
@@ -434,10 +444,10 @@ public:
 		}
 		else if (p1.y == p2.y) { // ㅡ 같은 선분
 			if (p1.x <= p2.x) {
-				if (mousePosition.y <= p1.y + 5 &&
-					mousePosition.y >= p1.y - 5 &&
-					mousePosition.x >= p1.x - 5 &&
-					mousePosition.x <= p2.x + 5) {
+				if (mousePosition.y <= p1.y + checkDist &&
+					mousePosition.y >= p1.y - checkDist &&
+					mousePosition.x >= p1.x - checkDist &&
+					mousePosition.x <= p2.x + checkDist) {
 					return true;
 				}
 				else {
@@ -445,10 +455,10 @@ public:
 				}
 			}
 			else {
-				if (mousePosition.y <= p1.y + 5 &&
-					mousePosition.y >= p1.y - 5 &&
-					mousePosition.x <= p1.x + 5 &&
-					mousePosition.x >= p2.x - 5) {
+				if (mousePosition.y <= p1.y + checkDist &&
+					mousePosition.y >= p1.y - checkDist &&
+					mousePosition.x <= p1.x + checkDist &&
+					mousePosition.x >= p2.x - checkDist) {
 					return true;
 				}
 				else {
@@ -457,40 +467,41 @@ public:
 			}
 		}
 		else { // 나머지 선분
-			POINT vSP = { mousePosition.x - p1.x, mousePosition.y - p1.y };
-			POINT vSE = { p2.x - p1.x,p2.y - p1.y };
-			POINT vEP = { mousePosition.x - p2.x, mousePosition.y - p2.y };
+			double m1 = (double)(p1.y - p2.y) / (double)(p1.x - p2.x);
+			double k1 = -m1 * p1.x + p1.y;
+			double m2 = -1.0 / m1;
+			double k2 = mousePosition.y - m2 * mousePosition.x;
+			double ax = (k2 - k1) / (m1 - m2);
+			double ay = m1 * ax + k1;
 
-			if ((vSP.x*vSE.x + vSP.y*vSE.y) * (vEP.x*vSE.x + vEP.y*vSE.y) <= 0) {
-				int dSE = vSE.x*vSE.x + vSE.y*vSE.y;
-				int cp = vSP.x*vSE.y - vSP.y*vSE.x;
-				int fcp = (cp > 0) ? cp : cp*-1;
+			double minPx = (p1.x <= p2.x) ? p1.x : p2.x;
+			double maxPx = (p1.x <= p2.x) ? p2.x : p1.x;
+			double minPy = (p1.y <= p2.y) ? p1.y : p2.y;
+			double maxPy = (p1.y <= p2.y) ? p2.y : p1.y;
+			if (ax >= minPx && ax <= maxPx &&
+				ay >= minPy && ay <= maxPy) {
+				double dis = sqrt(((ax - mousePosition.x)*(ax - mousePosition.x)) + ((ay - mousePosition.y)*(ay - mousePosition.y)));
 
-				if (fcp*fcp / dSE <= 5 * 5) {
+				if (dis <= checkDist) {
+					puts("isIn : line \n");
 					return true;
 				}
-				else {
-					return false;
-				}
+				else return false;
 			}
 			else {
-				int dSP = vSP.x*vSP.x + vSP.y*vSP.y;
-				int dEP = vEP.x*vEP.x + vEP.y*vEP.y;
+				double dis1 = sqrt(((p1.x - mousePosition.x)*(p1.x - mousePosition.x)) + ((p1.y - mousePosition.y)*(p1.y - mousePosition.y)));
+				double dis2 = sqrt(((p2.x - mousePosition.x)*(p2.x - mousePosition.x)) + ((p2.y - mousePosition.y)*(p2.y - mousePosition.y)));
+				double minDis = (dis1 <= dis2) ? dis1 : dis2;
 
-				int min_dist = (dSP > dEP) ? dEP : dSP;
-				if (min_dist <= 5 * 5) {
+				if (minDis <= checkDist) {
+					puts("isiN : LINE \n");
 					return true;
 				}
-				else {
-					return false;
-				}
+				else return false;
 			}
-
-			return false;
 		}
-
-
 	}
+	
 
 	//7. line resize
 	void resize(POINT newUpLeft, POINT newDownRight) {
@@ -526,6 +537,21 @@ public:
 		}
 		else {
 			for (int i = 0; i < shapeNum; i++) {
+				mShape* temp = shapeVector[i];
+				temp->show(hdc);
+			}
+		}
+	}
+
+	void showAllExcept(HDC hdc, int exIdx) {
+		if (isEmpty()) {
+			return;
+		}
+		else {
+			for (int i = 0; i < shapeNum; i++) {
+				if (i == exIdx)
+					continue;
+
 				mShape* temp = shapeVector[i];
 				temp->show(hdc);
 			}
@@ -603,10 +629,11 @@ public:
 
 		mShape* temp = shapeVector[idx];
 		
+		
 		temp->show(hdc);
 		
 	}
-
+	
 	//10. moveAt
 	void moveAt(int idx, int xDist, int yDist) {
 		mShape* temp = shapeVector[idx];
@@ -1061,7 +1088,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 	case WM_PAINT: {
 		hdc = BeginPaint(hwnd, &ps);
-
+	
 		switch (orderFlag) {
 		case Flag::CIRCLE: {
 			mCircle().showProgress(hdc, mouse.getUpLeft().x, mouse.getUpLeft().y, mouse.getRightDown().x, mouse.getRightDown().y);
@@ -1095,9 +1122,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 		}
 		
-		msc.showAll(hdc);//msc.showAt(hdc, focusedIdx);
+		//msc.showAll(hdc);
+		msc.showAllExcept(hdc, focusedIdx); //showAll하면 showAt이 두번호출되어서 겹쳐보임. 
+		msc.showAt(hdc, focusedIdx);
 		msc.showDotAt(hdc, focusedIdx);
-		
 		EndPaint(hwnd, &ps);
 		break;
 	}
