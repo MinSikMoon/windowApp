@@ -175,7 +175,9 @@ public:
 		this->height = height;
 	}
 
-
+	size_m getHeight() {
+		return height;
+	}
 	//2. 이동과 입력 따로 만들어줘야 한다. 
 	//-1. 입력시  
 	void input(mScreenLineContainer& lc) {

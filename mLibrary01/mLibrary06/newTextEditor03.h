@@ -8,7 +8,7 @@
 class mTextEditor {
 private:
 	//멤버들
-	size_m WORD_HEIGHT; //글자 높이
+	//size_m WORD_HEIGHT; //글자 높이
 	mKeyboard keyboard; //키보드
 	mTextSource textSource; //본문
 	mScreenLineContainer lineContainer; //라인정보 컨테이너
@@ -34,6 +34,9 @@ public:
 		addText(keyboard.getMstr());
 	}
 
+	size_m getWordHeight() {
+		return caret.getHeight();
+	}
 	//메소드
 	//1. 텍스트 하나 추가(문단하나 추가) => 노드 하나가 추가되는 것
 	void addText(TCHAR* _inStr) {
@@ -80,8 +83,21 @@ public:
 
 	//4. 보여주기 //보여주면서 lc에 모든 정보들이 담겨진다. 
 	void showAllText(HDC hdc, size_m screenWidth, int firstLineXpos, int firstLineYpos) {
-		textSource.showAllText(hdc, screenWidth, firstLineXpos, firstLineYpos, 16, lineContainer);
-		lineContainer.show();
+		int wordWidth = 16;
+
+		if (screenWidth < 20)
+			return; //오작동 방지 
+
+		textSource.showAllText(hdc, screenWidth, firstLineXpos, firstLineYpos, wordWidth, lineContainer);
+		//lineContainer.show();
+	}
+	//4.5 lineContainer에 들어있는 모든 라인의 수를 세서. wordHeight를 곱해서 배출 => 현재 텍스트의 전체 높이는 몇인가를 구한다. 
+	size_m getLcTotalLineNum() {
+		return lineContainer.getTotalLineNum();
+	}
+	size_m getTextHeight() {
+		printf("여깃 textEditor03, 라인수는 %d, wordheights: %d \n", lineContainer.getTotalLineNum(), getWordHeight());
+		return getLcTotalLineNum()*getWordHeight();
 	}
 
 	//5. 시작 좌상단 좌표 바꾸기 

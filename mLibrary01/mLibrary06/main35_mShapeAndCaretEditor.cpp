@@ -1,5 +1,6 @@
 //텍스트 에디터 클래스화 시키기
-#include "mTextEditor.h"
+//#include "mTextEditor.h"
+#include "newTextEditor03.h"
 #include "resource3.h"
 #include <vector>
 
@@ -14,7 +15,7 @@ class mShape {
 private:
 	POINT upLeft, downRight; //좌상단 우하단 좌표
 	mTextEditor textEditor;
-	int editorWidth, editorX, editorY; //에디터의 제한 너비
+	int editorWidth,editorHeight, editorX, editorY; //에디터의 제한 너비// ** 현재 버젼에서 높이 추가 
 	int diff = 2;
 
 public:
@@ -29,6 +30,7 @@ public:
 		downRight.x = _downRightX;
 		downRight.y = _downRightY;
 		editorWidth = _downRightX - _upLeftX;
+		editorHeight = _downRightY - _upLeftY;
 
 		editorX = _upLeftX;
 		editorY = _upLeftY;
@@ -40,6 +42,7 @@ public:
 		downRight.x = _downRightX;
 		downRight.y = _downRightY;
 		editorWidth = _downRightX - _upLeftX;
+		editorHeight = _downRightY - _upLeftY;
 
 		editorX = _upLeftX;
 		editorY = _upLeftY;
@@ -49,8 +52,14 @@ public:
 	void setEditorWidth(int newEditorWidth) {
 		editorWidth = newEditorWidth;
 	}
+	void setEditorHeight(int newEditorHeight) {
+		editorHeight = newEditorHeight;
+	}
 	int getEditorWidth() {
 		return editorWidth;
+	}
+	int getEditorHeight() {
+		return editorHeight;
 	}
 	void setEditorX(int x) {
 		editorX = x;
@@ -85,6 +94,12 @@ public:
 	int getEditorY() {
 		return editorY;
 	}
+	POINT getUpLeft() {
+		return upLeft;
+	}
+	POINT getDownRight() {
+		return downRight;
+	}
 
 	//4. mProc
 	void mProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
@@ -94,11 +109,16 @@ public:
 
 	//5. show
 	virtual void show(HDC hdc) = 0; //왜 virtual 붙였는 지 알것
-									//6. showText
+		
+	//6. showText
 	void showText(HDC hdc) {
+		
 		textEditor.showAllText(hdc, editorWidth, editorX, editorY);
 
 	}
+	//6. showText
+	
+	
 
 	//7. showProgress
 	virtual void  showProgress(HDC hdc, int ulX, int ulY, int drX, int drY) = 0;
@@ -170,6 +190,14 @@ public:
 		downRight.x = drx;
 		downRight.y = dry;
 	}
+
+	//16. 텍스트 에디터의 글자 높이, 텍스트 높이 알아내기 
+	size_m getTextHeight() {
+		return textEditor.getTextHeight();
+	}
+	size_m getWordHeight() {
+		return textEditor.getWordHeight();
+	}
 };
 
 class mRectangle : public mShape {
@@ -179,6 +207,7 @@ public:
 
 	mRectangle(int _upLeftX, int _upLeftY, int _downRightX, int _downRightY) : mShape(_upLeftX, _upLeftY, _downRightX, _downRightY) {
 		setEditorWidth(_downRightX - _upLeftX - getDiff() * 2);
+		setEditorHeight(_downRightY - _upLeftY - getDiff() * 2);
 		setEditorX(_upLeftX + getDiff());
 		setEditorY(_upLeftY + getDiff());
 	}
@@ -186,6 +215,7 @@ public:
 	void make(int _upLeftX, int _upLeftY, int _downRightX, int _downRightY) {
 		mShape::make(_upLeftX, _upLeftY, _downRightX, _downRightY);
 		setEditorWidth(_downRightX - _upLeftX - getDiff() * 2);
+		setEditorHeight(_downRightY - _upLeftY - getDiff() * 2);
 		setEditorX(_upLeftX + getDiff());
 		setEditorY(_upLeftY + getDiff());
 	}
@@ -193,10 +223,10 @@ public:
 
 	//3. show
 	void show(HDC hdc) {
+		resize(getUpLeft(), getDownRight());
 		Rectangle(hdc, getUpLeftX(), getUpLeftY(), getDownRightX(), getDownRightY());
-		//printf("%d %d %d %d \n", getUpLeftX(), getUpLeftY(), getDownRightX(), getDownRightY());
 		showText(hdc);
-
+		//printf("%d %d %d %d \n", getUpLeftX(), getUpLeftY(), getDownRightX(), getDownRightY());
 	}
 
 	//4. showProgress
@@ -244,10 +274,20 @@ public:
 	//resize
 	void resize(POINT newUpLeft, POINT newDownRight) {
 		changeXy(newUpLeft.x, newUpLeft.y, newDownRight.x, newDownRight.y);
-
+		
 		setEditorWidth(newDownRight.x - newUpLeft.x - getDiff() * 2);
+		setEditorHeight(newDownRight.y - newUpLeft.y - getDiff() * 2);
 		setEditorX(newUpLeft.x + getDiff());
 		setEditorY(newUpLeft.y + getDiff());
+		
+		if (getTextHeight() > getEditorHeight()) { //글자 높이가 더 크면 조정해줘야지. 
+			int midTextHeight = getTextHeight() / 2; 
+			int midYpos = (newDownRight.y - ((newDownRight.y - newUpLeft.y) / 2));
+			int diffLineNum = ((getTextHeight() - getEditorHeight()) / getWordHeight() + 1); //몇 줄이나 튀어나갔나? 
+			setEditorY(midYpos - midTextHeight + getDiff());
+			setEditorHeight(getEditorHeight() + diffLineNum*getWordHeight()*2);
+		}
+
 	}
 
 
@@ -259,14 +299,16 @@ public:
 	//1. 생성자
 	mCircle() {}
 	mCircle(int _upLeftX, int _upLeftY, int _downRightX, int _downRightY) : mShape(_upLeftX, _upLeftY, _downRightX, _downRightY) {
-		setEditorWidth((_downRightX - _upLeftX) / 10 * 8 - getDiff() * 2 );
+		setEditorWidth((_downRightX - _upLeftX) / 10 * 8 - getDiff() * 2);
+		setEditorHeight((_downRightY - _upLeftY) / 2 + getDiff());
 		setEditorX(_upLeftX + (getEditorWidth() / 10) + getDiff() + 8);
 		setEditorY(_upLeftY + ((_downRightY - _upLeftY) / 4) + getDiff());
 	}
 	void make(int _upLeftX, int _upLeftY, int _downRightX, int _downRightY) {
 		mShape::make(_upLeftX, _upLeftY, _downRightX, _downRightY);
 		setEditorWidth((_downRightX - _upLeftX) / 10 * 8 - getDiff() * 2);
-		setEditorX(_upLeftX + (getEditorWidth() / 10) + getDiff()+8);
+		setEditorHeight((_downRightY - _upLeftY) / 2 + getDiff());
+		setEditorX(_upLeftX + (getEditorWidth() / 10) + getDiff() + 8);
 		setEditorY(_upLeftY + ((_downRightY - _upLeftY) / 4) + getDiff());
 	}
 
@@ -319,8 +361,10 @@ public:
 	void resize(POINT newUpLeft, POINT newDownRight) {
 		changeXy(newUpLeft.x, newUpLeft.y, newDownRight.x, newDownRight.y);
 		setEditorWidth((newDownRight.x - newUpLeft.x) / 10 * 8 - getDiff() * 2);
-		setEditorX(newUpLeft.x + (getEditorWidth() / 10) + getDiff()+8);
+		setEditorHeight((newDownRight.y - newUpLeft.y) / 2 + getDiff());
+		setEditorX(newUpLeft.x + (getEditorWidth() / 10) + getDiff() + 8);
 		setEditorY(newUpLeft.y + ((newDownRight.y - newUpLeft.y) / 4) + getDiff());
+		printf("resize!!!!!!!!!!!!!!!!!!!!111\n");
 
 	}
 };
@@ -495,6 +539,7 @@ public:
 		}
 		mShape* temp = shapeVector[_idx];
 		temp->mProc(hwnd, Message, wParam, lParam);
+		
 	}
 
 	//5. getShapeNum
@@ -557,7 +602,9 @@ public:
 			return;
 
 		mShape* temp = shapeVector[idx];
+		
 		temp->show(hdc);
+		
 	}
 
 	//10. moveAt
@@ -896,7 +943,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 	case WM_MOUSEMOVE: {
 
 		if (g_isPulling) { //누른 상태라면 
-		
+
 			g_newX = LOWORD(lParam);
 			g_newY = HIWORD(lParam); //마우스 찍은 위치 기억 //여기가 원점이 된다. 
 
@@ -995,13 +1042,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 			else { //선택된 도형이 없다. => 아무일도 일어나지 않는다. 
 			}
 		}
-
-
-
+				
 		break;
 	}
 
-	
+
 
 
 	case WM_IME_ENDCOMPOSITION:
@@ -1009,6 +1054,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 	case WM_CHAR: {
 		if (!msc.isEmpty())
 			msc.procAt(hwnd, Message, wParam, lParam, focusedIdx);
+
+		
 		break;
 	}
 
@@ -1047,10 +1094,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 		}
 
 		}
-
-		msc.showAll(hdc);
-		msc.showAt(hdc, focusedIdx);
+		
+		msc.showAll(hdc);//msc.showAt(hdc, focusedIdx);
 		msc.showDotAt(hdc, focusedIdx);
+		
 		EndPaint(hwnd, &ps);
 		break;
 	}
