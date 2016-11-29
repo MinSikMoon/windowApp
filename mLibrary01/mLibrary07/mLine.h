@@ -31,6 +31,12 @@ public:
 		MoveToEx(hdc, ulX, ulY, NULL);
 		LineTo(hdc, drX, drY);
 	}
+	void showProgress_relative(HDC hdc, int ulX, int ulY, int drX, int drY, POINT originPoint) {
+		int offsetX = originPoint.x;
+		int offsetY = originPoint.y;
+		MoveToEx(hdc, ulX + offsetX, ulY + offsetY, NULL);
+		LineTo(hdc, drX+offsetX, drY+offsetY);
+	}
 	//5. show Dot
 	void  showDot(HDC hdc) {
 		//setpixel 말고 lineto로 만들어보자. 
@@ -40,6 +46,19 @@ public:
 		mSetPixel(hdc, getDownRightX(), getDownRightY()); // 우하단
 		SelectObject(hdc, oldPen);
 	};
+	void showDot_relative(HDC hdc, POINT originPoint) {
+		int offsetX = originPoint.x;
+		int offsetY = originPoint.y;
+
+		//setpixel 말고 lineto로 만들어보자. 
+		//setpixel 말고 lineto로 만들어보자. 
+		HPEN tempPen = CreatePen(PS_SOLID, 5, blueColor); //노란색
+		HPEN oldPen = (HPEN)SelectObject(hdc, tempPen);
+		mSetPixel(hdc, getUpLeftX() + offsetX, getUpLeftY()+offsetY); //좌상단
+		mSetPixel(hdc, getDownRightX() + offsetX, getDownRightY() + offsetY); // 우하단
+		SelectObject(hdc, oldPen);
+
+	}
 
 	//6. isIn
 	bool isIn(POINT mousePosition) {

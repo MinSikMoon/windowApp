@@ -39,7 +39,12 @@ public:
 	void showProgress(HDC hdc, int ulX, int ulY, int drX, int drY) {
 		Rectangle(hdc, ulX, ulY, drX, drY);
 	}
-
+	void showProgress_relative(HDC hdc, int ulX, int ulY, int drX, int drY, POINT originPoint) {
+		int offsetX = originPoint.x;
+		int offsetY = originPoint.y;
+		
+		Rectangle(hdc, ulX + offsetX, ulY + offsetY, drX + offsetX, drY + offsetY);
+	}
 	//5. showDot
 	void  showDot(HDC hdc) {
 		//setpixel 말고 lineto로 만들어보자. 
@@ -51,7 +56,20 @@ public:
 		mSetPixel(hdc, getDownRightX(), getDownRightY()); // 우하단
 		SelectObject(hdc, oldPen);
 	};
+	void showDot_relative(HDC hdc, POINT originPoint) {
+		int offsetX = originPoint.x;
+		int offsetY = originPoint.y;
 
+		//setpixel 말고 lineto로 만들어보자. 
+		HPEN tempPen = CreatePen(PS_SOLID, 5, blueColor); //노란색
+		HPEN oldPen = (HPEN)SelectObject(hdc, tempPen);
+		mSetPixel(hdc, getUpLeftX() + offsetX, getUpLeftY() + offsetY); //좌상단
+		mSetPixel(hdc, getUpLeftX() + offsetX, getDownRightY() + offsetY); //좌하단
+		mSetPixel(hdc, getDownRightX() + offsetX, getUpLeftY() + offsetY); //우상단
+		mSetPixel(hdc, getDownRightX() + offsetX, getDownRightY() + offsetY); // 우하단
+		SelectObject(hdc, oldPen);
+
+	}
 	//6. isIn : 도형안에 마우스가 들어왔는지 판별해주는 것
 	bool isIn(POINT mousePosition) {
 		POINT p1 = { getUpLeftX(), getUpLeftY() };

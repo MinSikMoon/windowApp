@@ -141,9 +141,10 @@ public:
 
 	//7. showProgress
 	virtual void  showProgress(HDC hdc, int ulX, int ulY, int drX, int drY) = 0;
-
+	virtual void showProgress_relative(HDC hdc, int ulX, int ulY, int drX, int drY, POINT originPoint) = 0;
 	//8. showDot //선택같은거 할때 점찍어서 보여주는것
 	virtual void  showDot(HDC hdc) = 0;
+	virtual void showDot_relative(HDC hdc, POINT originPoint) = 0;
 
 	//9. dot쉽게 찍기
 	void mSetPixel(HDC hdc, int x, int y) {

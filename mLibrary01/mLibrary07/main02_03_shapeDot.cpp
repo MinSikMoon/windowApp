@@ -12,9 +12,9 @@
 #include "mLine.h"
 #include "mShapeContainer.h"
 
-#ifdef _DEBUG
-#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
-#endif
+//#ifdef _DEBUG
+//#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
+//#endif
 using namespace std;
 
 //전역 변수들
@@ -50,41 +50,61 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 		}
 
 		}
+		
 		break;
 	}
 	case WM_RBUTTONDOWN: {
 		g_mouse.setPulled(true);
+		g_mouse.setGrap(true);
 		g_mouse.setOldPos(LOWORD(lParam), HIWORD(lParam));
 		break;
 	}
 
 	case WM_MOUSEMOVE: {
-		g_mouse.setNewPos(LOWORD(lParam), HIWORD(lParam)); //현재 찍은 곳 절대 좌표 저장. 
-		//원점 바꾸기.
-		if (g_mouse.getPulled()) { 
-			ORIGIN_POINT.move(g_mouse.getXdist(), g_mouse.getYdist());
-			g_mouse.pullingAction();
-			g_mouse.setOldPos(LOWORD(lParam), HIWORD(lParam));
+		g_mouse.setNewPos(LOWORD(lParam), HIWORD(lParam)); //현재 찍은 곳 절대 좌표 저장. //printf("마우스 현재 relative x,y = %d, %d \n", g_mouse.getRelativeNewPos().x, g_mouse.getRelativeNewPos().y);
+														   //원점 바꾸기.
+		if (g_mouse.getGrapped()) {
+			//. 화면 풀링 로직
+			if (g_mouse.getPulled()) {
+				ORIGIN_POINT.move(g_mouse.getXdist(), g_mouse.getYdist());
+				g_mouse.pullingAction();
+				g_mouse.setOldPos(LOWORD(lParam), HIWORD(lParam));
+			}
+
+			//. 도형이동 로직
+			if (g_orderFlag == Flag::MOVE) {
+				g_msc.moveAt(g_focusedIdx, g_mouse.getXdist(), g_mouse.getYdist());
+				g_mouse.setOldPos(LOWORD(lParam), HIWORD(lParam));
+				
+			}
+			InvalidateRect(hwnd, NULL, TRUE);
 		}
-		
-		//printf("마우스 현재 relative x,y = %d, %d \n", g_mouse.getRelativeNewPos().x, g_mouse.getRelativeNewPos().y);
-		InvalidateRect(hwnd, NULL, TRUE);
-		break;
+	break;
 	}
 
 	case WM_RBUTTONUP: {
 		g_mouse.setPulled(false);
-
+		g_mouse.setGrap(false);
 		break;
 	}
 
 
 	case WM_LBUTTONDOWN: {
-		g_mouse.setNewPos(LOWORD(lParam), HIWORD(lParam));
-		printf("%d, %d \n", g_mouse.getRelativeNewX(), g_mouse.getRelativeNewY());
+		g_mouse.setNewPos(LOWORD(lParam), HIWORD(lParam)); //printf("%d, %d \n", g_mouse.getRelativeNewX(), g_mouse.getRelativeNewY());
 		g_mouse.setGrap(true);
 		
-	
+		//. 도형 이동 로직
+		if (g_focusedIdx != -1) { //도형이 선택되어 있다면..
+			if (g_focusedIdx == g_msc.whoIsIn(g_mouse.getRelativeNewPos(), g_focusedIdx)) {
+				g_orderFlag = Flag::MOVE; //움직이라는 명령 장착 
+			}
+		}
+
+		//. 도형 선택 로직
+		if (g_orderFlag == Flag::NOTHING) {
+			g_focusedIdx = g_msc.whoIsIn(g_mouse.getRelativeNewPos(), g_focusedIdx); //printf("돌고난후 focused: %d \n", g_focusedIdx); //어느 도형을 찍었는지 판별해준다 //선택 잘 됨.
+		}
+		
 		g_mouse.setOldPos(LOWORD(lParam), HIWORD(lParam));
 		break;
 	}
@@ -92,40 +112,25 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 	case WM_LBUTTONUP: {
 		g_mouse.setGrap(false);
 		g_mouse.setNewPos(LOWORD(lParam), HIWORD(lParam));
+		g_focusedIdx = g_msc.buMakeShapeAction(g_orderFlag, g_focusedIdx, g_mouse);
 
-		switch (g_orderFlag) {
-		case Flag::CIRCLE: {
-			g_msc.add(new mCircle(g_mouse.getRelativeUpleft().x, g_mouse.getRelativeUpleft().y, g_mouse.getRelativeDownRight().x, g_mouse.getRelativeDownRight().y));
-			printf("%d,%d 에서 %d, %d로 그었다. \n", g_mouse.getRelativeUpleft().x, g_mouse.getRelativeUpleft().y, g_mouse.getRelativeDownRight().x, g_mouse.getRelativeDownRight().y);
-			g_focusedIdx = g_msc.getShapeNum() - 1;
-			break;
-		}
-		case Flag::RECTANGLE: {
-			g_msc.add(new mRectangle(g_mouse.getRelativeUpleft().x, g_mouse.getRelativeUpleft().y, g_mouse.getRelativeDownRight().x, g_mouse.getRelativeDownRight().y));
-			g_focusedIdx = g_msc.getShapeNum() - 1;
-			break;
-		}
-		case Flag::LINE: { //라인이 거꾸로 나오는 문제 
-			g_msc.add(new mLine(g_mouse.getRelativeOldX(), g_mouse.getRelativeOldY(), g_mouse.getRelativeNewX(), g_mouse.getRelativeNewY()));
-			printf("%d,%d 에서 %d, %d로 그었다. \n", g_mouse.getRelativeUpleft().x, g_mouse.getRelativeUpleft().y, g_mouse.getRelativeDownRight().x, g_mouse.getRelativeDownRight().y);
-			g_focusedIdx = g_msc.getShapeNum() - 1;
-			break;
-		}
-		}
-
+		g_orderFlag = Flag::NOTHING; //선택하기 위해서 
 		InvalidateRect(hwnd, NULL, TRUE);
 		break;
 	}
 
 	case WM_PAINT: {
 		hdc = BeginPaint(hwnd, &ps);
+
+		//. 현재 진행상황 실시간 보여주기
+		if (g_mouse.getGrapped()) { 
+			g_msc.paintShowProgressAction(hdc, g_orderFlag, g_mouse, ORIGIN_POINT.getOriginPoint());
+		}
+
 		
-		
-		
-		
-		
-		
-		g_msc.showAll_relative(hdc, ORIGIN_POINT.getOriginPoint());
+		g_msc.showAllExcept_relative(hdc, g_focusedIdx, ORIGIN_POINT.getOriginPoint());
+		g_msc.showAt_relative(hdc, g_focusedIdx, ORIGIN_POINT.getOriginPoint());
+		g_msc.showDotAt_relative(hdc, g_focusedIdx, ORIGIN_POINT.getOriginPoint());
 		ORIGIN_POINT.show(hdc);
 		EndPaint(hwnd, &ps);
 		break;
@@ -145,6 +150,39 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 	}
 	return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

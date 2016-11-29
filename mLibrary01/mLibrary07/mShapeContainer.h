@@ -62,6 +62,20 @@ public:
 			}
 		}
 	}
+	void showAllExcept_relative(HDC hdc, int exIdx, POINT ORIGIN_POINT) {
+		if (isEmpty()) {
+			return;
+		}
+		else {
+			for (int i = 0; i < shapeNum; i++) {
+				if (i == exIdx)
+					continue;
+
+				mShape* temp = shapeVector[i];
+				temp->showRelative(hdc, ORIGIN_POINT);
+			}
+		}
+	}
 
 	//4. procAt
 	void procAt(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam, int _idx) {
@@ -126,7 +140,13 @@ public:
 		mShape* temp = shapeVector[idx];
 		temp->showDot(hdc);
 	}
+	void showDotAt_relative(HDC hdc, int idx, POINT originPoint) {
+		if (idx < 0)
+			return;
 
+		mShape* temp = shapeVector[idx];
+		temp->showDot_relative(hdc,originPoint);
+	}
 	//9. showAt
 	void showAt(HDC hdc, int idx) {
 		if (idx < 0)
@@ -137,6 +157,15 @@ public:
 
 		temp->show(hdc);
 
+	}
+	void showAt_relative(HDC hdc, int idx, POINT ORIGIN_POINT) {
+		if (idx < 0)
+			return;
+
+		mShape* temp = shapeVector[idx];
+
+
+		temp->showRelative(hdc, ORIGIN_POINT);
 	}
 	void showZoomedAt(HDC hdc, int idx, double zoomLevel) {
 		if (idx < 0)
@@ -209,7 +238,57 @@ public:
 		mShape* temp = shapeVector[idx];
 		temp->multiply(multiple);
 	}
+	
 	//proc관련
+
+
 	//18. shapeMaking
+	int buMakeShapeAction(int orderFlag, int focusedIdx, mMouse& g_mouse) {
+		int g_focusedIdx = focusedIdx;
+		switch (orderFlag) {
+		case Flag::CIRCLE: {
+			add(new mCircle(g_mouse.getRelativeUpleft().x, g_mouse.getRelativeUpleft().y, g_mouse.getRelativeDownRight().x, g_mouse.getRelativeDownRight().y));
+			printf("%d,%d 에서 %d, %d로 그었다. \n", g_mouse.getRelativeUpleft().x, g_mouse.getRelativeUpleft().y, g_mouse.getRelativeDownRight().x, g_mouse.getRelativeDownRight().y);
+			g_focusedIdx = getShapeNum() - 1;
+			break;
+		}
+		case Flag::RECTANGLE: {
+			add(new mRectangle(g_mouse.getRelativeUpleft().x, g_mouse.getRelativeUpleft().y, g_mouse.getRelativeDownRight().x, g_mouse.getRelativeDownRight().y));
+			g_focusedIdx = getShapeNum() - 1;
+			break;
+		}
+		case Flag::LINE: { //라인이 거꾸로 나오는 문제 
+			add(new mLine(g_mouse.getRelativeOldX(), g_mouse.getRelativeOldY(), g_mouse.getRelativeNewX(), g_mouse.getRelativeNewY()));
+			printf("%d,%d 에서 %d, %d로 그었다. \n", g_mouse.getRelativeUpleft().x, g_mouse.getRelativeUpleft().y, g_mouse.getRelativeDownRight().x, g_mouse.getRelativeDownRight().y);
+			g_focusedIdx = getShapeNum() - 1;
+			break;
+		}
+		}
+
+		return g_focusedIdx;
+	}
+
+	//19. showProgress
+	void paintShowProgressAction(HDC hdc, int g_orderFlag, mMouse g_mouse, POINT ORIGIN_POINT) {
+		switch (g_orderFlag) {
+
+		case Flag::CIRCLE: {
+			mCircle().showProgress_relative(hdc, g_mouse.getRelativeUpleft().x, g_mouse.getRelativeUpleft().y, g_mouse.getRelativeDownRight().x, g_mouse.getRelativeDownRight().y, ORIGIN_POINT);
+			break;
+		}
+		case Flag::RECTANGLE: {
+			mRectangle().showProgress_relative(hdc, g_mouse.getRelativeUpleft().x, g_mouse.getRelativeUpleft().y, g_mouse.getRelativeDownRight().x, g_mouse.getRelativeDownRight().y, ORIGIN_POINT);
+			break;
+		}
+		case Flag::LINE: {
+			mLine().showProgress_relative(hdc, g_mouse.getRelativeOldX(), g_mouse.getRelativeOldY(), g_mouse.getRelativeNewX(), g_mouse.getRelativeNewY(), ORIGIN_POINT);
+			break;
+		}
+		}
+	}
+
+
+
+
 
 };
