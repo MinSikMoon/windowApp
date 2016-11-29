@@ -7,6 +7,8 @@ private:
 	bool grapped;
 	bool pulled;
 	POINT ORIGIN_POS;
+	POINT tempPos1,tempPos2; //임시로 쓸 수 있는 편한 저장소 
+
 public:
 	mMouse() {
 		oldPos.x = 0;
@@ -17,6 +19,21 @@ public:
 		pulled = false;
 		ORIGIN_POS = { 0,0 };
 	}
+	//. 
+	void setTemPos1(POINT temp) {
+		tempPos1 = temp;
+	}
+	POINT getTempPos1() {
+		return tempPos1;
+	}
+	void setTemPos2(POINT temp) {
+		tempPos2 = temp;
+	}
+	POINT getTempPos2() {
+		return tempPos2;
+	}
+
+
 
 	//1. 좌상단, 우하단 알아서 뱉어주는 함수
 	POINT getUpLeft() {

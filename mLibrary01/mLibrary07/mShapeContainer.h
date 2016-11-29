@@ -287,6 +287,28 @@ public:
 		}
 	}
 
+	//20. moveResizeAction
+	void moveResizeAction(int g_focusedIdx, int g_resizePoint, mMouse& g_mouse) {
+		POINT tempUl, tempRd;
+		if (g_resizePoint == 1) { //좌상단만 변해준다.  
+			tempUl = { g_mouse.getRelativeNewX(), g_mouse.getRelativeNewY() };
+			tempRd = g_mouse.getTempPos2();
+		}
+		else if (g_resizePoint == 2) {
+			tempUl = { g_mouse.getTempPos1().x, g_mouse.getRelativeNewY() };
+			tempRd = { g_mouse.getRelativeNewX(), g_mouse.getTempPos2().y };
+		}
+		else if (g_resizePoint == 3) { //우하단만 변경
+
+			tempUl = g_mouse.getTempPos1();
+			tempRd = { g_mouse.getRelativeNewX(), g_mouse.getRelativeNewY() };
+		}
+		else {
+			tempUl = { g_mouse.getRelativeNewX(), g_mouse.getTempPos1().y };
+			tempRd = { g_mouse.getTempPos2().x,  g_mouse.getRelativeNewY() };
+		}
+		resizeAt(g_focusedIdx, tempUl, tempRd); //사이즈 변경 
+	}
 
 
 
