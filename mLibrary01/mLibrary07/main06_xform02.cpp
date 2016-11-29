@@ -13,10 +13,9 @@
 #include "mShapeContainer.h"
 #include "mZoom.h"
 
-#ifdef _DEBUG
-#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
-#endif
-
+//#ifdef _DEBUG
+//#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
+//#endif
 using namespace std;
 
 //전역 변수들
@@ -28,8 +27,9 @@ int g_resizePoint;
 mMouse g_mouse;
 mOriginPoint ORIGIN_POINT;
 mShapeContainer g_msc;
-
-
+mZoom g_zoom;
+double zoomLevel = 1.0;
+XFORM xform;
 //////////////////////////////////////////////WIN PROC/////////////////////////////////////////////////////////////////////////////////////
 /* This is where all the input to the window goes to */
 LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
@@ -57,13 +57,35 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 		break;
 	}
+	case WM_MOUSEWHEEL: {
+		if ((short)HIWORD(wParam) > 0) {
+			zoomLevel += 0.1;
+		}
+		else if ((short)HIWORD(wParam) < 0) {
+			zoomLevel -= 0.1;
+			if (zoomLevel < 1)
+				zoomLevel = 1;
+		}
 
-	
+
+		printf("zoom: %lf \n", zoomLevel);
+		InvalidateRect(hwnd, NULL, TRUE);
+		break;
+	}
+
+	case WM_RBUTTONDOWN: {
+		g_mouse.setPulled(true);
+		g_mouse.setGrap(true);
+		//g_mouse.setOldPos(LOWORD(lParam), HIWORD(lParam));
+		g_mouse.setOldZoomPos(LOWORD(lParam), HIWORD(lParam), zoomLevel);
+		break;
+	}
+
 	case WM_MOUSEMOVE: {
-		g_mouse.setNewPos(LOWORD(lParam), HIWORD(lParam)); //현재 찍은 곳 절대 좌표 저장. //printf("마우스 현재 relative x,y = %d, %d \n", g_mouse.getRelativeNewPos().x, g_mouse.getRelativeNewPos().y);
+		//g_mouse.setNewPos(LOWORD(lParam), HIWORD(lParam)); //현재 찍은 곳 절대 좌표 저장. //printf("마우스 현재 relative x,y = %d, %d \n", g_mouse.getRelativeNewPos().x, g_mouse.getRelativeNewPos().y);
 														   //. 마우스를 누른상태이거나 아니거나.								   //원점 바꾸기.
 
-														   //마우스 커서 변환
+		g_mouse.setNewZoomPos(LOWORD(lParam), HIWORD(lParam),zoomLevel);											   //마우스 커서 변환
 
 		if (g_focusedIdx == g_msc.whoIsIn(g_mouse.getRelativeNewPos(), g_focusedIdx) && g_focusedIdx != -1) {
 			SetClassLongPtr(hwnd, GCLP_HCURSOR, (LONG_PTR)LoadCursor(NULL, IDC_SIZEALL));
@@ -75,9 +97,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 		if (g_mouse.getGrapped()) {
 			//. 화면 풀링 로직
 			if (g_mouse.getPulled()) {
-				ORIGIN_POINT.move(g_mouse.getXdist(), g_mouse.getYdist());
-				g_mouse.pullingAction();
-				g_mouse.setOldPos(LOWORD(lParam), HIWORD(lParam));
+				ORIGIN_POINT.move(g_mouse.getZoomXdist(zoomLevel), g_mouse.getZoomYdist(zoomLevel));
+				g_mouse.pullingZoomAction(zoomLevel);
+				g_mouse.setOldZoomPos(LOWORD(lParam), HIWORD(lParam),zoomLevel);
 
 			}
 			if (g_orderFlag == Flag::RESIZE) {
@@ -87,7 +109,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 			//. 도형이동 로직
 			if (g_orderFlag == Flag::MOVE) {
 				g_msc.moveAt(g_focusedIdx, g_mouse.getXdist(), g_mouse.getYdist());
-				g_mouse.setOldPos(LOWORD(lParam), HIWORD(lParam));
+				g_mouse.setOldZoomPos(LOWORD(lParam), HIWORD(lParam), zoomLevel);
 			}
 			InvalidateRect(hwnd, NULL, TRUE);
 		}
@@ -111,6 +133,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 				//printf("is closed = %d \n", g_resizePoint);
 			}
 		}
+		InvalidateRect(hwnd, NULL, TRUE);
 		break;
 	}
 
@@ -122,13 +145,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 
 	case WM_LBUTTONDOWN: {
-		g_mouse.setNewPos(LOWORD(lParam), HIWORD(lParam)); //printf("%d, %d \n", g_mouse.getRelativeNewX(), g_mouse.getRelativeNewY());
+		g_mouse.setNewZoomPos(LOWORD(lParam), HIWORD(lParam), zoomLevel);	//printf("%d, %d \n", g_mouse.getRelativeNewX(), g_mouse.getRelativeNewY());
 		g_mouse.setGrap(true);
 
 		//. 도형 이동 로직
 		if (g_focusedIdx != -1) { //도형이 선택되어 있다면..
 			if (g_resizePoint != -1) { //리사이즈 시작한다는 의미
-				g_mouse.setTemPos1(g_msc.getUpLeftAt(g_focusedIdx));
+				g_mouse.setTemPos1(g_msc.getUpLeftAt(g_focusedIdx)); //원본의 zoomPos를 저장해야한다. 
 				g_mouse.setTemPos2(g_msc.getDownRightAt(g_focusedIdx));
 				g_orderFlag = Flag::RESIZE;
 			}
@@ -146,13 +169,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 			g_focusedIdx = g_msc.whoIsIn(g_mouse.getRelativeNewPos(), g_focusedIdx); //printf("돌고난후 focused: %d \n", g_focusedIdx); //어느 도형을 찍었는지 판별해준다 //선택 잘 됨.
 		}
 
-		g_mouse.setOldPos(LOWORD(lParam), HIWORD(lParam));
+		g_mouse.setOldZoomPos(LOWORD(lParam), HIWORD(lParam), zoomLevel);
 		break;
 	}
 
 	case WM_LBUTTONUP: {
 		g_mouse.setGrap(false);
-		g_mouse.setNewPos(LOWORD(lParam), HIWORD(lParam));
+		g_mouse.setNewZoomPos(LOWORD(lParam), HIWORD(lParam), zoomLevel);
 		g_focusedIdx = g_msc.buMakeShapeAction(g_orderFlag, g_focusedIdx, g_mouse);
 
 		g_orderFlag = Flag::NOTHING; //선택하기 위해서 
@@ -165,11 +188,15 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 		//. 현재 진행상황 실시간 보여주기
 		if (g_mouse.getGrapped()) {
-			g_msc.paintShowProgressAction(hdc, g_orderFlag, g_mouse, ORIGIN_POINT.getOriginPoint());
+			g_msc.paintShowZoomProgressAction(hdc, g_orderFlag, g_mouse, g_mouse.getZoomOriginPos(zoomLevel),zoomLevel);
+			//g_msc.paintShowProgressAction(hdc, g_orderFlag, g_mouse, ORIGIN_POINT.getOriginPoint());
 		}
+		xform.eM11 = zoomLevel;
+		xform.eM22 = zoomLevel;
+		SetGraphicsMode(hdc, GM_ADVANCED);
+		SetWorldTransform(hdc, &xform);
 
-	
-
+		TextOut(hdc, 10, 10, TEXT("안녕하세욥!"), 6);
 		g_msc.showAllExcept_relative(hdc, g_focusedIdx, ORIGIN_POINT.getOriginPoint());
 		g_msc.showAt_relative(hdc, g_focusedIdx, ORIGIN_POINT.getOriginPoint());
 		g_msc.showDotAt_relative(hdc, g_focusedIdx, ORIGIN_POINT.getOriginPoint());

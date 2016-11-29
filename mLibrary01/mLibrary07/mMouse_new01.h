@@ -1,5 +1,5 @@
 #pragma once
-#include <Windows.h>
+#include <Windef.h>
 class mMouse {
 private:
 	POINT oldPos;
@@ -7,7 +7,7 @@ private:
 	bool grapped;
 	bool pulled;
 	POINT ORIGIN_POS;
-	POINT tempPos1,tempPos2; //임시로 쓸 수 있는 편한 저장소 
+	POINT tempPos1, tempPos2; //임시로 쓸 수 있는 편한 저장소 
 
 public:
 	mMouse() {
@@ -22,14 +22,6 @@ public:
 	//. 
 	void setTemPos1(POINT temp) {
 		tempPos1 = temp;
-	}
-	void setZoomTempPos1(POINT temp, double zoomLevel) {
-		tempPos1.x = temp.x*zoomLevel;
-		tempPos1.y = temp.y*zoomLevel;
-	}
-	void setZoomTempPos2(POINT temp, double zoomLevel) {
-		tempPos2.x = temp.x*zoomLevel;
-		tempPos2.y = temp.y*zoomLevel;
 	}
 	POINT getTempPos1() {
 		return tempPos1;
@@ -124,19 +116,9 @@ public:
 		oldPos.x = _x;
 		oldPos.y = _y;
 	}
-	void setOldZoomPos(int _x, int _y, double zoomLevel) {
-		double tempX = (double)_x / zoomLevel;
-		double tempY = (double)_y / zoomLevel;
-		setOldPos(tempX, tempY);
-	}
 	void setNewPos(int _x, int _y) {
 		newPos.x = _x;
 		newPos.y = _y;
-	}
-	void setNewZoomPos(int _x, int _y, double zoomLevel) {
-		double tempX = (double)_x / zoomLevel;
-		double tempY = (double)_y / zoomLevel;
-		setNewPos(tempX, tempY);
 	}
 	void setNewPos(POINT _newPos) {
 		newPos = _newPos;
@@ -144,14 +126,6 @@ public:
 	void setOldPos(POINT _oldPos) {
 		oldPos = _oldPos;
 	}
-
-	int getNewZoomX(double zoomLevel) {
-		return (double)getNewPos().x / zoomLevel;
-	}
-	int getOldZoomX(double zoomLevel) {
-		return (double)getOldPos().x / zoomLevel;
-	}
-
 	POINT getOldPos() {
 		return oldPos;
 	}
@@ -186,28 +160,14 @@ public:
 	int getYdist() {
 		return newPos.y - oldPos.y;
 	}
-	int getZoomXdist(double zoomLevel) {
-		return (double)getXdist()*zoomLevel;
-	}
-	int getZoomYdist(double zoomLevel) {
-		return (double)getYdist()*zoomLevel;
-	}
-
 
 	POINT getOriginPos() {
 		return ORIGIN_POS;
 	}
 
-	POINT getZoomOriginPos(double zoomLevel) {
-		int tempX = (double)ORIGIN_POS.x/zoomLevel;
-		int tempY = (double)ORIGIN_POS.y/zoomLevel;
-		return{ tempX, tempY };
-	}
-
 	int getRelativeNewX() {
 		return ORIGIN_POS.x + newPos.x;
 	}
-	
 	int getRelativeNewY() {
 		return ORIGIN_POS.y + newPos.y;
 	}
@@ -215,7 +175,7 @@ public:
 		POINT temp;
 		temp.x = getRelativeNewX();
 		temp.y = getRelativeNewY();
-		return { temp.x, temp.y };
+		return{ temp.x, temp.y };
 	}
 	int getRelativeOldX() {
 		return ORIGIN_POS.x + oldPos.x;
@@ -298,20 +258,9 @@ public:
 		return tempPoint;
 	}
 
+	//. zoomLevel에 따라 상이한 좌표 배출
+	
 	//1. pulling 액션
-	void pullingZoomAction(double zoomLevel) {
-		if (getPulled()) {
-			int xdist = getZoomXdist(zoomLevel);
-			int ydist = getZoomYdist(zoomLevel);
-			int newOriginX = getOriginPos().x - xdist;
-			int newOriginY = getOriginPos().y - ydist;
-			setOriginPos(newOriginX, newOriginY); //원점 새로 지정 
-
-			setOldPos(getNewPos()); //새로 갈아 끼우기
-
-		}
-	}
-
 	void pullingAction() {
 		if (getPulled()) {
 			int xdist = getXdist();
@@ -324,17 +273,5 @@ public:
 
 		}
 	}
-	//void pullingAction(double zoomLevel) {
-	//	if (getPulled()) {
-	//		int xdist = (double)getXdist()/zoomLevel;
-	//		int ydist = (double)getYdist()/zoomLevel;
-	//		int newOriginX = getOriginPos().x - xdist;
-	//		int newOriginY = getOriginPos().y - ydist;
-	//		setOriginPos(newOriginX, newOriginY); //원점 새로 지정 
-
-	//		setOldPos(getNewPos()); //새로 갈아 끼우기
-
-	//	}
-	//}
 
 };

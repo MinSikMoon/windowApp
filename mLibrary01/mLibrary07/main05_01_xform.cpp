@@ -13,10 +13,9 @@
 #include "mShapeContainer.h"
 #include "mZoom.h"
 
-#ifdef _DEBUG
-#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
-#endif
-
+//#ifdef _DEBUG
+//#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
+//#endif
 using namespace std;
 
 //전역 변수들
@@ -28,7 +27,10 @@ int g_resizePoint;
 mMouse g_mouse;
 mOriginPoint ORIGIN_POINT;
 mShapeContainer g_msc;
+mZoom g_zoom;
 
+XFORM xform;
+double zoomLevel = 1.0;
 
 //////////////////////////////////////////////WIN PROC/////////////////////////////////////////////////////////////////////////////////////
 /* This is where all the input to the window goes to */
@@ -38,6 +40,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 	switch (Message) {
 	case WM_COMMAND: {
+		
 		switch (LOWORD(wParam)) {
 			g_focusedIdx = -1;
 		case ID_40001: { //원
@@ -57,10 +60,19 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 		break;
 	}
+	case WM_RBUTTONDOWN: {
+		g_mouse.setPulled(true);
+		g_mouse.setGrap(true);
+		g_mouse.setOldPos(LOWORD(lParam), HIWORD(lParam));
+		break;
+	}
 
-	
 	case WM_MOUSEMOVE: {
-		g_mouse.setNewPos(LOWORD(lParam), HIWORD(lParam)); //현재 찍은 곳 절대 좌표 저장. //printf("마우스 현재 relative x,y = %d, %d \n", g_mouse.getRelativeNewPos().x, g_mouse.getRelativeNewPos().y);
+		double tempX = LOWORD(lParam)/zoomLevel;
+		double tempY = HIWORD(lParam)/zoomLevel;
+
+		g_mouse.setNewPos(tempX, tempY);
+		//g_mouse.setNewPos(LOWORD(lParam), HIWORD(lParam)); //현재 찍은 곳 절대 좌표 저장. //printf("마우스 현재 relative x,y = %d, %d \n", g_mouse.getRelativeNewPos().x, g_mouse.getRelativeNewPos().y);
 														   //. 마우스를 누른상태이거나 아니거나.								   //원점 바꾸기.
 
 														   //마우스 커서 변환
@@ -75,9 +87,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 		if (g_mouse.getGrapped()) {
 			//. 화면 풀링 로직
 			if (g_mouse.getPulled()) {
-				ORIGIN_POINT.move(g_mouse.getXdist(), g_mouse.getYdist());
+				double tempXmove = g_mouse.getXdist() * zoomLevel;
+				double tempYmove = g_mouse.getYdist() * zoomLevel;
+				ORIGIN_POINT.move(tempXmove, tempYmove);
 				g_mouse.pullingAction();
-				g_mouse.setOldPos(LOWORD(lParam), HIWORD(lParam));
+				g_mouse.setOldPos(tempX, tempY);
 
 			}
 			if (g_orderFlag == Flag::RESIZE) {
@@ -122,7 +136,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 
 	case WM_LBUTTONDOWN: {
-		g_mouse.setNewPos(LOWORD(lParam), HIWORD(lParam)); //printf("%d, %d \n", g_mouse.getRelativeNewX(), g_mouse.getRelativeNewY());
+		double tempX = LOWORD(lParam) / zoomLevel;
+		double tempY = HIWORD(lParam) / zoomLevel;
+
+		g_mouse.setNewPos(tempX, tempY);
+		//g_mouse.setNewPos(LOWORD(lParam), HIWORD(lParam)); //printf("%d, %d \n", g_mouse.getRelativeNewX(), g_mouse.getRelativeNewY());
 		g_mouse.setGrap(true);
 
 		//. 도형 이동 로직
@@ -152,23 +170,43 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 	case WM_LBUTTONUP: {
 		g_mouse.setGrap(false);
-		g_mouse.setNewPos(LOWORD(lParam), HIWORD(lParam));
+		double tempX = LOWORD(lParam) / zoomLevel;
+		double tempY = HIWORD(lParam) / zoomLevel;
+
+		g_mouse.setNewPos(tempX, tempY);
+		//g_mouse.setNewPos(LOWORD(lParam), HIWORD(lParam));
 		g_focusedIdx = g_msc.buMakeShapeAction(g_orderFlag, g_focusedIdx, g_mouse);
 
 		g_orderFlag = Flag::NOTHING; //선택하기 위해서 
 		InvalidateRect(hwnd, NULL, TRUE);
 		break;
 	}
+	case WM_MOUSEWHEEL: {
+		if ((short)HIWORD(wParam) > 0) {
+			zoomLevel += 0.2;
+		}
+		else if ((short)HIWORD(wParam) < 0) {
+			zoomLevel -= 0.2;
+			if (zoomLevel < 1)
+				zoomLevel = 1;
+		}
 
+
+		printf("zoom: %lf \n", zoomLevel);
+		InvalidateRect(hwnd, NULL, TRUE);
+		break;
+	}
 	case WM_PAINT: {
 		hdc = BeginPaint(hwnd, &ps);
-
+		xform.eM11 = zoomLevel;
+		xform.eM22 = zoomLevel;
+		SetGraphicsMode(hdc, GM_ADVANCED);
+		SetWorldTransform(hdc, &xform);
 		//. 현재 진행상황 실시간 보여주기
 		if (g_mouse.getGrapped()) {
 			g_msc.paintShowProgressAction(hdc, g_orderFlag, g_mouse, ORIGIN_POINT.getOriginPoint());
 		}
 
-	
 
 		g_msc.showAllExcept_relative(hdc, g_focusedIdx, ORIGIN_POINT.getOriginPoint());
 		g_msc.showAt_relative(hdc, g_focusedIdx, ORIGIN_POINT.getOriginPoint());

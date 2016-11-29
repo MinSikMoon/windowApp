@@ -268,6 +268,31 @@ public:
 		return g_focusedIdx;
 	}
 
+	int buMakeZoomShapeAction(int orderFlag, int focusedIdx, mMouse& g_mouse, double zoomLevel, POINT originPoint) {
+		int g_focusedIdx = focusedIdx;
+		switch (orderFlag) {
+		case Flag::CIRCLE: {
+			add(new mCircle(g_mouse.getRelativeUpleft().x /zoomLevel, g_mouse.getRelativeUpleft().y / zoomLevel, g_mouse.getRelativeDownRight().x / zoomLevel, g_mouse.getRelativeDownRight().y / zoomLevel));
+			printf("%d,%d 에서 %d, %d로 그었다. \n", g_mouse.getRelativeUpleft().x*zoomLevel, g_mouse.getRelativeUpleft().y*zoomLevel, g_mouse.getRelativeDownRight().x*zoomLevel, g_mouse.getRelativeDownRight().y / zoomLevel);
+			g_focusedIdx = getShapeNum() - 1;
+			break;
+		}
+		case Flag::RECTANGLE: {
+			add(new mRectangle(g_mouse.getRelativeUpleft().x / zoomLevel, g_mouse.getRelativeUpleft().y / zoomLevel, g_mouse.getRelativeDownRight().x / zoomLevel, g_mouse.getRelativeDownRight().y / zoomLevel));
+			g_focusedIdx = getShapeNum() - 1;
+			break;
+		}
+		case Flag::LINE: { //라인이 거꾸로 나오는 문제 
+			add(new mLine(g_mouse.getRelativeOldX(), g_mouse.getRelativeOldY(), g_mouse.getRelativeNewX(), g_mouse.getRelativeNewY()));
+			printf("%d,%d 에서 %d, %d로 그었다. \n", g_mouse.getRelativeUpleft().x, g_mouse.getRelativeUpleft().y, g_mouse.getRelativeDownRight().x, g_mouse.getRelativeDownRight().y);
+			g_focusedIdx = getShapeNum() - 1;
+			break;
+		}
+		}
+
+		return g_focusedIdx;
+	}
+
 	//19. showProgress
 	void paintShowProgressAction(HDC hdc, int g_orderFlag, mMouse g_mouse, POINT ORIGIN_POINT) {
 		switch (g_orderFlag) {
@@ -282,6 +307,23 @@ public:
 		}
 		case Flag::LINE: {
 			mLine().showProgress_relative(hdc, g_mouse.getRelativeOldX(), g_mouse.getRelativeOldY(), g_mouse.getRelativeNewX(), g_mouse.getRelativeNewY(), ORIGIN_POINT);
+			break;
+		}
+		}
+	}
+	void paintShowZoomProgressAction(HDC hdc, int g_orderFlag, mMouse g_mouse, POINT ORIGIN_POINT, double zoomLevel) {
+		switch (g_orderFlag) {
+
+		case Flag::CIRCLE: {
+			mCircle().showProgress_relative(hdc, g_mouse.getRelativeUpleft().x*zoomLevel, g_mouse.getRelativeUpleft().y, g_mouse.getRelativeDownRight().x*zoomLevel, g_mouse.getRelativeDownRight().y*zoomLevel, ORIGIN_POINT);
+			break;
+		}
+		case Flag::RECTANGLE: {
+			mRectangle().showProgress_relative(hdc, g_mouse.getRelativeUpleft().x*zoomLevel, g_mouse.getRelativeUpleft().y*zoomLevel, g_mouse.getRelativeDownRight().x, g_mouse.getRelativeDownRight().y*zoomLevel, ORIGIN_POINT);
+			break;
+		}
+		case Flag::LINE: {
+			mLine().showProgress_relative(hdc, g_mouse.getRelativeOldX()*zoomLevel, g_mouse.getRelativeOldY()*zoomLevel, g_mouse.getRelativeNewX()*zoomLevel, g_mouse.getRelativeNewY()*zoomLevel, ORIGIN_POINT);
 			break;
 		}
 		}
