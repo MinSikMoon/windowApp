@@ -44,6 +44,7 @@ public:
 			for (int i = 0; i < shapeNum; i++) {
 				mShape* temp = shapeVector[i];
 				temp->showRelative(hdc, originPoint);
+				
 			}
 		}
 	}
@@ -76,6 +77,36 @@ public:
 			}
 		}
 	}
+	void showAllExcept_Zoom(HDC hdc, int exIdx, POINT ORIGIN_POINT, double zoomLevel) {
+		if (isEmpty()) {
+			return;
+		}
+		else {
+			for (int i = 0; i < shapeNum; i++) {
+				/*if (i == exIdx)
+					continue;*/
+
+				mShape* temp = shapeVector[i];
+				temp->showZoomRelative(hdc, ORIGIN_POINT, zoomLevel);
+			}
+		}
+	}
+
+	//void showAllZoomExcept(HDC hdc, int exIdx, POINT ORIGIN_POINT, double zoomLevel) {
+	//	if (isEmpty()) {
+	//		return;
+	//	}
+	//	else {
+	//		for (int i = 0; i < shapeNum; i++) {
+	//			if (i == exIdx)
+	//				continue;
+
+	//			mShape* temp = shapeVector[i];
+	//			//temp->showRelative(hdc, ORIGIN_POINT);
+	//			temp->showZoomRelative(hdc, ORIGIN_POINT, zoomLevel);
+	//		}
+	//	}
+	//}
 
 	//4. procAt
 	void procAt(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam, int _idx) {
@@ -334,7 +365,7 @@ public:
 
 		case Flag::CIRCLE: {
 			mCircle().showZoomProgress(hdc, g_mouse.getRelativeUpleft().x*zoomLevel, g_mouse.getRelativeUpleft().y*zoomLevel, g_mouse.getRelativeDownRight().x*zoomLevel, g_mouse.getRelativeDownRight().y*zoomLevel, ORIGIN_POINT, zoomLevel);
-			printf("현재 zoomProgress: 좌상단 relative: %d에 zoomlevel %lf를 곱해서 %lf가 나오는데, 여기에 원점의 offset: %d를 상쇄해서 표시 \n", g_mouse.getRelativeUpleft().x, zoomLevel, (g_mouse.getRelativeUpleft().x*zoomLevel), ORIGIN_POINT.x);
+			//printf("현재 zoomProgress: 좌상단 relative: %d에 zoomlevel %lf를 곱해서 %lf가 나오는데, 여기에 원점의 offset: %d를 상쇄해서 표시 \n", g_mouse.getRelativeUpleft().x, zoomLevel, (g_mouse.getRelativeUpleft().x*zoomLevel), ORIGIN_POINT.x);
 			break;
 		}
 		case Flag::RECTANGLE: {

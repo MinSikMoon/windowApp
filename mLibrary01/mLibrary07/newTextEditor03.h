@@ -91,6 +91,16 @@ public:
 		textSource.showAllText(hdc, screenWidth, firstLineXpos, firstLineYpos, wordWidth, lineContainer);
 		//lineContainer.show();
 	}
+
+	void showAllZoomText(HDC hdc, size_m screenWidth, int firstLineXpos, int firstLineYpos, double zoomLevel) {
+		int wordWidth = 16;
+
+		if (screenWidth < 20)
+			return; //오작동 방지 
+
+		textSource.showAllText(hdc, screenWidth, firstLineXpos, firstLineYpos, wordWidth, lineContainer);
+		//textsource.showAllZoomText()
+	}
 	//4.5 lineContainer에 들어있는 모든 라인의 수를 세서. wordHeight를 곱해서 배출 => 현재 텍스트의 전체 높이는 몇인가를 구한다. 
 	size_m getLcTotalLineNum() {
 		return lineContainer.getTotalLineNum();

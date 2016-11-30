@@ -18,7 +18,7 @@ namespace Flag {
 
 
 
-class mShape : public mZoomOrigin {
+class mShape {
 private:
 	POINT upLeft, downRight; //좌상단 우하단 좌표
 	mTextEditor textEditor;
@@ -43,8 +43,7 @@ public:
 		editorX = _upLeftX;
 		editorY = _upLeftY;
 
-		setZoomUpLeft(upLeft);
-		setZoomDownRight(downRight);
+		
 
 	}
 	void make(int _upLeftX, int _upLeftY, int _downRightX, int _downRightY) {
@@ -59,8 +58,7 @@ public:
 		editorX = _upLeftX;
 		editorY = _upLeftY;
 
-		setZoomUpLeft(upLeft);
-		setZoomDownRight(downRight);
+	
 	}
 
 	//2. 에디터 너비 조정 
@@ -125,17 +123,21 @@ public:
 	//5. show
 	virtual void show(HDC hdc) = 0; //왜 virtual 붙였는 지 알것
 	virtual void showRelative(HDC hdc, POINT origin) = 0;
-	
+	virtual void showZoomRelative(HDC hdc, POINT originPoint, double zoomLevel) = 0;
 	//6. showText
 	void showText(HDC hdc) {
 
 		textEditor.showAllText(hdc, editorWidth, editorX, editorY);
 
 	}
-	////6. showZoomedText
-	//void showZoomedText(HDC hdc, double zoomLevel) {
-	//	textEditor.showAllText(hdc, editorWidth*zoomLevel, editorX*zoomLevel, editorY*zoomLevel);
-	//}
+
+	
+
+	void showZoomText(HDC hdc, POINT originPoint, double zoomLevel) {
+		textEditor.showAllText(hdc, editorWidth, (editorX + originPoint.x), (editorY+originPoint.y));
+		//textEditor.showAllZoomText()
+	}
+	
 
 
 

@@ -29,7 +29,20 @@ public:
 		int offsetX = originPoint.x;
 		int offsetY = originPoint.y;
 		Ellipse(hdc, getUpLeftX() + offsetX, getUpLeftY() + offsetY, getDownRightX() + offsetX, getDownRightY()+offsetY);
-		//showText(hdc);
+		printf("현재 circle의 좌상단 x,y = %d, %d \n", getUpLeftX(), getUpLeftY());
+		printf("현재 circle의 editor x,y = %d, %d \n", getEditorX(), getEditorY());
+		//showZoomText(hdc, originPoint, 2.0);
+		showText(hdc);
+		
+	}
+
+	void showZoomRelative(HDC hdc, POINT originPoint, double zoomLevel) {
+		int offsetX = originPoint.x;
+		int offsetY = originPoint.y;
+		Ellipse(hdc, getUpLeftX() + offsetX, getUpLeftY() + offsetY, getDownRightX() + offsetX, getDownRightY() + offsetY);
+		//printf("현재 circle의 좌상단 x,y = %d, %d \n", getUpLeftX(), getUpLeftY());
+		//printf("현재 circle의 editor x,y = %d, %d \n", getEditorX(), getEditorY());
+		showZoomText(hdc, originPoint, zoomLevel);
 	}
 
 
@@ -52,7 +65,7 @@ public:
 	void showZoomProgress(HDC hdc, double ulX, double ulY, double drX, double drY, POINT originPoint, double zoomLevel) {
 		int offsetX = originPoint.x*zoomLevel ;
 		int offsetY = originPoint.y * zoomLevel;
-		printf("zoomoffset xy : %d, %d \n", offsetX, offsetY);
+		//printf("zoomoffset xy : %d, %d \n", offsetX, offsetY);
 		//Ellipse(hdc, ulX + offsetX, ulY/zoomLevel + offsetY, drX/zoomLevel + offsetX, drY/zoomLevel + offsetY);
 		Ellipse(hdc, ulX + offsetX, ulY + offsetY, drX + offsetX, drY + offsetY);
 
@@ -109,19 +122,7 @@ public:
 	//7. circle resize
 	void resize(POINT newUpLeft, POINT newDownRight) {
 		changeXy(newUpLeft.x, newUpLeft.y, newDownRight.x, newDownRight.y);
-		/*setEditorWidth((newDownRight.x - newUpLeft.x) / 10 * 8 - getDiff() * 2);
-		setEditorHeight((newDownRight.y - newUpLeft.y) / 2 + getDiff());
-		setEditorX(newUpLeft.x + (getEditorWidth() / 10) + getDiff() + 8);
-		setEditorY(newUpLeft.y + ((newDownRight.y - newUpLeft.y) / 4) + getDiff());*/
-
-		//if (getTextHeight() > getEditorHeight()) { //글자 높이가 더 크면 조정해줘야지. 
-		//	int midTextHeight = getTextHeight() / 2;
-		//	int midYpos = (newDownRight.y - ((newDownRight.y - newUpLeft.y) / 2));
-		//	int diffLineNum = ((getTextHeight() - getEditorHeight()) / getWordHeight() + 1); //몇 줄이나 튀어나갔나? 
-		//	setEditorY(midYpos - midTextHeight + getDiff());
-		//	setEditorHeight(getEditorHeight() + diffLineNum*getWordHeight() * 2);
-		//}
-
+		setEdit(newUpLeft, newDownRight);
 		printf("resize!!!!!!!!!!!!!!!!!!!!111\n");
 
 	}

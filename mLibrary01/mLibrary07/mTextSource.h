@@ -266,7 +266,7 @@ public:
 		screenLineContainer.setTotalLineNum(totalLoopCnt); //텍스트 전체 라인이 몇개인지 저장. 
 	}
 
-
+	
 
 
 	//debugging : show
