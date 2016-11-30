@@ -4,9 +4,7 @@
 
 //1. mString을 받아서 픽셀 가로길이를 리턴해주는 함수
 size_m getMstrPixelWidth(HDC hdc, mString& mStr, size_m startIdx, size_m endIdx) {
-	//if (startIdx == 0 && endIdx == 0) {
-	//	return 0;
-	//}
+	
 	size_m length = mStr.getLength(); //mStr의 str 길이
 	if (startIdx < 0 || endIdx >(length-1) || startIdx > endIdx) { //필터 for 잘못된 입력
 		printf("!!!!!!!!!********>>>>잘못된 범위 지정 in getStrPixelWidth() : length: %d ,sIdx: %d, eIdx: %d \n",length, startIdx, endIdx);
@@ -55,9 +53,6 @@ int getScreenEndIdx(HDC hdc, mString& mStr, int limitWidth, int startIdx, int av
 	}
 
 
-	//if (getMstrPixelWidthFull(hdc, mStr) <= limitWidth) { //화면이 문장보다 더 길면 그냥 문장의 마지막 인덱스 뽑아주면 되겠지. 
-	//	return (mStr.getLength() - 1);
-	//}
 
 	//1. 평균 글자 너비를 이용해서 limitWidth 안에 총 몇글자 정도 들어갈지 예상해본다.
 	int estWordNum = limitWidth / avgCharWidth + 1;

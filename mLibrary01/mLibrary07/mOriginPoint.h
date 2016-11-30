@@ -1,5 +1,6 @@
 #pragma once
 #include <windef.h>
+#include "mMouse.h"
 class mOriginPoint {
 private:
 	POINT origin_point;
@@ -39,6 +40,18 @@ public:
 		LineTo(hdc, origin_point.x + lineWidth, origin_point.y);
 		//3. 0.0Ç¥½Ã
 		TextOut(hdc, origin_point.x + 2, origin_point.y - 18, TEXT("0,0"), 3);
+	}
+
+	//7. setStartPoint
+	void setStartPoint(mMouse& mouse, int xDist, int yDist) {
+		move(xDist, yDist);
+		mouse.setOriginPos(-xDist, -yDist);
+	}
+
+	void goToZero(mMouse& mouse, int screenWidth, int screenHeight) {
+		move(-origin_point.x, -origin_point.y);
+		mouse.setOriginPos(origin_point.x, origin_point.y);
+
 	}
 
 	

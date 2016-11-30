@@ -46,7 +46,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 	switch (Message) {
 	case WM_CREATE: {
-		ORIGIN_POINT.setStartPoint(g_mouse, WINDOW_WIDTH / 2, WINDOW_HEIGHT /5* 2);
+		ORIGIN_POINT.setStartPoint(g_mouse, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 5 * 2);
 		g_options.setFontName(TEXT("궁서"));
 		break;
 	}
@@ -86,6 +86,31 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 		}
 		case ID_40003: { //선분
 			g_orderFlag = Flag::LINE;
+			break;
+		}
+		case ID_40004: { //선분
+			g_options.setFontName(TEXT("궁서"));
+			InvalidateRect(hwnd, NULL, TRUE);
+			break;
+		}
+		case ID_40005: { //선분
+			g_options.setFontName(TEXT("바탕"));
+			InvalidateRect(hwnd, NULL, TRUE);
+			break;
+		}
+		case ID_40006: { //선분
+			g_options.setFontName(TEXT("굴림"));
+			InvalidateRect(hwnd, NULL, TRUE);
+			break;
+		}
+		case ID_40008: { //선분
+			g_options.setFontName(TEXT("돋움"));
+			InvalidateRect(hwnd, NULL, TRUE);
+			break;
+		}
+		case ID_40007: { //선분
+			ORIGIN_POINT.goToZero(g_mouse, WINDOW_WIDTH, WINDOW_HEIGHT);
+			InvalidateRect(hwnd, NULL, TRUE);
 			break;
 		}
 
@@ -164,9 +189,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 		//1. 1배일 때는 100,100이면 2배일 때는 50,50이 찍혀야 되니까 zoomLevel을 나눠서 넣어줘야 된다. 
 		g_mouse.setNewZoomPos(LOWORD(lParam), HIWORD(lParam), g_options.getZoomLevel());
 		g_mouse.setGrap(true);
-		
-		printf("현재 originpos는 %d, %d \n", ORIGIN_POINT.getOriginPoint(), ORIGIN_POINT.getOriginPoint().y);
-		printf("물리적 좌표 newPos는 %d, %d \n", LOWORD(lParam), HIWORD(lParam));
+
+		/*printf("현재 originpos는 %d, %d \n", ORIGIN_POINT.getOriginPoint(), ORIGIN_POINT.getOriginPoint().y);
+		printf("물리적 좌표 newPos는 %d, %d \n", LOWORD(lParam), HIWORD(lParam));*/
 		printf("relative new x,y : %d, %d, relative old = %d, %d \n", g_mouse.getRelativeNewX(), g_mouse.getRelativeNewY(), g_mouse.getRelativeOldX(), g_mouse.getRelativeOldY()); //잘 됨. 
 		if (g_focusedIdx != -1) { //도형이 선택되어 있다면..
 			if (g_resizePoint != -1) { //리사이즈 시작한다는 의미
@@ -205,7 +230,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 	case WM_PAINT: {
 		hdc = BeginPaint(hwnd, &ps);
-		
+
 		if (g_mouse.getGrapped()) {
 			g_msc.paintShowZoomProgressAction(hdc, g_orderFlag, g_mouse, ORIGIN_POINT.getOriginPoint(), g_options.getZoomLevel());
 		}
@@ -213,7 +238,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 		g_msc.showAllExcept_Zoom(hdc, g_focusedIdx, ORIGIN_POINT.getOriginPoint(), g_options.getZoomLevel());
 		g_msc.showAt_zoom(hdc, g_focusedIdx, ORIGIN_POINT.getOriginPoint(), g_options.getZoomLevel());
 		g_msc.showDotAt_relative(hdc, g_focusedIdx, ORIGIN_POINT.getOriginPoint());
-		
+
 		ORIGIN_POINT.show(hdc);
 		EndPaint(hwnd, &ps);
 		break;

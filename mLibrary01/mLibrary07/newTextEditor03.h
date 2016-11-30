@@ -85,7 +85,7 @@ public:
 	void showAllText(HDC hdc, size_m screenWidth, int firstLineXpos, int firstLineYpos) {
 		int wordWidth = 16;
 
-		if (screenWidth < 20)
+		if (screenWidth < 10)
 			return; //오작동 방지 
 
 		textSource.showAllText(hdc, screenWidth, firstLineXpos, firstLineYpos, wordWidth, lineContainer);

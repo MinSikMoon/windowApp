@@ -326,17 +326,6 @@ public:
 
 		}
 	}
-	//void pullingAction(double zoomLevel) {
-	//	if (getPulled()) {
-	//		int xdist = (double)getXdist()/zoomLevel;
-	//		int ydist = (double)getYdist()/zoomLevel;
-	//		int newOriginX = getOriginPos().x - xdist;
-	//		int newOriginY = getOriginPos().y - ydist;
-	//		setOriginPos(newOriginX, newOriginY); //원점 새로 지정 
-
-	//		setOldPos(getNewPos()); //새로 갈아 끼우기
-
-	//	}
-	//}
+	
 
 };

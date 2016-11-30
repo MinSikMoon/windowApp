@@ -114,7 +114,6 @@ int autoLineSwitch(HDC hdc, TCHAR* _mStr, int screenWidth, int startXpos, int st
 	}
 	
 	int limitWidth = screenWidth;
-	//int limitWidth = screenWidth - startXpos;
 	int startIdx = 0;
 	int lastIdx = 0;
 	int loopCnt = 0;

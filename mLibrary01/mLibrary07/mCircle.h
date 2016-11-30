@@ -46,12 +46,6 @@ public:
 	}
 
 
-	//void show(HDC hdc, double zoomLevel) {
-	//	resize(getUpLeft(), getDownRight());
-	//	Ellipse(hdc, getUpLeftX()*zoomLevel, getUpLeftY()*zoomLevel, getDownRightX()*zoomLevel, getDownRightY()*zoomLevel);
-	//	showZoomedText(hdc, zoomLevel);
-	//}
-
 	//4. showProgress
 	void showProgress(HDC hdc, int ulX, int ulY, int drX, int drY) {
 		Ellipse(hdc, ulX, ulY, drX, drY);
