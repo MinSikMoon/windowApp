@@ -122,6 +122,11 @@ public:
 	//7. circle resize
 	void resize(POINT newUpLeft, POINT newDownRight) {
 		changeXy(newUpLeft.x, newUpLeft.y, newDownRight.x, newDownRight.y);
+		int tempUlx = getUpLeftX() < getDownRightX() ? getUpLeftX() : getDownRightX();
+		int tempDrx = getUpLeftX() < getDownRightX() ? getDownRightX() : getUpLeftX();
+		int tempUly = getUpLeftY() < getDownRightY() ? getUpLeftY() : getDownRightY();
+		int tempDry = getUpLeftY() < getDownRightY() ? getDownRightY() : getUpLeftY();
+		changeXy(tempUlx, tempUly, tempDrx, tempDry);
 		setEdit(newUpLeft, newDownRight);
 		printf("resize!!!!!!!!!!!!!!!!!!!!111\n");
 

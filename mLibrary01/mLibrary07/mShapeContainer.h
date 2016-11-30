@@ -83,8 +83,8 @@ public:
 		}
 		else {
 			for (int i = 0; i < shapeNum; i++) {
-				/*if (i == exIdx)
-					continue;*/
+				if (i == exIdx)
+					continue;
 
 				mShape* temp = shapeVector[i];
 				temp->showZoomRelative(hdc, ORIGIN_POINT, zoomLevel);
@@ -92,21 +92,7 @@ public:
 		}
 	}
 
-	//void showAllZoomExcept(HDC hdc, int exIdx, POINT ORIGIN_POINT, double zoomLevel) {
-	//	if (isEmpty()) {
-	//		return;
-	//	}
-	//	else {
-	//		for (int i = 0; i < shapeNum; i++) {
-	//			if (i == exIdx)
-	//				continue;
-
-	//			mShape* temp = shapeVector[i];
-	//			//temp->showRelative(hdc, ORIGIN_POINT);
-	//			temp->showZoomRelative(hdc, ORIGIN_POINT, zoomLevel);
-	//		}
-	//	}
-	//}
+	
 
 	//4. procAt
 	void procAt(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam, int _idx) {
@@ -131,6 +117,7 @@ public:
 
 	//7. WhoisIn겹쳐 있는 도형에서 가장 최근에 넣은 도형이 나오게 되는 상황 방지 
 	int whoIsIn(POINT mousePoint, int curFocusedIdx) {
+		
 		if (shapeNum == 0) {
 			return -1; //아무것도 없다는 뜻
 		}
@@ -142,6 +129,7 @@ public:
 			mShape* temp = shapeVector[i];
 
 			if (temp->isIn(mousePoint)) {
+				//printf("%d 도형이 들어왔다. \n", i);
 				inCnt++;
 				tempIdx = i; //이렇게 되면 가장 최근에 찍은게 나오게 된다. 
 			}
@@ -178,6 +166,7 @@ public:
 		mShape* temp = shapeVector[idx];
 		temp->showDot_relative(hdc,originPoint);
 	}
+
 	//9. showAt
 	void showAt(HDC hdc, int idx) {
 		if (idx < 0)
@@ -198,6 +187,24 @@ public:
 
 		temp->showRelative(hdc, ORIGIN_POINT);
 	}
+
+	void showAt_zoom(HDC hdc, int exIdx, POINT ORIGIN_POINT, double zoomLevel) {
+		if (exIdx < 0)
+			return;
+
+		mShape* temp = shapeVector[exIdx];
+
+
+		temp->showZoomRelative(hdc, ORIGIN_POINT, zoomLevel);
+
+		//디버깅
+		for (int i = 0; i < shapeNum; i++) {
+			mShape* temp2 = shapeVector[i];
+			printf("[%d]번째 도형 좌상단 %d,%d 우하단 %d,%d \n",i, temp2->getUpLeftX(), temp2->getUpLeftY(), temp2->getDownRightX(), temp2->getDownRightY());
+		}
+	}
+
+
 	void showZoomedAt(HDC hdc, int idx, double zoomLevel) {
 		if (idx < 0)
 			return;

@@ -85,32 +85,32 @@ public:
 	}
 	//6. isIn : 도형안에 마우스가 들어왔는지 판별해주는 것
 	bool isIn(POINT mousePosition) {
-		POINT p1 = { getUpLeftX(), getUpLeftY() };
-		POINT p2 = { getDownRightX(), getDownRightY() };
+		int tempUlx = getUpLeftX() < getDownRightX() ? getUpLeftX() : getDownRightX();
+		int tempDrx = getUpLeftX() < getDownRightX() ? getDownRightX() : getUpLeftX();
+		int tempUly = getUpLeftY() < getDownRightY() ? getUpLeftY() : getDownRightY();
+		int tempDry = getUpLeftY() < getDownRightY() ? getDownRightY() : getUpLeftY();
 
-		bool isXSatisfied = false;
-		bool isYSatisfied = false;
 
-		if (mousePosition.x >= p1.x && mousePosition.x <= p2.x) {
-			isXSatisfied = true;
-		}
-
-		if (mousePosition.y >= p1.y && mousePosition.y <= p2.y) {
-			isYSatisfied = true;
-		}
-
-		if (isXSatisfied && isYSatisfied) {
+		if (tempUlx <= mousePosition.x && mousePosition.x <= tempDrx
+			&& tempUly <= mousePosition.y&&mousePosition.y <= tempDry) {
 			return true;
 		}
 		else {
 			return false;
 		}
+
+	
 	}
 
 	//7. rectangle resize
 	//resize
 	void resize(POINT newUpLeft, POINT newDownRight) {
 		changeXy(newUpLeft.x, newUpLeft.y, newDownRight.x, newDownRight.y);
+		int tempUlx = getUpLeftX() < getDownRightX() ? getUpLeftX() : getDownRightX();
+		int tempDrx = getUpLeftX() < getDownRightX() ? getDownRightX() : getUpLeftX();
+		int tempUly = getUpLeftY() < getDownRightY() ? getUpLeftY() : getDownRightY();
+		int tempDry = getUpLeftY() < getDownRightY() ? getDownRightY() : getUpLeftY();
+		changeXy(tempUlx, tempUly, tempDrx, tempDry);
 
 		setEditorWidth(newDownRight.x - newUpLeft.x - getDiff() * 2);
 		setEditorHeight(newDownRight.y - newUpLeft.y - getDiff() * 2);

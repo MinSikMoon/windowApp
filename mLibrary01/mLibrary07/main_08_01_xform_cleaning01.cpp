@@ -4,22 +4,33 @@
 #include "locale.h"
 #include <windows.h>
 #include <tchar.h>
-#include "mMouse.h"
 #include "resource3.h"
+///////////////////////////////////////////////////////////////
 #include "mOriginPoint.h"
+
+#include "mMouse.h"
+
 #include "mCircle.h"
 #include "mRectangle.h"
 #include "mLine.h"
+
 #include "mShapeContainer.h"
+
 #include "mZoom.h"
 
-//#ifdef _DEBUG
-//#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
-//#endif
+
+#include "mOptions.h"
+
+#ifdef _DEBUG
+#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
+#endif
 
 using namespace std;
 
 //전역 변수들
+const int WINDOW_WIDTH = 900;
+const int WINDOW_HEIGHT = 600;
+
 HINSTANCE g_Inst;
 int g_focusedIdx = -1;
 int g_orderFlag = -1;
@@ -32,6 +43,9 @@ mShapeContainer g_msc;
 double zoomLevel = 1.0;
 XFORM xform;
 HFONT g_font;
+HPEN g_pen;
+
+
 
 //////////////////////////////////////////////WIN PROC/////////////////////////////////////////////////////////////////////////////////////
 /* This is where all the input to the window goes to */
@@ -41,11 +55,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 	switch (Message) {
 	case WM_CREATE: {
-		g_font = CreateFont(16, 0, 0, 0, 0, 0, 0, 0, HANGEUL_CHARSET, 3, 2, 1, VARIABLE_PITCH | FF_ROMAN, TEXT("궁서"));
-		
+		g_font = CreateFont(16, 0, 0, 0, 0, 0, 0, 0, HANGEUL_CHARSET, 3, 2, 1, VARIABLE_PITCH | FF_ROMAN, TEXT("고딕"));
+		g_pen = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
 		break;
 	}
-	//키보드 메시지
+					//키보드 메시지
 	case WM_IME_ENDCOMPOSITION:
 	case WM_IME_COMPOSITION:
 	case WM_CHAR: {
@@ -60,10 +74,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 	case WM_MOUSEWHEEL: {
 		if ((short)HIWORD(wParam) > 0) {
-			zoomLevel += 0.05;
+			zoomLevel += 0.1;
 		}
 		else if ((short)HIWORD(wParam) < 0) {
-			zoomLevel -= 0.05;
+			zoomLevel -= 0.1;
 			if (zoomLevel < 1)
 				zoomLevel = 1;
 		}
@@ -163,7 +177,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 	case WM_LBUTTONDOWN: {
 		//1. 1배일 때는 100,100이면 2배일 때는 50,50이 찍혀야 되니까 zoomLevel을 나눠서 넣어줘야 된다. 
-		//g_mouse.setNewPos(LOWORD(lParam), HIWORD(lParam)); //
 		g_mouse.setNewZoomPos(LOWORD(lParam), HIWORD(lParam), zoomLevel);
 		g_mouse.setGrap(true);
 		printf("relative new x,y : %d, %d \n", g_mouse.getRelativeNewX(), g_mouse.getRelativeNewY()); //잘 됨. 
@@ -186,6 +199,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 		//. 도형 선택 로직
 		if (g_orderFlag == Flag::NOTHING) {
 			g_focusedIdx = g_msc.whoIsIn(g_mouse.getRelativeNewPos(), g_focusedIdx); //printf("돌고난후 focused: %d \n", g_focusedIdx); //어느 도형을 찍었는지 판별해준다 //선택 잘 됨.
+			//printf("현재 마우스 안에 있는 도형: %d \n", g_focusedIdx);
 		}
 
 		g_mouse.setOldZoomPos(LOWORD(lParam), HIWORD(lParam), zoomLevel);
@@ -205,6 +219,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 	case WM_PAINT: {
 		hdc = BeginPaint(hwnd, &ps);
 		SelectObject(hdc, g_font);
+		SelectObject(hdc, g_pen);
 		//. 현재 진행상황 실시간 보여주기
 		if (g_mouse.getGrapped()) {
 			g_msc.paintShowZoomProgressAction(hdc, g_orderFlag, g_mouse, ORIGIN_POINT.getOriginPoint(), zoomLevel);
@@ -217,7 +232,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 		SetWorldTransform(hdc, &xform);
 
 
-	
+
 		g_msc.showAllExcept_Zoom(hdc, g_focusedIdx, ORIGIN_POINT.getOriginPoint(), zoomLevel);
 		g_msc.showAt_zoom(hdc, g_focusedIdx, ORIGIN_POINT.getOriginPoint(), zoomLevel);
 		g_msc.showDotAt_relative(hdc, g_focusedIdx, ORIGIN_POINT.getOriginPoint());
@@ -306,8 +321,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	hwnd = CreateWindowEx(WS_EX_CLIENTEDGE, _T("WindowClass"), _T("Caption"), WS_VISIBLE | WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, /* x */
 		CW_USEDEFAULT, /* y */
-		640, /* width */
-		480, /* height */
+		WINDOW_WIDTH, /* width */
+		WINDOW_HEIGHT, /* height */
 		NULL, NULL, hInstance, NULL);
 
 	if (hwnd == NULL) {

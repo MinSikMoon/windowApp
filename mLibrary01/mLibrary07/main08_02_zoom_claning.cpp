@@ -4,14 +4,22 @@
 #include "locale.h"
 #include <windows.h>
 #include <tchar.h>
-#include "mMouse.h"
 #include "resource3.h"
+///////////////////////////////////////////////////////////////
 #include "mOriginPoint.h"
+
+#include "mMouse.h"
+
 #include "mCircle.h"
 #include "mRectangle.h"
 #include "mLine.h"
+
 #include "mShapeContainer.h"
+
 #include "mZoom.h"
+
+
+#include "mOptions.h"
 
 //#ifdef _DEBUG
 //#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
@@ -20,6 +28,9 @@
 using namespace std;
 
 //전역 변수들
+const int WINDOW_WIDTH = 900;
+const int WINDOW_HEIGHT = 600;
+
 HINSTANCE g_Inst;
 int g_focusedIdx = -1;
 int g_orderFlag = -1;
@@ -28,10 +39,7 @@ int g_resizePoint;
 mMouse g_mouse;
 mOriginPoint ORIGIN_POINT;
 mShapeContainer g_msc;
-
-double zoomLevel = 1.0;
-XFORM xform;
-HFONT g_font;
+mOptions g_options;
 
 //////////////////////////////////////////////WIN PROC/////////////////////////////////////////////////////////////////////////////////////
 /* This is where all the input to the window goes to */
@@ -41,11 +49,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 	switch (Message) {
 	case WM_CREATE: {
-		g_font = CreateFont(16, 0, 0, 0, 0, 0, 0, 0, HANGEUL_CHARSET, 3, 2, 1, VARIABLE_PITCH | FF_ROMAN, TEXT("궁서"));
-		
+		g_options.setFontName(TEXT("궁서"));
 		break;
 	}
-	//키보드 메시지
+					//키보드 메시지
 	case WM_IME_ENDCOMPOSITION:
 	case WM_IME_COMPOSITION:
 	case WM_CHAR: {
@@ -60,16 +67,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 	case WM_MOUSEWHEEL: {
 		if ((short)HIWORD(wParam) > 0) {
-			zoomLevel += 0.05;
+			g_options.zoomIn();
 		}
 		else if ((short)HIWORD(wParam) < 0) {
-			zoomLevel -= 0.05;
-			if (zoomLevel < 1)
-				zoomLevel = 1;
+			g_options.zoomOut();
 		}
-
-
-		printf("zoom: %lf \n", zoomLevel);
 		InvalidateRect(hwnd, NULL, TRUE);
 		break;
 	}
@@ -96,7 +98,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 
 	case WM_MOUSEMOVE: {
-		g_mouse.setNewZoomPos(LOWORD(lParam), HIWORD(lParam), zoomLevel); //물리-> 논리//printf("마우스 현재 relative x,y = %d, %d \n", g_mouse.getRelativeNewPos().x, g_mouse.getRelativeNewPos().y);
+		g_mouse.setNewZoomPos(LOWORD(lParam), HIWORD(lParam), g_options.getZoomLevel()); //물리-> 논리//printf("마우스 현재 relative x,y = %d, %d \n", g_mouse.getRelativeNewPos().x, g_mouse.getRelativeNewPos().y);
 
 		if (g_focusedIdx == g_msc.whoIsIn(g_mouse.getRelativeNewPos(), g_focusedIdx) && g_focusedIdx != -1) {
 			SetClassLongPtr(hwnd, GCLP_HCURSOR, (LONG_PTR)LoadCursor(NULL, IDC_SIZEALL));
@@ -108,9 +110,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 		if (g_mouse.getGrapped()) {
 			//. 화면 풀링 로직
 			if (g_mouse.getPulled()) {
-				ORIGIN_POINT.move(g_mouse.getZoomXdist(zoomLevel), g_mouse.getZoomYdist(zoomLevel)); //논리 -> 물리  
-				g_mouse.pullingZoomAction(zoomLevel);
-				g_mouse.setOldZoomPos(LOWORD(lParam), HIWORD(lParam), zoomLevel); //물리 -> 논리
+				ORIGIN_POINT.move(g_mouse.getZoomXdist(g_options.getZoomLevel()), g_mouse.getZoomYdist(g_options.getZoomLevel())); //논리 -> 물리  
+				g_mouse.pullingZoomAction(g_options.getZoomLevel());
+				g_mouse.setOldZoomPos(LOWORD(lParam), HIWORD(lParam), g_options.getZoomLevel()); //물리 -> 논리
 
 			}
 			if (g_orderFlag == Flag::RESIZE) { //논리 좌표들을 변경 
@@ -120,7 +122,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 			//. 도형이동 로직
 			if (g_orderFlag == Flag::MOVE) {
 				g_msc.moveAt(g_focusedIdx, g_mouse.getXdist(), g_mouse.getYdist());
-				g_mouse.setOldZoomPos(LOWORD(lParam), HIWORD(lParam), zoomLevel); //물리 -> 논리 
+				g_mouse.setOldZoomPos(LOWORD(lParam), HIWORD(lParam), g_options.getZoomLevel()); //물리 -> 논리 
 			}
 			InvalidateRect(hwnd, NULL, TRUE);
 		}
@@ -150,8 +152,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 	case WM_RBUTTONDOWN: {
 		g_mouse.setPulled(true);
 		g_mouse.setGrap(true);
-		g_mouse.setOldZoomPos(LOWORD(lParam), HIWORD(lParam), zoomLevel);
-
+		g_mouse.setOldZoomPos(LOWORD(lParam), HIWORD(lParam), g_options.getZoomLevel());
 		break;
 	}
 	case WM_RBUTTONUP: {
@@ -163,11 +164,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 	case WM_LBUTTONDOWN: {
 		//1. 1배일 때는 100,100이면 2배일 때는 50,50이 찍혀야 되니까 zoomLevel을 나눠서 넣어줘야 된다. 
-		//g_mouse.setNewPos(LOWORD(lParam), HIWORD(lParam)); //
-		g_mouse.setNewZoomPos(LOWORD(lParam), HIWORD(lParam), zoomLevel);
+		g_mouse.setNewZoomPos(LOWORD(lParam), HIWORD(lParam), g_options.getZoomLevel());
 		g_mouse.setGrap(true);
 		printf("relative new x,y : %d, %d \n", g_mouse.getRelativeNewX(), g_mouse.getRelativeNewY()); //잘 됨. 
-																									  //. 도형 이동 로직
+																									
 		if (g_focusedIdx != -1) { //도형이 선택되어 있다면..
 			if (g_resizePoint != -1) { //리사이즈 시작한다는 의미
 				g_mouse.setTemPos1(g_msc.getUpLeftAt(g_focusedIdx));
@@ -186,15 +186,16 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 		//. 도형 선택 로직
 		if (g_orderFlag == Flag::NOTHING) {
 			g_focusedIdx = g_msc.whoIsIn(g_mouse.getRelativeNewPos(), g_focusedIdx); //printf("돌고난후 focused: %d \n", g_focusedIdx); //어느 도형을 찍었는지 판별해준다 //선택 잘 됨.
+																					 //printf("현재 마우스 안에 있는 도형: %d \n", g_focusedIdx);
 		}
 
-		g_mouse.setOldZoomPos(LOWORD(lParam), HIWORD(lParam), zoomLevel);
+		g_mouse.setOldZoomPos(LOWORD(lParam), HIWORD(lParam), g_options.getZoomLevel());
 		break;
 	}
 
 	case WM_LBUTTONUP: {
 		g_mouse.setGrap(false);
-		g_mouse.setNewZoomPos(LOWORD(lParam), HIWORD(lParam), zoomLevel);
+		g_mouse.setNewZoomPos(LOWORD(lParam), HIWORD(lParam), g_options.getZoomLevel());
 		g_focusedIdx = g_msc.buMakeShapeAction(g_orderFlag, g_focusedIdx, g_mouse);
 
 		g_orderFlag = Flag::NOTHING; //선택하기 위해서 
@@ -204,23 +205,15 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 	case WM_PAINT: {
 		hdc = BeginPaint(hwnd, &ps);
-		SelectObject(hdc, g_font);
-		//. 현재 진행상황 실시간 보여주기
+		
 		if (g_mouse.getGrapped()) {
-			g_msc.paintShowZoomProgressAction(hdc, g_orderFlag, g_mouse, ORIGIN_POINT.getOriginPoint(), zoomLevel);
-
+			g_msc.paintShowZoomProgressAction(hdc, g_orderFlag, g_mouse, ORIGIN_POINT.getOriginPoint(), g_options.getZoomLevel());
 		}
-
-		xform.eM11 = zoomLevel;
-		xform.eM22 = zoomLevel;
-		SetGraphicsMode(hdc, GM_ADVANCED);
-		SetWorldTransform(hdc, &xform);
-
-
-	
-		g_msc.showAllExcept_Zoom(hdc, g_focusedIdx, ORIGIN_POINT.getOriginPoint(), zoomLevel);
-		g_msc.showAt_zoom(hdc, g_focusedIdx, ORIGIN_POINT.getOriginPoint(), zoomLevel);
+		g_options.setting(hdc);
+		g_msc.showAllExcept_Zoom(hdc, g_focusedIdx, ORIGIN_POINT.getOriginPoint(), g_options.getZoomLevel());
+		g_msc.showAt_zoom(hdc, g_focusedIdx, ORIGIN_POINT.getOriginPoint(), g_options.getZoomLevel());
 		g_msc.showDotAt_relative(hdc, g_focusedIdx, ORIGIN_POINT.getOriginPoint());
+		
 		ORIGIN_POINT.show(hdc);
 		EndPaint(hwnd, &ps);
 		break;
@@ -306,8 +299,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	hwnd = CreateWindowEx(WS_EX_CLIENTEDGE, _T("WindowClass"), _T("Caption"), WS_VISIBLE | WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, /* x */
 		CW_USEDEFAULT, /* y */
-		640, /* width */
-		480, /* height */
+		WINDOW_WIDTH, /* width */
+		WINDOW_HEIGHT, /* height */
 		NULL, NULL, hInstance, NULL);
 
 	if (hwnd == NULL) {
