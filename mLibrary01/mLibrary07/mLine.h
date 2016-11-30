@@ -37,6 +37,15 @@ public:
 		MoveToEx(hdc, ulX + offsetX, ulY + offsetY, NULL);
 		LineTo(hdc, drX+offsetX, drY+offsetY);
 	}
+	void showZoomProgress(HDC hdc, double ulX, double ulY, double drX, double drY, POINT originPoint, double zoomLevel) {
+		int offsetX = originPoint.x*zoomLevel;
+		int offsetY = originPoint.y * zoomLevel;
+		printf("zoomoffset xy : %d, %d \n", offsetX, offsetY);
+		//Ellipse(hdc, ulX + offsetX, ulY/zoomLevel + offsetY, drX/zoomLevel + offsetX, drY/zoomLevel + offsetY);
+		MoveToEx(hdc, ulX + offsetX, ulY + offsetY, NULL);
+		LineTo(hdc, drX + offsetX, drY + offsetY);
+
+	}
 	//5. show Dot
 	void  showDot(HDC hdc) {
 		//setpixel 말고 lineto로 만들어보자. 

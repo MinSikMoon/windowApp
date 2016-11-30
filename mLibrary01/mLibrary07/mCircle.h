@@ -49,6 +49,14 @@ public:
 		printf("offset xy : %d, %d \n", offsetX, offsetY);
 		Ellipse(hdc, ulX + offsetX, ulY + offsetY, drX + offsetX, drY + offsetY);
 	}
+	void showZoomProgress(HDC hdc, double ulX, double ulY, double drX, double drY, POINT originPoint, double zoomLevel) {
+		int offsetX = originPoint.x*zoomLevel ;
+		int offsetY = originPoint.y * zoomLevel;
+		printf("zoomoffset xy : %d, %d \n", offsetX, offsetY);
+		//Ellipse(hdc, ulX + offsetX, ulY/zoomLevel + offsetY, drX/zoomLevel + offsetX, drY/zoomLevel + offsetY);
+		Ellipse(hdc, ulX + offsetX, ulY + offsetY, drX + offsetX, drY + offsetY);
+
+	}
 
 
 	//5. dot 보여주기

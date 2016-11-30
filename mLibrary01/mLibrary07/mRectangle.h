@@ -39,6 +39,13 @@ public:
 	void showProgress(HDC hdc, int ulX, int ulY, int drX, int drY) {
 		Rectangle(hdc, ulX, ulY, drX, drY);
 	}
+	void showZoomProgress(HDC hdc, double ulX, double ulY, double drX, double drY, POINT originPoint, double zoomLevel) {
+		int offsetX = originPoint.x*zoomLevel;
+		int offsetY = originPoint.y * zoomLevel;
+		printf("zoomoffset xy : %d, %d \n", offsetX, offsetY);
+		Rectangle(hdc, ulX + offsetX, ulY + offsetY, drX + offsetX, drY + offsetY);
+
+	}
 	void showProgress_relative(HDC hdc, int ulX, int ulY, int drX, int drY, POINT originPoint) {
 		int offsetX = originPoint.x;
 		int offsetY = originPoint.y;

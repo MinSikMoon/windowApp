@@ -136,6 +136,7 @@ public:
 	void setNewZoomPos(int _x, int _y, double zoomLevel) {
 		double tempX = (double)_x / zoomLevel;
 		double tempY = (double)_y / zoomLevel;
+		//printf(" newpos¿¡ %lf, %lf \n", tempX, tempY);
 		setNewPos(tempX, tempY);
 	}
 	void setNewPos(POINT _newPos) {
@@ -314,6 +315,7 @@ public:
 
 	void pullingAction() {
 		if (getPulled()) {
+			printf("pulling action \n");
 			int xdist = getXdist();
 			int ydist = getYdist();
 			int newOriginX = getOriginPos().x - xdist;
