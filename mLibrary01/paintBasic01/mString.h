@@ -43,7 +43,7 @@ char* toAnsi(TCHAR* _inStr) {
 	size_t strLen = _tcslen(_inStr)+1;
 
 	char* ansi = new char[strLen];
-	setlocale(LC_ALL, "");
+	setlocale(LC_ALL, "Korean");
 	wcstombs_s(&convertedChars,ansi, strLen, _inStr, strLen);
 	ansi[strLen] = 0;
 	return ansi;

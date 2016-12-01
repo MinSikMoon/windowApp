@@ -179,4 +179,9 @@ public:
 	mString& getKeyboardStr(){
 		return keyboard.getMstr();
 	}
+
+	//textsource로 부터 text얻어오기
+	TCHAR* getTextAt(int idx) {
+		return textSource.getTextAt(idx);
+	}
 };

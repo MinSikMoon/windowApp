@@ -250,4 +250,8 @@ public:
 		return dotPen;
 	}
 
+	//20. ÀúÀå¿ë getText
+	TCHAR* getTextAt(int idx) {
+		return textEditor.getTextAt(idx);
+	}
 };

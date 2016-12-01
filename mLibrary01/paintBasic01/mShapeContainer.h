@@ -432,6 +432,11 @@ public:
 	}
 
 
+	//21. 저장테스트용 임시 getText
+	TCHAR* getText(int idx) {
+		mShape* temp = shapeVector[idx];
+		return temp->getTextAt(0);
+	}
 
 
 };

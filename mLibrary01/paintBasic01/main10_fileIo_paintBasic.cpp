@@ -49,7 +49,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 	HANDLE hFile;
 	DWORD dwWritten;
 
-
+	
 	switch (Message) {
 	case WM_CREATE: {
 		ORIGIN_POINT.setStartPoint(g_mouse, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 5 * 2);
@@ -145,13 +145,18 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 					saveContents.add(tempOneLine); //한줄씩 추가
 					wsprintf(tempOneLine, TEXT("%d\t"), g_msc.getDownRightAt(i).x);
 					saveContents.add(tempOneLine); //한줄씩 추가
-					wsprintf(tempOneLine, TEXT("%d\r\n"), g_msc.getDownRightAt(i).y);
+					wsprintf(tempOneLine, TEXT("%d\t"), g_msc.getDownRightAt(i).y);
 					saveContents.add(tempOneLine); //한줄씩 추가
+					saveContents.add(g_msc.getText(i)); //텍스트도 추가
+					saveContents.add(TEXT("\r\n"));
 				}
 				wprintf(L"현재 mstr: %ls \n", saveContents.getStr());
 				//txt로 만들 내용물이 생겼으니 저장만하자. 
+				unsigned short unicodeMark = 0xFEFF;
+			
 				hFile = CreateFile(fileAddr, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-				WriteFile(hFile,toAnsi(saveContents.getStr()), saveContents.getLength()+1, &dwWritten, NULL);
+				WriteFile(hFile, &unicodeMark, sizeof(unicodeMark), &dwWritten, NULL); //이걸 표시해 주면 텍스트 파일이 유니코드로 인식이 되어 한글 인식이 된다. 
+				WriteFile(hFile,saveContents.getStr(), (saveContents.getLength()+1)*sizeof(TCHAR), &dwWritten, NULL);
 				CloseHandle(hFile);
 
 			}
