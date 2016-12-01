@@ -38,6 +38,17 @@ wchar_t* toWC(const char *str_param) {
 	return wc;
 }
 
+char* toAnsi(TCHAR* _inStr) {
+	size_t convertedChars = 0;
+	size_t strLen = _tcslen(_inStr)+1;
+
+	char* ansi = new char[strLen];
+	setlocale(LC_ALL, "");
+	wcstombs_s(&convertedChars,ansi, strLen, _inStr, strLen);
+	ansi[strLen] = 0;
+	return ansi;
+}
+
 //3. const tchar 문자열을 그냥 tchar로 복제
 TCHAR* cloneStr(const TCHAR* _inStr) {
 	int bufferSize = (_tcslen(_inStr) + 1) * sizeof(TCHAR);

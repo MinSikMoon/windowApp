@@ -18,9 +18,9 @@
 
 #include "mOptions.h"
 
-//#ifdef _DEBUG
-//#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
-//#endif
+#ifdef _DEBUG
+#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
+#endif
 
 using namespace std;
 
@@ -46,6 +46,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 	OPENFILENAME OFN;
 	TCHAR fileAddr[300];
 	TCHAR lpstrFile[MAX_PATH] = TEXT("");
+	HANDLE hFile;
+	DWORD dwWritten;
+
 
 	switch (Message) {
 	case WM_CREATE: {
@@ -90,6 +93,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 		}
 		case ID_40007: { //원점
 			ORIGIN_POINT.goToZero(g_mouse, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 5 * 2);
+			g_options.setZoomLevel(1.0);
 			InvalidateRect(hwnd, NULL, TRUE);
 			break;
 		}
@@ -106,10 +110,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 				MessageBox(hwnd, fileAddr, TEXT("파일 열기 성공 "), MB_OK); //fileAddr에 주소가 담겨있다. 
 			}
 
+			//이제 fileAddr에 디렉터리와 파일명이 입력되어 있다. 
+
 
 			break;
 		}
-		case ID_FILE_SAVE: { //원점
+		case ID_FILE_SAVE: { //파일 저장
 			memset(&OFN, 0, sizeof(OPENFILENAME)); //OFN 초기화
 			OFN.lStructSize = sizeof(OPENFILENAME); //구조체 크기 저장
 			OFN.hwndOwner = hwnd; //대화상자의 부모윈도우
@@ -118,9 +124,41 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 			OFN.nMaxFile = MAX_PATH;
 
 			if (GetSaveFileName(&OFN) != 0) { //제대로 파일주소가 선택되었다면
-				wsprintf(fileAddr, TEXT("%ls 로 저장됩니다. "), OFN.lpstrFile);
+				wsprintf(fileAddr, TEXT("%ls"), OFN.lpstrFile);
 				MessageBox(hwnd, fileAddr, TEXT("파일 저장하기 성공 "), MB_OK); //fileAddr에 주소가 담겨있다. 
 			}
+			
+			if (g_msc.getShapeNum() != 0) {
+				//txt를 쓸 빈 mString을 만들자. 
+				mString saveContents;
+				TCHAR tempOneLine[100]; //이 한줄한줄을 saveContents에 add 시켜서 txt로 뽑자. 
+
+				//줌 레벨 입력
+				swprintf_s(tempOneLine, TEXT("%.2lf\r\n"), g_options.getZoomLevel());
+				saveContents.add(tempOneLine); //한줄씩 추가
+
+				for (int i = 0; i < g_msc.getShapeNum(); i++) { 
+					//printf("현재 좌상단: %d \n", g_msc.getUpLeftAt(i).x);
+					wsprintf(tempOneLine, TEXT("%d\t"), g_msc.getUpLeftAt(i).x);
+					saveContents.add(tempOneLine); //한줄씩 추가
+					wsprintf(tempOneLine, TEXT("%d\t"), g_msc.getUpLeftAt(i).y);
+					saveContents.add(tempOneLine); //한줄씩 추가
+					wsprintf(tempOneLine, TEXT("%d\t"), g_msc.getDownRightAt(i).x);
+					saveContents.add(tempOneLine); //한줄씩 추가
+					wsprintf(tempOneLine, TEXT("%d\r\n"), g_msc.getDownRightAt(i).y);
+					saveContents.add(tempOneLine); //한줄씩 추가
+				}
+				wprintf(L"현재 mstr: %ls \n", saveContents.getStr());
+				//txt로 만들 내용물이 생겼으니 저장만하자. 
+				hFile = CreateFile(fileAddr, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+				WriteFile(hFile,toAnsi(saveContents.getStr()), saveContents.getLength()+1, &dwWritten, NULL);
+				CloseHandle(hFile);
+
+			}
+
+
+
+
 			break;
 		}
 		}
