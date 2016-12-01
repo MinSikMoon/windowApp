@@ -124,6 +124,7 @@ public:
 	virtual void show(HDC hdc) = 0; //왜 virtual 붙였는 지 알것
 	virtual void showRelative(HDC hdc, POINT origin) = 0;
 	virtual void showZoomRelative(HDC hdc, POINT originPoint, double zoomLevel) = 0;
+	virtual void showZoomRelative(HDC hdc, POINT originPoint, double zoomLevel, int wordWidth) = 0;
 	//6. showText
 	void showText(HDC hdc) {
 
@@ -137,7 +138,10 @@ public:
 		textEditor.showAllText(hdc, editorWidth, (editorX + originPoint.x), (editorY+originPoint.y));
 		//textEditor.showAllZoomText()
 	}
-	
+	void showZoomText(HDC hdc, POINT originPoint, double zoomLevel, int wordWidth) {
+		textEditor.showAllText(hdc, editorWidth, (editorX + originPoint.x), (editorY + originPoint.y), wordWidth);
+		//textEditor.showAllZoomText()
+	}
 
 
 

@@ -8,6 +8,7 @@ typedef int size_m;
 //1. 일반 전역 함수들
 //1. TCHAR에 대한 sub
 TCHAR* subFromTo(TCHAR* str, size_m startIdx, size_m endIdx) {
+	
 	int length = _tcslen(str);
 	if (startIdx < 0 || endIdx >(length - 1) || startIdx > endIdx) { //필터 for 잘못된 입력
 		printf("!!!!!!!!!********>>>>잘못된 범위 지정 in subFromTo() : sIdx: %d, eIdx: %d \n", startIdx, endIdx);
@@ -240,6 +241,7 @@ public:
 		str = _inStr; //str 교체
 		//delete cleaner; //delete를 안해주면 어떻게 될까. delete때문에 문제가 계속 생긴다. 
 		
+		if(_inStr != NULL)
 		length = _tcslen(_inStr); //길이도 교체
 	}
 	

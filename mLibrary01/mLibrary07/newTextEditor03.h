@@ -85,7 +85,14 @@ public:
 	void showAllText(HDC hdc, size_m screenWidth, int firstLineXpos, int firstLineYpos) {
 		int wordWidth = 16;
 
-		if (screenWidth < 10)
+		if (screenWidth < wordWidth)
+			return; //오작동 방지 
+
+		textSource.showAllText(hdc, screenWidth, firstLineXpos, firstLineYpos, wordWidth, lineContainer);
+		//lineContainer.show();
+	}
+	void showAllText(HDC hdc, size_m screenWidth, int firstLineXpos, int firstLineYpos, double wordWidth) {
+		if (screenWidth < wordWidth)
 			return; //오작동 방지 
 
 		textSource.showAllText(hdc, screenWidth, firstLineXpos, firstLineYpos, wordWidth, lineContainer);
@@ -96,6 +103,13 @@ public:
 		int wordWidth = 16;
 
 		if (screenWidth < 20)
+			return; //오작동 방지 
+
+		textSource.showAllText(hdc, screenWidth, firstLineXpos, firstLineYpos, wordWidth, lineContainer);
+		//textsource.showAllZoomText()
+	}
+	void showAllZoomText(HDC hdc, size_m screenWidth, int firstLineXpos, int firstLineYpos, double zoomLevel, int wordWidth) {
+		if (screenWidth < wordWidth)
 			return; //오작동 방지 
 
 		textSource.showAllText(hdc, screenWidth, firstLineXpos, firstLineYpos, wordWidth, lineContainer);

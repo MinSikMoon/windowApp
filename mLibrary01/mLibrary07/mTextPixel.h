@@ -33,6 +33,7 @@ size_m getMstrPixelWidthFull(HDC hdc, mString& mStr) {
 
 //3. textOut д©╫╨ер
 void textOutCustom(HDC hdc, mString& mStr, size_m startIdx, size_m endIdx, int xPos, int yPos) {
+	
 	TCHAR* tempStr = mStr.subFromTo(startIdx, endIdx);
 	int tempLength = _tcslen(tempStr);
 

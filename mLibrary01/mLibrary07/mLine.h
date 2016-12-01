@@ -28,6 +28,12 @@ public:
 		MoveToEx(hdc, getUpLeftX() + offsetX, getUpLeftY() + offsetY, NULL);
 		LineTo(hdc, getDownRightX() + offsetX, getDownRightY() + offsetY);
 	}
+	void showZoomRelative(HDC hdc, POINT originPoint, double zoomLevel, int wordWidth) {
+		int offsetX = originPoint.x;
+		int offsetY = originPoint.y;
+		MoveToEx(hdc, getUpLeftX() + offsetX, getUpLeftY() + offsetY, NULL);
+		LineTo(hdc, getDownRightX() + offsetX, getDownRightY() + offsetY);
+	}
 	//4. mProc
 	void mProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
 		return;

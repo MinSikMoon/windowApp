@@ -41,6 +41,12 @@ public:
 		Rectangle(hdc, getUpLeftX() + offsetX, getUpLeftY() + offsetY, getDownRightX() + offsetX, getDownRightY() + offsetY);
 		showZoomText(hdc, originPoint, zoomLevel);
 	}
+	void showZoomRelative(HDC hdc, POINT originPoint, double zoomLevel, int wordWidth) {
+		int offsetX = originPoint.x;
+		int offsetY = originPoint.y;
+		Rectangle(hdc, getUpLeftX() + offsetX, getUpLeftY() + offsetY, getDownRightX() + offsetX, getDownRightY() + offsetY);
+		showZoomText(hdc, originPoint, zoomLevel);
+	}
 	//4. showProgress
 	void showProgress(HDC hdc, int ulX, int ulY, int drX, int drY) {
 		Rectangle(hdc, ulX, ulY, drX, drY);

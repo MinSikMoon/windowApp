@@ -77,7 +77,7 @@ public:
 			}
 		}
 	}
-	void showAllExcept_Zoom(HDC hdc, int exIdx, POINT ORIGIN_POINT, double zoomLevel) {
+	void showAllExcept_Zoom(HDC hdc, int exIdx, POINT ORIGIN_POINT, double zoomLevel) {//----------------------
 		if (isEmpty()) {
 			return;
 		}
@@ -88,6 +88,21 @@ public:
 
 				mShape* temp = shapeVector[i];
 				temp->showZoomRelative(hdc, ORIGIN_POINT, zoomLevel);
+			}
+		}
+	}
+
+	void showAllExcept_Zoom(HDC hdc, int exIdx, POINT ORIGIN_POINT, double zoomLevel, int wordWidth) {//----------------------
+		if (isEmpty()) {
+			return;
+		}
+		else {
+			for (int i = 0; i < shapeNum; i++) {
+				if (i == exIdx)
+					continue;
+
+				mShape* temp = shapeVector[i];
+				temp->showZoomRelative(hdc, ORIGIN_POINT, zoomLevel, wordWidth);
 			}
 		}
 	}
@@ -204,15 +219,22 @@ public:
 		}
 	}
 
-
-	void showZoomedAt(HDC hdc, int idx, double zoomLevel) {
-		if (idx < 0)
+	void showAt_zoom(HDC hdc, int exIdx, POINT ORIGIN_POINT, double zoomLevel, int wordWidth) {
+		if (exIdx < 0)
 			return;
 
-		mShape* temp = shapeVector[idx];
+		mShape* temp = shapeVector[exIdx];
 
-		//각 도형마다 showZoomed를 만들어야 한다. 
+
+		temp->showZoomRelative(hdc, ORIGIN_POINT, zoomLevel, wordWidth);
+
+		//디버깅
+		for (int i = 0; i < shapeNum; i++) {
+			mShape* temp2 = shapeVector[i];
+			printf("[%d]번째 도형 좌상단 %d,%d 우하단 %d,%d \n", i, temp2->getUpLeftX(), temp2->getUpLeftY(), temp2->getDownRightX(), temp2->getDownRightY());
+		}
 	}
+	
 
 	//10. moveAt
 	void moveAt(int idx, int xDist, int yDist) {

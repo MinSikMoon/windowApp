@@ -126,6 +126,7 @@ int autoLineSwitch(HDC hdc, TCHAR* _mStr, int screenWidth, int startXpos, int st
 
 	//이제 여기서 nodeIdx당 라인당 글자수, 첫 인덱스, 끝인덱스를 기록해줘야 한다. 
 	while (1) {
+		
 		if (wordCnt == mStr.getLength())
 			break;
 
@@ -133,16 +134,18 @@ int autoLineSwitch(HDC hdc, TCHAR* _mStr, int screenWidth, int startXpos, int st
 
 		lastIdx = getScreenEndIdx(hdc, mStr, limitWidth, startIdx, estCharWidth, 1);
 
+		
 		if (lastIdx < 0) // lastIdx가 -1인 경우가 생기더라. 
 			return 0;
 
 		tempLineWordCnt = (lastIdx - startIdx + 1);
 		wordCnt += tempLineWordCnt;
 		screenLineContainer.setNodeLineData(nodeIdx, loopCnt, tempLineWordCnt, startIdx, lastIdx);
-
+	
 		textOutCustom(hdc, mStr, startIdx, lastIdx, startXpos, loopCnt*wordHeight - startYpos);
+		
 		startIdx = lastIdx + 1;
-		//printf("현재 loopcnt : %d, lastidx: %d, wordcnt: %d, 다음 startIdx : %d \n", loopCnt, lastIdx, wordCnt, startIdx);
+		printf("현재 loopcnt : %d, lastidx: %d, wordcnt: %d, 다음 startIdx : %d \n", loopCnt, lastIdx, wordCnt, startIdx);
 		loopCnt++;
 	}
 	return loopCnt; //현재 들어온 문단하나가 몇개의 라인으로 출력되고 있는가

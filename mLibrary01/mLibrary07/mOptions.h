@@ -14,13 +14,17 @@ private: //줌레벨, 줌관련 xform, 폰트크기,
 
 	//2. 폰트
 	HFONT hFont;
+	map<TCHAR*,HFONT> hFontMap;
 	double fontSize;
-	TCHAR fontName[100];
+	TCHAR* fontName;
 
 	//3. 선
 	HPEN hPen;
 	double penWidth;
-
+	
+	//4. old 
+	HFONT hOldFont;
+	HPEN hOldPen;
 
 public:
 	//1. constructor
@@ -33,8 +37,11 @@ public:
 		zoomMax = 20.0;
 
 		fontSize = 16;
-		_tcscpy_s(fontName, 100, TEXT("궁서"));
-		hFont = CreateFont(fontSize, 0, 0, 0, 0, 0, 0, 0, HANGEUL_CHARSET, 3, 2, 1, VARIABLE_PITCH | FF_ROMAN, fontName);
+		
+		saveNewFont(TEXT("궁서"));
+		saveNewFont(TEXT("바탕"));
+		saveNewFont(TEXT("굴림"));
+		saveNewFont(TEXT("돋움"));
 
 		penWidth = 1;
 		hPen = CreatePen(PS_SOLID, penWidth, RGB(0, 0, 0));
@@ -72,21 +79,30 @@ public:
 		return zoomLevel;
 	}
 	
-
-	//3. font 관련
-	HFONT getFont() {
-		return CreateFont(fontSize, 0, 0, 0, 0, 0, 0, 0, HANGEUL_CHARSET, 3, 2, 1, VARIABLE_PITCH | FF_ROMAN, fontName);
-	}
+	
 	void setFontSize(double size) {
 		fontSize = size;
 	}
+	double getFontSize() {
+		return fontSize;
+	}
 	void setFontName(TCHAR* newFontName) {
-		_tcscpy_s(fontName, 100, newFontName);
+		fontName = newFontName; //철저히 주소값으로 한다. 
 	}
 
+	void saveNewFont(TCHAR* newFontName) {
+		hFontMap[newFontName] = (HFONT)CreateFont(fontSize, 0, 0, 0, 0, 0, 0, 0, HANGEUL_CHARSET, 3, 2, 1, VARIABLE_PITCH | FF_ROMAN, newFontName);
+	}
+
+	HFONT getFont(TCHAR* fontName) {
+		wprintf(L"현재 글꼴은 %ls \n", this->fontName);
+		wprintf(L"%ls 글꼴을 달라 \n", fontName);
+		wprintf(L"반환되는 값은 %lf \n", hFontMap[fontName]);
+		return hFontMap[fontName];
+	}
 	//4. pen 관련
 	HPEN getPen() {
-		return CreatePen(PS_SOLID, penWidth, RGB(0, 0, 0));
+		return hPen;
 	}
 	void setPenWidth(double newPenWidth) {
 		penWidth = newPenWidth;
@@ -94,14 +110,18 @@ public:
 
 	//5. paint
 	void setting(HDC hdc) {
-		hFont = getFont();
+		
+		hFont = getFont(fontName);
 		hPen = getPen();
-		SelectObject(hdc, hFont);
-		SelectObject(hdc, hPen);
+		hOldFont =(HFONT)SelectObject(hdc, hFont);
+		hOldPen = (HPEN)SelectObject(hdc, hPen);
 		zoomXform.eM11 = zoomLevel;
 		zoomXform.eM22 = zoomLevel;
 		SetGraphicsMode(hdc, GM_ADVANCED);
 		SetWorldTransform(hdc, &zoomXform);
 	}
-
+	void settingOlds(HDC hdc) {
+		SelectObject(hdc, hOldFont);
+		SelectObject(hdc, hOldPen);
+	}
 };
