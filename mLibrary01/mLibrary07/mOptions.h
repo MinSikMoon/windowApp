@@ -95,9 +95,9 @@ public:
 	}
 
 	HFONT getFont(TCHAR* fontName) {
-		wprintf(L"현재 글꼴은 %ls \n", this->fontName);
+		/*wprintf(L"현재 글꼴은 %ls \n", this->fontName);
 		wprintf(L"%ls 글꼴을 달라 \n", fontName);
-		wprintf(L"반환되는 값은 %lf \n", hFontMap[fontName]);
+		wprintf(L"반환되는 값은 %lf \n", hFontMap[fontName]);*/
 		return hFontMap[fontName];
 	}
 	//4. pen 관련

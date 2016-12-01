@@ -24,12 +24,13 @@ private:
 	mTextEditor textEditor;
 	int editorWidth, editorHeight, editorX, editorY; //에디터의 제한 너비// ** 현재 버젼에서 높이 추가 
 	int diff = 2;
-	
+	HPEN dotPen; //점 찍을 때 쓸 펜
 	
 public:
 	//1. 생성자 
 	mShape() {
 		textEditor.make(2, 16);
+		
 	}
 	mShape(int _upLeftX, int _upLeftY, int _downRightX, int _downRightY) {
 		textEditor.make(2, 16);
@@ -43,7 +44,7 @@ public:
 		editorX = _upLeftX;
 		editorY = _upLeftY;
 
-		
+		dotPen = CreatePen(PS_SOLID, 5, blueColor);
 
 	}
 	void make(int _upLeftX, int _upLeftY, int _downRightX, int _downRightY) {
@@ -58,6 +59,7 @@ public:
 		editorX = _upLeftX;
 		editorY = _upLeftY;
 
+		dotPen = CreatePen(PS_SOLID, 5, blueColor);
 	
 	}
 
@@ -241,4 +243,10 @@ public:
 		downRight.x *= multi;
 		downRight.y *= multi;
 	}
+
+	//19. getDotPen : 점찍는 펜 가져다 쓰기 
+	HPEN getDotPen() {
+		return dotPen;
+	}
+
 };

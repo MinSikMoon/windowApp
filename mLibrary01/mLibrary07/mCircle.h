@@ -90,7 +90,8 @@ public:
 		int offsetY = originPoint.y;
 
 		//setpixel 말고 lineto로 만들어보자. 
-		HPEN tempPen = CreatePen(PS_SOLID, 5, blueColor); //노란색
+		//HPEN tempPen = CreatePen(PS_SOLID, 5, blueColor); //노란색
+		HPEN tempPen = getDotPen();
 		HPEN oldPen = (HPEN)SelectObject(hdc, tempPen);
 		mSetPixel(hdc, getUpLeftX()+offsetX, getUpLeftY()+offsetY); //좌상단
 		mSetPixel(hdc, getUpLeftX() + offsetX, getDownRightY() + offsetY); //좌하단

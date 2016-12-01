@@ -48,9 +48,11 @@ public:
 		mouse.setOriginPos(-xDist, -yDist);
 	}
 
-	void goToZero(mMouse& mouse, int screenWidth, int screenHeight) {
+	void goToZero(mMouse& mouse, int xDist, int yDist) {
 		move(-origin_point.x, -origin_point.y);
 		mouse.setOriginPos(origin_point.x, origin_point.y);
+		move(xDist, yDist);
+		mouse.setOriginPos(-xDist, -yDist);
 
 	}
 
