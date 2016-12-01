@@ -44,13 +44,13 @@ public:
 		//printf("현재 circle의 editor x,y = %d, %d \n", getEditorX(), getEditorY());
 		showZoomText(hdc, originPoint, zoomLevel);
 	}
-	virtual void showZoomRelative(HDC hdc, POINT originPoint, double zoomLevel, int wordWidth) {
+	void showZoomRelative(HDC hdc, POINT originPoint, double zoomLevel, int wordWidth) {
 		int offsetX = originPoint.x;
 		int offsetY = originPoint.y;
 		Ellipse(hdc, getUpLeftX() + offsetX, getUpLeftY() + offsetY, getDownRightX() + offsetX, getDownRightY() + offsetY);
 		//printf("현재 circle의 좌상단 x,y = %d, %d \n", getUpLeftX(), getUpLeftY());
 		//printf("현재 circle의 editor x,y = %d, %d \n", getEditorX(), getEditorY());
-		showZoomText(hdc, originPoint, zoomLevel);
+		showZoomText(hdc, originPoint, zoomLevel, wordWidth);
 	}
 
 	//4. showProgress

@@ -45,7 +45,7 @@ public:
 		int offsetX = originPoint.x;
 		int offsetY = originPoint.y;
 		Rectangle(hdc, getUpLeftX() + offsetX, getUpLeftY() + offsetY, getDownRightX() + offsetX, getDownRightY() + offsetY);
-		showZoomText(hdc, originPoint, zoomLevel);
+		showZoomText(hdc, originPoint, zoomLevel, wordWidth);
 	}
 	//4. showProgress
 	void showProgress(HDC hdc, int ulX, int ulY, int drX, int drY) {
