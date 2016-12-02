@@ -256,4 +256,14 @@ public:
 	TCHAR* getTextAt(int idx) {
 		return textEditor.getTextAt(idx);
 	}
+
+	////21. 불러오기용 setText
+	//void addText(TCHAR* _inStr) {
+	//	textEditor.addText( _inStr);
+	//}
+
+	//21. 이미 SHAPE가 만들어질 때부터 노드가 1개 들어가 있기에 REPLACE해줘야함
+	void replaceTextAt(int idx, TCHAR* _newStr) {
+		textEditor.replaceTextAt(idx, _newStr);
+	}
 };

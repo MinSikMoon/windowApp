@@ -184,4 +184,7 @@ public:
 	TCHAR* getTextAt(int idx) {
 		return textSource.getTextAt(idx);
 	}
+
+	//노드가 없을때 add해주는것
+	
 };

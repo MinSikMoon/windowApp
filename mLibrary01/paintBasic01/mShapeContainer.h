@@ -308,7 +308,7 @@ public:
 		switch (orderFlag) {
 		case Flag::CIRCLE: {
 			add(new mCircle(g_mouse.getRelativeUpleft().x, g_mouse.getRelativeUpleft().y, g_mouse.getRelativeDownRight().x, g_mouse.getRelativeDownRight().y));
-			printf("%d,%d 에서 %d, %d로 그었다. \n", g_mouse.getRelativeUpleft().x, g_mouse.getRelativeUpleft().y, g_mouse.getRelativeDownRight().x, g_mouse.getRelativeDownRight().y);
+			//printf("%d,%d 에서 %d, %d로 그었다. \n", g_mouse.getRelativeUpleft().x, g_mouse.getRelativeUpleft().y, g_mouse.getRelativeDownRight().x, g_mouse.getRelativeDownRight().y);
 			g_focusedIdx = getShapeNum() - 1;
 			break;
 		}
@@ -319,7 +319,7 @@ public:
 		}
 		case Flag::LINE: { //라인이 거꾸로 나오는 문제 
 			add(new mLine(g_mouse.getRelativeOldX(), g_mouse.getRelativeOldY(), g_mouse.getRelativeNewX(), g_mouse.getRelativeNewY()));
-			printf("%d,%d 에서 %d, %d로 그었다. \n", g_mouse.getRelativeUpleft().x, g_mouse.getRelativeUpleft().y, g_mouse.getRelativeDownRight().x, g_mouse.getRelativeDownRight().y);
+			//printf("%d,%d 에서 %d, %d로 그었다. \n", g_mouse.getRelativeUpleft().x, g_mouse.getRelativeUpleft().y, g_mouse.getRelativeDownRight().x, g_mouse.getRelativeDownRight().y);
 			g_focusedIdx = getShapeNum() - 1;
 			break;
 		}
@@ -444,5 +444,11 @@ public:
 		return temp->getName();
 	}
 
+	//23. replaceTextAt() : 불러오기 테스트용 
+	void replaceTextAt(int idx, TCHAR* _newStr) { //넘겨줄때 힙영역에 생성된 얘로 넘겨줘야함.
+		TCHAR* cpyStr = cloneStr(_newStr);
+		mShape* temp = shapeVector[idx];
+		temp->replaceTextAt(0, cpyStr);
+	}
 
 };
