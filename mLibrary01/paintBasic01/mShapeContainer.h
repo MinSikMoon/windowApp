@@ -438,5 +438,11 @@ public:
 		return temp->getTextAt(0);
 	}
 
+	//22. getNameAt() //현재 선택된 도형이 무슨 도형인가?
+	int getNameAt(int idx) {
+		mShape* temp = shapeVector[idx];
+		return temp->getName();
+	}
+
 
 };

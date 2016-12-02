@@ -28,6 +28,8 @@ private:
 	HPEN dotPen; //점 찍을 때 쓸 펜
 	
 public:
+	//0. 자신이 무슨 도형인지 가르쳐 주는 함수 : => 저장, 불러오기 때 필요 
+	virtual int getName() = 0;
 	//1. 생성자 
 	mShape() {
 		textEditor.make(2, 16);

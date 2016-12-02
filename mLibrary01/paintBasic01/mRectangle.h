@@ -3,6 +3,9 @@
 
 class mRectangle : public mShape {
 public:
+	int getName() {
+		return Flag::RECTANGLE;
+	}
 	//1. »ý¼ºÀÚ
 	mRectangle() {}
 

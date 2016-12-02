@@ -2,6 +2,9 @@
 #include "mShape.h"
 class mCircle : public mShape {
 public:
+	int getName() {
+		return Flag::CIRCLE;
+	}
 	//1. »ý¼ºÀÚ
 	mCircle() {}
 	mCircle(int _upLeftX, int _upLeftY, int _downRightX, int _downRightY) : mShape(_upLeftX, _upLeftY, _downRightX, _downRightY) {

@@ -139,6 +139,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 				for (int i = 0; i < g_msc.getShapeNum(); i++) { 
 					//printf("현재 좌상단: %d \n", g_msc.getUpLeftAt(i).x);
+					wsprintf(tempOneLine, TEXT("%d\t"), g_msc.getNameAt(i));
+					saveContents.add(tempOneLine); //한줄씩 추가
 					wsprintf(tempOneLine, TEXT("%d\t"), g_msc.getUpLeftAt(i).x);
 					saveContents.add(tempOneLine); //한줄씩 추가
 					wsprintf(tempOneLine, TEXT("%d\t"), g_msc.getUpLeftAt(i).y);

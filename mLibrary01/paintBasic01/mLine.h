@@ -2,6 +2,9 @@
 #include "mShape.h"
 class mLine : public mShape {
 public:
+	int getName() {
+		return Flag::LINE;
+	}
 	//1. »ý¼ºÀÚ
 	mLine() {}
 	mLine(int _upLeftX, int _upLeftY, int _downRightX, int _downRightY) : mShape(_upLeftX, _upLeftY, _downRightX, _downRightY) {}
