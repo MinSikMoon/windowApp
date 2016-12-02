@@ -61,7 +61,24 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 	}
 	case WM_COMMAND: {
 		switch (LOWORD(wParam)) {
+		case ID_NEW_FILE: {
+			printf("들어옴 ");
+			/*if (g_msc.getShapeNum() != 0) {
+			MessageBox(hwnd, TEXT("현재 작성중인 파일이 있습니다. 저장부터 하세요. "), TEXT("현재 파일 저장하기"), MB_OK);
+			SendMessage(hwnd, WM_COMMAND, ID_FILE_SAVE, NULL);
+			g_msc.deleteAll();
 			g_focusedIdx = -1;
+			g_orderFlag = -1;
+			}*/
+			g_msc.deleteAll();
+			g_focusedIdx = -1;
+			//g_orderFlag = -1;
+			SendMessage(hwnd, WM_LBUTTONDOWN, NULL, NULL);
+			SendMessage(hwnd, WM_LBUTTONUP, NULL, NULL);
+			InvalidateRect(hwnd, NULL, TRUE);
+			break;
+
+		}
 		case ID_40001: { //원
 			g_orderFlag = Flag::CIRCLE;
 			break;
@@ -108,6 +125,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 				g_focusedIdx = -1;
 				g_orderFlag = -1;
 				
+				
 			}
 			memset(&OFN, 0, sizeof(OPENFILENAME)); //OFN 초기화
 			OFN.lStructSize = sizeof(OPENFILENAME); //구조체 크기 저장
@@ -118,7 +136,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 			if (GetOpenFileName(&OFN) != 0) { //제대로 파일주소가 선택되었다면
 				wsprintf(fileAddr, TEXT("%ls"), OFN.lpstrFile);
-				MessageBox(hwnd, fileAddr, TEXT("파일 열기 성공 "), MB_OK); //fileAddr에 주소가 담겨있다. 
+				//MessageBox(hwnd, TEXT("파일 열기 성공 "), TEXT("파일 열기 성공 "), MB_OK); //fileAddr에 주소가 담겨있다. 
 			}
 			else {
 				break;
@@ -198,13 +216,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 					g_msc.add(new mLine(ulX, ulY, drX, drY));
 
 				}
-
-
-
+				
 			}
 
-
-		
+			SendMessage(hwnd, WM_LBUTTONDOWN, NULL, NULL);
+			SendMessage(hwnd, WM_LBUTTONUP, NULL, NULL);
 			InvalidateRect(hwnd, NULL, TRUE);
 			break;
 		}
@@ -218,7 +234,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 			if (GetSaveFileName(&OFN) != 0) { //제대로 파일주소가 선택되었다면
 				wsprintf(fileAddr, TEXT("%ls"), OFN.lpstrFile);
-				MessageBox(hwnd, fileAddr, TEXT("파일 저장하기 성공 "), MB_OK); //fileAddr에 주소가 담겨있다. 
+				MessageBox(hwnd, TEXT("저장되었습니다."), TEXT("저장되었습니다."), MB_OK); //fileAddr에 주소가 담겨있다. 
 			}
 			else {
 				break;
@@ -265,6 +281,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 			break;
 		}
 		}
+		
 
 		break;
 	}
