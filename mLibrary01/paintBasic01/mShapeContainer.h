@@ -451,4 +451,9 @@ public:
 		temp->replaceTextAt(0, cpyStr);
 	}
 
+	//24. deleteAll()
+	void deleteAll() {
+		shapeVector.clear();
+		shapeNum = 0;
+	}
 };
