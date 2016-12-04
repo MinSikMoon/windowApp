@@ -255,20 +255,105 @@ public:
 		int totalLoopCnt = 0;
 		int tempNodeIdx = 0; //노드 인덱스 검출 변수
 		int tempLineNumInNode; //노드 라인 인덱스 갯수 검출 변수, 루프당 초기화 되어야함. 루프 하나가 노드 하나이기 때문
-
+		
 		for (text::iterator itr = (*textSource).begin(); itr != (*textSource).end(); itr++) {
 			tempLineNumInNode = 0;
+			//테스트 autoLineSwitch에서 노드는 있는데, 라인이 0줄이면 lineNum에 추가가 안된다. 
 			tempLineNumInNode += autoLineSwitch(hdc, (*itr), screenWidth, firstLineXpos, (firstLineYpos + totalLoopCnt*wordHeight)*(-1), wordHeight, screenLineContainer, tempNodeIdx);
 			totalLoopCnt += tempLineNumInNode;
-			//printf("tempLineNum = %d \n", tempLineNumInNode);
+			
 			screenLineContainer.setNodeLineNumInfo(tempNodeIdx++, tempLineNumInNode); //노드당 몇 라인을 가지고 있는지 저장.
 		}
 		screenLineContainer.setTotalLineNum(totalLoopCnt); //텍스트 전체 라인이 몇개인지 저장. 
 	}
 
+	//테스트 : showAllText는 단순히 라인컨테이너 갱신을 목적으로 하고, 글자를 보여주는 것은 여기서 하자. 
+	void textShowByLineContainer(HDC hdc, size_m screenWidth, int firstLineXpos, int firstLineYpos, size_m wordHeight, mScreenLineContainer& screenLineContainer) {
+		text::iterator itr = (*textSource).begin();
+		int totalLoopCnt = 0;
+
+		int i = 0;
+		for (text::iterator itr = (*textSource).begin(); itr != (*textSource).end(); itr++) { //문단 노드 하나씩 돈다. 
+			int lineNum = screenLineContainer.getNodeLineNumInfo(i); 
+			if (lineNum == 0) { //빈문장을 배출한다. 
+				TextOut(hdc, firstLineXpos, totalLoopCnt*wordHeight - firstLineYpos, TEXT(""), 0);
+				totalLoopCnt++;
+			}
+			else {
+				mString mStr((*itr));
+				for (int j = 0; j < lineNum; j++) {
+					textOutCustom(hdc, mStr, screenLineContainer.getFirstIdx(i, j),screenLineContainer.getLastIdx(i,j), firstLineXpos, totalLoopCnt*wordHeight - firstLineYpos);
+					totalLoopCnt++;
+				}
+			}
+			i++;
+		}
+	}
+
+	//showAlltext에서 라인컨테이너 정보도 수정하고 textout까지 하는 것은 기능이 너무 많다.
+	//라인 컨테이너 정보만 새로 갱신하는 것 만들자.  // 한 문단이 들어간다. 몇 줄로 나뉘었는지 카운트 뽑아준다. 
+	int setOneNodeLineContainerInfo(HDC hdc, TCHAR* _mStr, int screenWidth, int startXpos, int startYpos, int wordHeight, size_m nodeIdx, mScreenLineContainer& screenLineContainer) {
+		mString mStr(_mStr); //임시 mStr 만든다. // mStr이 한 문단이다. 전체 텍스트가 아니라.
+
+		if (mStr.getLength() == 0) {
+			return 1; //일단 문단이 하나 들어왔다면 기본적으로 0줄이 아니라 1줄이다. 
+		}
+
+		int limitWidth = screenWidth;
+		int startIdx = 0;
+		int lastIdx = 0;
+		int loopCnt = 0; //글자가 한 글자라도 들어가 있으면 1줄이 된다.  
+		int tempStrPixelWidth = getMstrPixelWidthFull(hdc, mStr); // 전체 문장의 픽셀너비
+		int estCharWidth = tempStrPixelWidth / mStr.getLength(); // 대강 한글자당 픽셀 너비가 몇인가 예측
+		int wordCnt = 0;
+		int tempLineWordCnt = 0;
+
+		//이제 여기서 nodeIdx당 라인당 글자수, 첫 인덱스, 끝인덱스를 기록해줘야 한다. 
+		while (1) {
+
+			if (wordCnt == mStr.getLength())
+				break;
+
+			int tempLineWordCnt = 0;
+
+			lastIdx = getScreenEndIdx(hdc, mStr, limitWidth, startIdx, estCharWidth, 1);
+					
+			if (lastIdx < startIdx) //위에것이 아니라 이게 문제였음. 이런 경우 필터링 해줘야함. 
+				return 0;
+
+			tempLineWordCnt = (lastIdx - startIdx + 1);
+			wordCnt += tempLineWordCnt;
+			screenLineContainer.setNodeLineData(nodeIdx, loopCnt, tempLineWordCnt, startIdx, lastIdx);
+			
+			startIdx = lastIdx + 1;
+			loopCnt++;
+		}
+		return loopCnt; //현재 들어온 문단하나가 몇개의 라인으로 출력되고 있는가
+	}
+	void setAllLineContainerInfo(HDC hdc, size_m screenWidth, int firstLineXpos, int firstLineYpos, size_m wordHeight, mScreenLineContainer& screenLineContainer) {
+		screenLineContainer.setTextSourceNodeNum(textNum); //1. 노드가 몇개인지 전달해준다. 
+		
+		if (textNum == 0) //문단이 하나도 없으면  그냥 리턴
+			return;
+
+		int totalLoopCnt = 0;
+		int tempNodeIdx = 0; //노드 인덱스 검출 변수
+		int tempLineNumInNode; //노드 라인 인덱스 갯수 검출 변수, 루프당 초기화 되어야함. 루프 하나가 노드 하나이기 때문
+
+		for (text::iterator itr = (*textSource).begin(); itr != (*textSource).end(); itr++) {
+			tempLineNumInNode = 0;
+			tempLineNumInNode += setOneNodeLineContainerInfo(hdc, (*itr), screenWidth, firstLineXpos, (firstLineYpos + totalLoopCnt*wordHeight)*(-1), wordHeight, tempNodeIdx, screenLineContainer);
+			totalLoopCnt += tempLineNumInNode;
+
+			screenLineContainer.setNodeLineNumInfo(tempNodeIdx++, tempLineNumInNode); //노드당 몇 라인을 가지고 있는지 저장.
+		}
+		screenLineContainer.setTotalLineNum(totalLoopCnt); //텍스트 전체 라인이 몇개인지 저장. 
+
+	}
 	
-
-
+	
+	
+	
 	//debugging : show
 	void show() {
 		printf("cur list size : %d \n", (*textSource).size());

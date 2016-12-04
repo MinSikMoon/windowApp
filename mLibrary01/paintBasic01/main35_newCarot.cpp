@@ -44,9 +44,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 			//=> 현재 노드 지워주는 식 구하기 
 			printf("back 당시 ===> 위가 lc \n");
 			textEditor2.caretBackSpace();//백스페이스로 지워주는 신호면 백스페이스용 캐럿 처리 해줘야함.
-			//여기서 이미 caretNodeIdx가 1줄어들고 keyboard에는 ""라는 빈문자열이 있는데, 
-			//밑에서 replace해주니까 이전 노드가 ""즉 빈문자열이 되어버린다. 
-			
+										 //여기서 이미 caretNodeIdx가 1줄어들고 keyboard에는 ""라는 빈문자열이 있는데, 
+										 //밑에서 replace해주니까 이전 노드가 ""즉 빈문자열이 되어버린다. 
+
 		}
 		else if (keyFlag == 2) { //엔터가 눌려졌다면 //키보드의 문자열은 ""로 리셋된상태 //textSource에 빈문자열 하나 추가하고.  
 			textEditor2.replaceCurText(); //현재 노드에 모든 문자열을 넣어주고. 
@@ -70,8 +70,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 		textEditor2.caretInput();
 		printf("위에 sendmessage로 강제 print 해줌 하고 다시 invalidate \n ");
-		
-		
+
+
 		InvalidateRect(hwnd, &rect, TRUE);
 		SetCaretPos(textEditor2.getCaretXpixel(hdc), textEditor2.getCaretYpixel()); //백스페이스 기능 때문에 백스페이스 하면 오류남. 
 		ReleaseDC(hwnd, hdc);
@@ -89,10 +89,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 		hdc = BeginPaint(hwnd, &ps);
 
 		textEditor2.showAllText(hdc, 100, 100, 100); //여기서 항상 
-		
+
 		SetCaretPos(textEditor2.getCaretXpixel(hdc), textEditor2.getCaretYpixel()); //백스페이스 기능 때문에 백스페이스 하면 오류남. 
-		
-		
+
+
 		textEditor2.getCarotInfo();
 		EndPaint(hwnd, &ps);
 		break;

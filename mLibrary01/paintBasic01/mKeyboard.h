@@ -20,8 +20,8 @@ private:
 public:
 	//1. 생성자
 	mKeyboard() {
-		printf("mk1 초기화 \n");
-		printf("mk1 mstr 글자수 %d \n", mStr.getLength());
+		/*printf("mk1 초기화 \n");
+		printf("mk1 mstr 글자수 %d \n", mStr.getLength());*/
 		isCompleted = FALSE;
 		curComposingStat = FALSE; //현재 단계의 IME 통과여부 
 		prevComposingStat = FALSE; //이전 단계의 IME 통과여부 

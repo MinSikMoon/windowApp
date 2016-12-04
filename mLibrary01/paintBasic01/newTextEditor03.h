@@ -89,7 +89,8 @@ public:
 			return; //오작동 방지 
 
 		textSource.showAllText(hdc, screenWidth, firstLineXpos, firstLineYpos, wordWidth, lineContainer);
-		lineContainer.show();
+		//textSource.textShowByLineContainer(hdc, screenWidth, firstLineXpos, firstLineYpos, wordWidth, lineContainer);
+		//lineContainer.show();
 	}
 	void showAllText(HDC hdc, size_m screenWidth, int firstLineXpos, int firstLineYpos, double wordWidth) {
 		if (screenWidth < wordWidth)
@@ -151,7 +152,7 @@ public:
 		//1. 캐럿노드가 하나 줄어들었다면
 		//키보드의 mstr이 전 노드의 마지막 라인으로 대체되어야 한다. 
 		if (isNodeReduced) { //노드가 줄어들면서 동시에 라인에 글자수가 0이라면 
-			_tprintf(TEXT("노드가 하나 줄었다. %ls \n"), textSource.getTextAt(caret.getCnodeIdx()));
+			//_tprintf(TEXT("노드가 하나 줄었다. %ls \n"), textSource.getTextAt(caret.getCnodeIdx()));
 			keyboard.setMstr(textSource.cloneTextAt(caret.getCnodeIdx()));
 		}
 		

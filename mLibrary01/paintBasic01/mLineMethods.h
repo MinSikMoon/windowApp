@@ -153,3 +153,5 @@ int autoLineSwitch(HDC hdc, TCHAR* _mStr, int screenWidth, int startXpos, int st
 	}
 	return loopCnt; //현재 들어온 문단하나가 몇개의 라인으로 출력되고 있는가
 }
+
+

@@ -206,6 +206,47 @@ public:
 
 	
 
+	//int backSpace(mScreenLineContainer& lc) {
+	//	printf("캐럿 backspace 안에서의 lc상황: 현재 frontwordnum: %d, cNodeIdx: %d \n ", frontWordNum, cNodeIdx);
+	//	int isNodeReduced = 0;
+
+	//	int tempFrontWordNum = frontWordNum - 1; //가상으로 한글자 감소 시켜줘본다. 
+	//	if (tempFrontWordNum < 0) { // temp 0보다 작아진다면 0번째 노드면 0으로 고정, 앞에 노드가 더 있다면 앞노드의 마지막 글자로 가자. 
+	//								//frontWordNum = 0;
+	//		if (cNodeIdx == 0) {
+	//			frontWordNum = 0;
+	//		}
+	//		else { //앞에 노드가 더 있다면  //현재 캐럿이 속한 라인의 wordCnt가 0이면 해당 노드도 없애줘야 한다. 
+	//			cNodeIdx--; //전 노드로 이동 // 1로 알려준다. 
+	//			
+	//			int tempLastLineIdx = lc.getNodeLineNumInfo(cNodeIdx) - 1; //갯수니까 하나빼서 인덱스
+	//			printf("templastlineidx: %d \n", tempLastLineIdx);
+
+	//			if (tempLastLineIdx < 0) { //
+	//				tempLastLineIdx = 0;
+	//				frontWordNum = 0;
+	//			}
+	//			else { 
+	//				//int tempLastIdx = lc.getLastIdx(cNodeIdx, tempLastLineIdx);
+	//				//printf("templastidx = %d \n");
+	//				frontWordNum = lc.getLastIdx(cNodeIdx, tempLastLineIdx) + 1;
+	//			}
+	//			
+	//			isNodeReduced = 1;
+	//		}
+
+	//	}
+	//	else {
+	//		frontWordNum = tempFrontWordNum; //한글자 감소한 값으로 새로 장착.
+	//	}
+
+	//	//2. 새로운 frontWordNum기준으로 cIdx와 lineIdx, upperLineNum을 정해준다. 
+	//	setClineIdx(getLineIdxByFrontWordNum(frontWordNum, cNodeIdx, lc));
+	//	setCidx(getCidxByFrontWordNum(frontWordNum, cNodeIdx, lc));
+	//	setUpperLineNum(getUpperLineNumByFrontWordNum(frontWordNum, cNodeIdx, lc));
+	//	return isNodeReduced;
+
+	//}
 	int backSpace(mScreenLineContainer& lc) {
 		printf("캐럿 backspace 안에서의 lc상황: 현재 frontwordnum: %d, cNodeIdx: %d \n ", frontWordNum, cNodeIdx);
 		int isNodeReduced = 0;
@@ -216,22 +257,20 @@ public:
 			if (cNodeIdx == 0) {
 				frontWordNum = 0;
 			}
-			else { //앞에 노드가 더 있다면 
+			else { //앞에 노드가 더 있다면  //현재 캐럿이 속한 라인의 wordCnt가 0이면 해당 노드도 없애줘야 한다. 
 				cNodeIdx--; //전 노드로 이동 // 1로 알려준다. 
-				
-				int tempLastLineIdx = lc.getNodeLineNumInfo(cNodeIdx) - 1; //갯수니까 하나빼서 인덱스
+
+				int tempLastLineIdx = lc.getNodeLineNumInfo(cNodeIdx) - 1; //갯수니까 하나빼서 인덱스 //전노드의 마지막 라인 인덱스검출
 				printf("templastlineidx: %d \n", tempLastLineIdx);
 
-				if (tempLastLineIdx < 0) { //
-					tempLastLineIdx = 0;
-					frontWordNum = 0;
+				if (tempLastLineIdx < 0) { //전노드가 한줄밖에 없는 거라면 
+					tempLastLineIdx = 0; //라인인덱스는 0
+					frontWordNum = lc.getWordCnt(cNodeIdx, 0);//frontWordNum = 0;? // 전노드의 마지막 워드 카운트가 되어야 겠지. 
 				}
-				else { 
-					//int tempLastIdx = lc.getLastIdx(cNodeIdx, tempLastLineIdx);
-					//printf("templastidx = %d \n");
+				else {
 					frontWordNum = lc.getLastIdx(cNodeIdx, tempLastLineIdx) + 1;
 				}
-				
+
 				isNodeReduced = 1;
 			}
 
@@ -247,7 +286,6 @@ public:
 		return isNodeReduced;
 
 	}
-
 	//-3 엔터처리 ===========테스트중
 	void enter() {
 		frontWordNum = 0; //
