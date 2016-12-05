@@ -1,6 +1,7 @@
 //텍스트 에디터 클래스화 시키기
 #include "newTextEditor03.h"
 #include "newCarot02.h"
+#import <msxml6.dll>
 
 #ifdef _DEBUG
 #pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
