@@ -70,7 +70,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 			}
 			break;
 		}
-
 		case ID_NEW_FILE: {
 			printf("들어옴 ");
 			if (g_msc.getShapeNum() != 0) {
@@ -137,7 +136,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 			memset(&OFN, 0, sizeof(OPENFILENAME)); //OFN 초기화
 			OFN.lStructSize = sizeof(OPENFILENAME); //구조체 크기 저장
 			OFN.hwndOwner = hwnd; //대화상자의 부모윈도우
-			OFN.lpstrFilter = TEXT("모든 파일(*.*)\0*.*\0");
+			OFN.lpstrFilter = TEXT("텍스트 문서(.txt) \0*.txt\0 xml 문서(.xml) \0*.xml\0 모든 파일(*.*)\0*.*\0");
 			OFN.lpstrFile = lpstrFile;
 			OFN.nMaxFile = MAX_PATH;
 
@@ -255,7 +254,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 			memset(&OFN, 0, sizeof(OPENFILENAME)); //OFN 초기화
 			OFN.lStructSize = sizeof(OPENFILENAME); //구조체 크기 저장
 			OFN.hwndOwner = hwnd; //대화상자의 부모윈도우
-			OFN.lpstrFilter = TEXT("모든 파일(*.*)\0*.*\0");
+			OFN.lpstrFilter = TEXT("텍스트 문서(.txt) \0*.txt\0 xml 문서(.xml) \0*.xml\0 모든 파일(*.*)\0*.*\0");
 			OFN.lpstrFile = lpstrFile;
 			OFN.nMaxFile = MAX_PATH;
 

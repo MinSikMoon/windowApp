@@ -103,6 +103,7 @@ public:
 
 				mShape* temp = shapeVector[i];
 				temp->showZoomRelative(hdc, ORIGIN_POINT, zoomLevel, wordWidth);
+				temp->resize(temp->getUpLeft(), temp->getDownRight());
 			}
 		}
 	}
@@ -231,7 +232,8 @@ public:
 		//디버깅
 		for (int i = 0; i < shapeNum; i++) {
 			mShape* temp2 = shapeVector[i];
-			printf("[%d]번째 도형 좌상단 %d,%d 우하단 %d,%d \n", i, temp2->getUpLeftX(), temp2->getUpLeftY(), temp2->getDownRightX(), temp2->getDownRightY());
+			temp->resize(temp->getUpLeft(), temp->getDownRight());
+			//printf("[%d]번째 도형 좌상단 %d,%d 우하단 %d,%d \n", i, temp2->getUpLeftX(), temp2->getUpLeftY(), temp2->getDownRightX(), temp2->getDownRightY());
 		}
 	}
 	
