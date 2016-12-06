@@ -121,6 +121,7 @@ public:
 
 	//4. mProc
 	void mProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
+		textEditor.replaceKeyboard(textEditor.getTextAt(textEditor.getCaretNode()));
 		textEditor.mProc(hwnd, Message, wParam, lParam);
 		textEditor.replaceCurText();
 	}

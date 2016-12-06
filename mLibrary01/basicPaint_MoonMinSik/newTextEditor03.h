@@ -55,6 +55,9 @@ public:
 	int mProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
 		return keyboard.mProc(hwnd, Message, wParam, lParam);
 	}
+	void replaceKeyboard(TCHAR* _inStr) {
+		keyboard.replace(_inStr);
+	}
 
 	//3. 문단 내용 교체
 	void replaceTextAt(size_m nodeIdx, TCHAR* _newStr) {

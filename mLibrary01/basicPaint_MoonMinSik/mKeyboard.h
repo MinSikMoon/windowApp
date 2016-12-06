@@ -117,6 +117,10 @@ public:
 		mStr.replaceStr(TEXT(""));
 	}
 
+	void replace(TCHAR* _inStr) {
+		mStr.replaceStr(_inStr);
+	}
+
 	int mProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
 		switch (Message) {
 
